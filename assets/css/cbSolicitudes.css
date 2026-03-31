@@ -4,14 +4,21 @@
     --black: #000000;
     --white: #FFFFFF;
     --gray: #535353;
+    --icons: #2A5156;
+    --line-gray: #919A9B;
     --tab-selected: #ACBCC0;
     --tabs-gray: #A1AAAC;
-    --tabs-hover: #969c9c;
+    --tabs-hover: #969C9C;
 
     /* ============= TRANSLUCENT COLORS ============= */
     --transparent-white: rgba(255, 255, 255, 0.5);
     --transparent-blue: rgba(217, 217, 217, 0.5);
+    --transparent-gray: rgba(140, 146, 146, 0.5);
     --tr-medium-blue: rgba(217, 217, 217, 0.7);
+    --tr-status-pending: rgba(208, 175, 6, 0.25);
+    --tr-status-approved: rgba(113, 153, 144, 0.25);
+    --tr-status-rejected: rgba(169, 56, 53, 0.25);
+    --tr-status-canceled: rgba(118, 180, 233, 0.25);
 
     /* ============= GRADIENTS ============= */
     --background: linear-gradient(270deg,
@@ -35,6 +42,22 @@
         transparent 30%,
         rgba(217, 217, 217, 0.6),
         transparent 70%
+    );
+    --status-pending: linear-gradient(90deg,
+        #D0AF06 0%,
+        #66570C 100%
+    );
+    --status-approved: linear-gradient(90deg,
+        #719990 0%,
+        #243934 100%
+    );
+    --status-rejected: linear-gradient(90deg,
+        #A93835 0%,
+        #3E1413 100%
+    );
+    --status-canceled: linear-gradient(90deg,
+        #58A5E7 0%,
+        #1A5B94 100%
     );
 }
 
@@ -294,7 +317,7 @@ body {
     height: 100%;
     background-color: var(--transparent-white);
     border-radius: 40px;
-    padding: 2em 1.3em;
+    padding: 2em 1.3em 0.5em 1.3em;
     align-items: flex-start;
     position: relative;
     background-image: url('../images/Agave.webp');
@@ -441,8 +464,6 @@ body {
 .tab.approved.selected,
 .tab.rejected.selected { margin-right: 9px; }
 
-.tab:hover { z-index: 9; }
-
 .tab p {
     font-size: 1em;
     font-weight: 500;
@@ -487,7 +508,15 @@ body {
     padding: 0.5em;
 }
 
-.search-back i { color: var(--gray); }
+.search-back i { 
+    color: var(--gray);
+    cursor: pointer; 
+}
+
+.search-back i:hover { 
+    color: var(--icons); 
+    font-weight: 700;
+}
 
 .table-background {
     display: flex;
@@ -497,7 +526,7 @@ body {
     height: 70%;
     background-color: var(--transparent-blue);
     border-radius: 0 20px 20px 20px;
-    padding: 1.4em 1.5em;
+    padding: 1.4em;
 }
 
 .table-container {
@@ -505,4 +534,186 @@ body {
     height: 100%;
     background-color: var(--transparent-blue);
     border-radius: 10px;
+}
+
+.table-container table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+
+.table-head { box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.20); }
+
+.table-head th { 
+    font-size: 1.3em;
+    font-weight: 600;
+    padding: 0.3em 0.7em;
+    text-align: left;
+}
+
+.table-container .order-div {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.order {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(2px);
+}
+
+.table-container .order i { 
+    font-size: 0.5em;
+    line-height: 0.8;
+    margin: 0;
+}
+
+.table-body tr { border-bottom: 1px solid var(--line-gray); }
+
+.table-body tr:last-child { border-bottom: none; }
+
+.table-body td {
+    font-size: 1em;
+    font-weight: 400;
+    padding: 0 0.8em;
+}
+
+.table-body .folio { 
+    font-size: 1.1em;
+    font-weight: 600; 
+}
+
+.table-body .status {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    font-size: 0.8em;
+    padding: 0.2em 0.6em;
+    z-index: 1;
+}
+
+.table-body .status::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    padding: 2px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.table-body .st-pending { background-color: var(--tr-status-pending); }
+.table-body .st-approved { background-color: var(--tr-status-approved); }
+.table-body .st-rejected { background-color: var(--tr-status-rejected); }
+.table-body .st-canceled { background-color: var(--tr-status-canceled); }
+
+.table-body .st-pending::before { background: var(--status-pending); }
+.table-body .st-approved::before { background: var(--status-approved); }
+.table-body .st-rejected::before { background: var(--status-rejected); }
+.table-body .st-canceled::before { background: var(--status-canceled); }
+
+.table-body .status.finance { width: 97%; }
+
+.table-body .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.7em;
+    color: var(--icons);
+    font-size: 1.1em;
+}
+
+.table-body .actions i { cursor: pointer; }
+
+.tab-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 2em;
+    transform: translateY(-20px);
+}
+
+.back-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    width: 2.5em;
+    height: 2.5em;
+    background-color: var(--transparent-blue);
+}
+
+.back-buttons.disabled { background-color: var(--transparent-gray); }
+
+.prev,
+.page,
+.next {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 75%;
+    height: 75%;
+    border-radius: 999px;
+    background-color: var(--transparent-blue);
+}
+
+.prev,
+.next { cursor: pointer; }
+
+.page { cursor: default; }
+
+.prev.disabled,
+.next.disabled {
+    cursor: default;
+    color: var(--gray);
+}
+
+.prev .icon,
+.next .icon {
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transition: opacity 0.4s ease, stroke-dashoffset 3s ease;
+}
+
+.prev .default-icon,
+.next .default-icon {
+    opacity: 1;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+}
+
+.prev .hover-icon,
+.next .hover-icon {
+    opacity: 0;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+}
+
+.prev:hover .default-icon,
+.next:hover .default-icon {
+    opacity: 0;
+    stroke-dashoffset: 100;
+}
+
+.prev:hover .hover-icon,
+.next:hover .hover-icon {
+    opacity: 1;
+    stroke-dashoffset: 0;
 }
