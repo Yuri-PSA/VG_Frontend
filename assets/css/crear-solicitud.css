@@ -9,6 +9,7 @@
     --tab-selected: #ACBCC0;
     --tabs-gray: #B0BDC1;
     --tabs-hover: #969C9C;
+    --icons: #2A5156;
 
     /* ============= TRANSLUCENT COLORS ============= */
     --transparent-white: rgba(255, 255, 255, 0.5);
@@ -159,6 +160,7 @@
 }
 
 
+/* ============================== BASE ============================== */
 * {
     margin: 0;
     padding: 0;
@@ -500,9 +502,7 @@ body {
 }
 
 .date-header .month:hover,
-.date-header .year:hover {
-    background-color: var(--tabs-gray);
-}
+.date-header .year:hover { background-color: var(--tabs-gray); }
 
 .days-header {
     display: grid;
@@ -534,6 +534,7 @@ body {
 .date-cell.other-month { 
     color: var(--gray);
     cursor: default;
+    pointer-events: none;
 }
 
 .date-cell { 
@@ -549,10 +550,7 @@ body {
     color: var(--white);
 }
 
-.date-cell.in-range {
-    background-color: var(--tr-date-range);
-    border-radius: 0;
-}
+.date-cell.in-range { background-color: var(--tr-date-range); }
 
 .date-cell.start,
 .date-cell.end {
@@ -561,9 +559,36 @@ body {
     font-weight: 600;
 }
 
-.month-selector,
-.year-selector { display: none; }
+.months-grid,
+.years-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8em;
+    padding: 1em 0;
+}
 
+.month-item,
+.year-item {
+    text-align: center;
+    padding: 0.5em 0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.year-item:first-child,
+.year-item:last-child { 
+    color: var(--gray);
+    cursor: default; 
+    pointer-events: none;
+}
+
+.month-item:hover,
+.year-item:not(:first-child):not(:last-child):hover {
+    background-color: var(--selected);
+    color: var(--white);
+}
+ 
 .answer.motive { 
     height: 6em; 
     align-items: flex-start;
@@ -588,6 +613,7 @@ body {
 .answer.money input { margin-left: 0.3em; }
 
 .answer .flags {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;

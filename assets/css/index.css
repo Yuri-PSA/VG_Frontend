@@ -1,0 +1,466 @@
+:root {
+    /* ============= PRINCIPAL COLORS ============= */
+    --white: #D9D9D9;
+    --black: #000000;
+    --toast: #00333E;
+
+    /* ============= TRANSLUCENT COLORS ============= */
+    --transparent-blue: rgba(217, 217, 217, 0.5);
+
+    /* ============= GRADIENTS ============= */
+    --background: linear-gradient(90deg,
+        #002027 0%,
+        #005B6E 20%,
+        #00758D 50%,
+        #005B6E 80%,
+        #002027 100%
+    );
+    --phone-background: linear-gradient(0deg,
+        #002027 0%,
+        #005B6E 20%,
+        #00758D 50%,
+        #005B6E 80%,
+        #002027 100%
+    );
+    --button: linear-gradient(90deg,
+        #002027 0%,
+        #004C5B 38%,
+        #004452 53%,
+        #003B47 69%,
+        #002027 100%
+    );
+    --shine-hover: linear-gradient(120deg,
+        transparent 30%,
+        rgba(217, 217, 217, 0.4),
+        transparent 70%
+    );
+}
+
+/* ======================= CENTURY GOTHIC FONTS ======================= */
+/* Thin */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_thinItalic.ttf') format('truetype');
+    font-weight: 100;
+    font-style: italic;
+}
+
+/* Light */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_lightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+/* Regular */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* SemiBold */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_semibold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_semiboldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_boldItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* ExtraBold */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_extrabold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_extraboldItalic.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+}
+
+/* Black */
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CenturyGothic';
+    src: url('../fonts/cg_blackItalic.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+
+/* ============================== BASE ============================== */
+* {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    text-decoration: none;
+    box-sizing: border-box;
+    font-family: 'CenturyGothic';
+}
+
+::before,
+::after { box-sizing: border-box; }
+
+ul { list-style: none; }
+
+button {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+input { border-width: 0em; }
+
+a {
+    display: block;
+    color: inherit;
+}
+
+
+/* ============================== REUSABLE ============================== */
+p,
+h1,
+h2,
+h3,
+h4,
+h5 { font-family: 'CenturyGothic', sans-serif; }
+
+
+/* ============================== TOAST ============================== */
+.swal2-container { z-index: 100000 !important; }
+
+.swal2-toast { padding: 0; }
+
+.swal2-toast div:where(.swal2-html-container) { margin: 0 !important; }
+
+.swal2-popup.swal2-toast.colored-toast.swal2-show { padding: 0; }
+
+.colored-toast { 
+    background-color: var(--toast) !important;
+    font-family: 'CenturyGothic', sans-serif;
+    border-radius: 30px !important;
+}
+
+.colored-toast span { 
+    color: var(--white); 
+    font-size: 1rem;
+    padding: 12px 20px 12px 0 !important;
+}
+
+.agave-icon {
+    height: 6.5em; 
+    object-fit: contain; 
+    transform: translateY(10px);
+}
+
+
+/* ============================== BODY ============================== */
+body {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.background {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.3fr 2fr 1.3fr;
+    align-items: center;
+    width: 100vw;
+    background-image: var(--background);
+}
+
+
+/* ============================== CONTENT ============================== */
+.agave,
+.form {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.agave {
+    background-image: url('../images/Agave.webp');
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    opacity: 0.7;
+}
+
+.agave:first-child { background-position: right center; }
+.agave:last-child { background-position: left center; }
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--white);
+}
+
+.form img { 
+    width: 35%;
+    margin-bottom: 3em; 
+}
+
+.form h1 {
+    font-size: 5em;
+    font-weight: 600;
+}
+
+.form p {
+    font-weight: 600;
+    font-size: 1.3em;
+    line-height: 0.5em;
+}
+
+.form .field {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    height: 3.8em;
+    background-color: var(--transparent-blue);
+    border-radius: 10px;
+    padding: 0.5em;
+    margin-top: 7em;
+}
+
+.form .field.second { margin-top: 2em; }
+
+.form .field-back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--transparent-blue);
+    color: var(--black);
+    border-radius: 7px;
+    padding: 1em;
+}
+
+.form .field-back input {
+    height: 100%;
+    width: 100%;
+    color: var(--black);
+    background-color: transparent;
+    font-size: 1.2em;
+    padding: 0.6em;
+}
+
+.form .field-back i { font-size: 1.1em; }
+
+.form .field-back input::placeholder { color: var(--black); }
+
+.form .field-back .fa-eye,
+.form .field-back .fa-eye-slash { 
+    font-size: 1.2em;
+    cursor: pointer; 
+}
+
+.button-login {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6em 3em;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--white);
+    background-image: var(--button);
+    border-radius: 70px;
+    margin-top: 2.5em;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.button-login:hover::before { animation: shine 1.5s ease-out infinite; }
+
+.button-login::before {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100%;
+    background-image: var(--shine-hover);
+    top: 0;
+    left: -100px;
+    opacity: 0.6;
+}
+
+@keyframes shine {
+    0% { left: -100px; }
+    60% { left: 100%; }
+    to { left: 100%; }
+}
+
+
+/* ======================== RESPONSIVE DESKTOP FIRST ======================== */
+/* Escritorio */
+@media(min-width: 1920px) {
+    .colored-toast span { 
+        font-size: 1.5em; 
+        padding: 18px 21px 18px 0 !important;
+    }
+
+    .swal2-container.swal2-top-end.swal2-backdrop-show { width: 650px !important; }
+
+    .agave-icon { height: 8em; }
+
+    .form h1 { font-size: 7em; }
+
+    .form p { font-size: 2em; }
+
+    .form .field { height: 4.5em; }
+
+    .form .field-back { padding: 1.5em; }
+
+    .form .field-back i,
+    .form .field-back .fa-eye,
+    .form .field-back .fa-eye-slash { font-size: 1.6em; }
+
+    .form .field-back input { font-size: 1.8em; }
+
+    .button-login { font-size: 1.8em; }
+}
+
+
+/* Tabletas pequeñas / móviles grandes */
+@media(max-width: 1024px) {
+    .colored-toast span { font-size: 1.1em; }
+
+    .background {
+        grid-template-columns: 1fr;
+        grid-template-rows: 3.5fr 1fr;
+        background-image: var(--phone-background);
+    }
+
+    .agave { 
+        position: absolute;
+        bottom: -45%;
+        width: 50%;
+        height: 100%;
+        background-repeat: no-repeat;
+        background-size: auto 40%; ;
+    }
+
+    .agave:first-child { left: -2%; }
+
+    .agave:last-child { right: -2%; }
+
+    .form p { font-size: 1.5em; }
+
+    .form .field-back i { font-size: 1.2em; }
+
+    .form .field-back input { font-size: 1.3em; }
+
+    .button-login { font-size: 1.5em; }
+}
+
+/* Móviles */
+@media(max-width: 480px) {
+    .colored-toast span { font-size: 0.9rem; }
+
+    .agave-icon { height: 4.5em; }
+
+    .background {
+        grid-template-columns: 1fr;
+        grid-template-rows: 3.5fr 1fr;
+        background-image: var(--phone-background);
+    }
+
+    .agave { 
+        position: absolute;
+        bottom: -5%;
+        width: 50%;
+        height: 25%;
+        background-repeat: no-repeat;
+        background-size: auto 100%;
+    }
+
+    .agave:first-child { left: -2%; }
+
+    .agave:last-child { right: -2%; }
+
+    .form img { 
+        width: 40%; 
+        margin-bottom: 4em;
+    }
+
+    .form h1 { font-size: 3em; }
+
+    .form p { 
+        font-size: 0.9em;
+        line-height: 0.7em; 
+    }
+
+    .form .field { 
+        width: 80%; 
+        margin-top: 5em; 
+    }
+
+    .form .field-back i,
+    .form .field-back input { font-size: 1em; }
+
+    .form .field-back .fa-eye,
+    .form .field-back .fa-eye-slash { font-size: 1.1em; }
+
+    .button-login { font-size: 1.1em; }
+}
