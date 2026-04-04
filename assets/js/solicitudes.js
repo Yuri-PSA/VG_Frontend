@@ -40,3 +40,6 @@ function createTravelRequest() {
         window.location.href = 'crear-solicitud.html';
     });
 }
+
+
+/* ================================ CANCEL BUTTON ================================ */

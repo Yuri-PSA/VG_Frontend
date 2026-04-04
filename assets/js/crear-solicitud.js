@@ -20,6 +20,16 @@ function optionsBar() {
 }
 
 
+/* =============================== FORM BUTTONS =============================== */
+function cancelButton() {
+
+}
+
+function sendButton() {
+    const destination = document.getElementById('ans-destination').value;
+}
+
+
 /* ============================== CURRENCY OPTIONS ============================== */
 function currencyOptions() {
     const currencies = [
@@ -161,21 +171,21 @@ function initCalendar() {
     const monthLabel = document.querySelector('.date-header .month');
     const yearLabel = document.querySelector('.date-header .year');
     const datesContainer = document.querySelector('.dates');
+    const daysHeader = document.querySelector('.days-header');
     const prevBtn = document.querySelector('.prev-month');
     const nextBtn = document.querySelector('.next-month');
     const monthSelector = document.querySelector('.month-selector');
     const yearSelector = document.querySelector('.year-selector');
-    const monthGrid = document.querySelector('.month-grid');
-    const yearGrid = document.querySelector('.year-grid');
 
     let currentDate = new Date();
     let startDate = null;
     let endDate = null;
+    let viewMode = 'days';
 
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto',
                         'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-    // Funciones
+    // Funciones auxiliares
     function getDaysInMonth(year, month) {
         return new Date(year, month + 1, 0).getDate();
     }
@@ -193,7 +203,6 @@ function initCalendar() {
         return new Date(date.year, date.month, date.day).getTime();
     }
 
-    // Verifica si una fecha está dentro del rango [startDate, endDate]
     function isInRange(date) {
         if (!startDate || !endDate) return false;
         const dateTs = toTimestamp(date);
@@ -202,8 +211,9 @@ function initCalendar() {
         return dateTs >= startTs && dateTs <= endTs;
     }
 
-    // Renderiza el calendario
-    function renderCalendar() {
+    // Renderiza el calendario de días
+    function renderDays() {
+        monthLabel.style.display = 'flex';
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
 
@@ -223,6 +233,8 @@ function initCalendar() {
         const nextMonthDays = totalCells - (prevMonthDays + daysInMonth);
         
         datesContainer.innerHTML = '';
+        daysHeader.style.display = 'grid';
+        datesContainer.classList.remove('months-grid', 'years-grid');
 
         // 1. Mes anterior
         for(let i = prevMonthDays - 1; i >= 0; i--) {
@@ -246,7 +258,7 @@ function initCalendar() {
         }
     }
 
-    // Celda de día
+    // Vista de días
     function createDateCell(day, year, month, isOtherMonth) {
         const cell = document.createElement('div');
         cell.classList.add('date-cell');
@@ -256,14 +268,9 @@ function initCalendar() {
         const dateObj = { year, month, day };
 
         // Asignar clases de rango
-        if (startDate && isSameDate(dateObj, startDate))
-            cell.classList.add('start');
-
-        if (endDate && isSameDate(dateObj, endDate))
-            cell.classList.add('end');
-
-        if (isInRange(dateObj))
-            cell.classList.add('in-range');
+        if (startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
+        if (endDate && isSameDate(dateObj, endDate)) cell.classList.add('end');
+        if (isInRange(dateObj)) cell.classList.add('in-range');
 
         cell.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -274,7 +281,6 @@ function initCalendar() {
                 endDate = null;
                 console.log(`Rango reiniciado. Inicio: ${day}/${month+1}/${year}`);
             }
-
             // Si hay inicio pero no fin, se establece el fin (ordenando las fechas)
             else if (startDate && endDate === null) {
                 const currentTs = toTimestamp({ year, month, day });
@@ -284,6 +290,7 @@ function initCalendar() {
                     startDate = { year, month, day };
                 } else
                     endDate = { year, month, day };
+                
                 console.log(`Rango seleccionado: ${startDate.day}/${startDate.month+1}/${startDate.year} - ${endDate.day}/${endDate.month+1}/${endDate.year}`);
             }
 
@@ -292,59 +299,87 @@ function initCalendar() {
         return cell;
     }
 
-    // Cambiar de mes
-    function changeMonth(delta) {
-        currentDate.setMonth(currentDate.getMonth() + delta);
-        renderCalendar();
-        hideSelectors();
-    }
+    // Vista de meses
+    function renderMonths() {
+        const year = currentDate.getFullYear();
+        monthLabel.textContent = monthNames[currentDate.getMonth];
+        yearLabel.textContent = year;
 
-    // Selectores de mes y año
-    function showMonthSelector() {
-        if (monthGrid.children.length === 0) {
-            monthNames.forEach((name, idx) => {
-                const div = document.createElement('div');
-                div.textContent = name;
-                div.addEventListener('click', () => {
-                    currentDate.setMonth(idx);
-                    renderCalendar();
-                    hideSelectors();
-                });
-                monthGrid.appendChild(div);
+        daysHeader.style.display = 'none';
+        datesContainer.innerHTML = '';
+        datesContainer.classList.remove('years-grid');
+        datesContainer.classList.add('months-grid');
+        monthLabel.style.display = 'none';
+
+        for (let i = 0; i < 12; i++) {
+            const monthDiv = document.createElement('div');
+            monthDiv.classList.add('month-item');
+            monthDiv.textContent = monthNames[i];
+            monthDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Cambiar al mes seleccionado
+                currentDate.setMonth(i);
+                viewMode = 'days';
+                renderCalendar();
             });
+
+            datesContainer.appendChild(monthDiv);
         }
-        monthSelector.style.display = 'block';
-        yearSelector.style.display = 'none';
-        const rect = monthLabel.getBoundingClientRect();
-        const parentRect = document.querySelector('.datepicker').getBoundingClientRect();
-        monthSelector.style.position = 'absolute';
-        monthSelector.style.top = (rect.bottom - parentRect.top + 5) + 'px';
-        monthSelector.style.left = (rect.left - parentRect.left) + 'px';
     }
 
-    function showYearSelector() {
-        if (yearGrid.children.length === 0) {
-            const currentYear = currentDate.getFullYear();
-            const startYear = currentYear - 5;
-            const endYear = currentYear + 5;
-            for (let y = startYear; y <= endYear; y++) {
-                const div = document.createElement('div');
-                div.textContent = y;
-                div.addEventListener('click', () => {
-                    currentDate.setFullYear(y);
-                    renderCalendar();
-                    hideSelectors();
-                });
-                yearGrid.appendChild(div);
-            }
+    // Vista de años
+    function renderYears() {
+        const year = currentDate.getFullYear();
+        const decadeStart = Math.floor(year / 10) * 10;
+        yearLabel.textContent = `${decadeStart} - ${decadeStart + 9}`;
+        monthLabel.style.display = 'none';
+
+        daysHeader.style.display = 'none';
+        datesContainer.innerHTML = '';
+        datesContainer.classList.remove('months-grid');
+        datesContainer.classList.add('years-grid');
+
+        // Generar años
+        const startYear = decadeStart - 1;
+        for (let i = 0; i < 12; i++) {
+            const y = startYear + i;
+            const yearDiv = document.createElement('div');
+            yearDiv.classList.add('year-item');
+            yearDiv.textContent = y;
+            yearDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentDate.setFullYear(y);
+                viewMode = 'days';
+                renderCalendar();
+            });
+            datesContainer.appendChild(yearDiv);
         }
-        yearSelector.style.display = 'block';
-        monthSelector.style.display = 'none';
-        const rect = yearLabel.getBoundingClientRect();
-        const parentRect = document.querySelector('.datepicker').getBoundingClientRect();
-        yearSelector.style.position = 'absolute';
-        yearSelector.style.top = (rect.bottom - parentRect.top + 5) + 'px';
-        yearSelector.style.left = (rect.left - parentRect.left) + 'px';
+    }
+
+    // Render principal
+    function renderCalendar() {
+        if(viewMode === 'months')
+            renderMonths();
+        else if (viewMode === 'years')
+            renderYears();
+        else
+            renderDays();
+    }
+
+    // Navegación con flechas
+    function navigate(delta) {
+        if (viewMode === 'months') {
+            currentDate.setFullYear(currentDate.getFullYear() + delta);
+            renderMonths();
+        } else if (viewMode === 'years') {
+            currentDate.setFullYear(currentDate.getFullYear() + delta * 10);
+            renderYears();
+        } else {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderDays();
+        }
+        hideSelectors();
     }
 
     function hideSelectors() {
@@ -353,23 +388,37 @@ function initCalendar() {
     }
 
     // Eventos
-    if (prevBtn) prevBtn.addEventListener('click', () => changeMonth(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => changeMonth(1));
+    if (prevBtn) prevBtn.addEventListener('click', () => navigate(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => navigate(1));
 
     monthLabel.addEventListener('click', (e) => {
         e.stopPropagation();
-        showMonthSelector();
+
+        if (viewMode === 'days') {
+            viewMode = 'months';
+            renderCalendar();
+        } else if (viewMode === 'months') {
+            viewMode = 'days';
+            renderCalendar();
+        } else if (viewMode === 'years') {
+            viewMode = 'months';
+            renderCalendar();
+        }
+        hideSelectors();
     });
+
     yearLabel.addEventListener('click', (e) => {
         e.stopPropagation();
-        showYearSelector();
+        viewMode = 'years';
+        renderCalendar();
+        hideSelectors();
     });
 
     document.addEventListener('click', (e) => {
-        if (!monthSelector.contains(e.target) && !yearSelector.contains(e.target) &&
-            e.target !== monthLabel && e.target !== yearLabel) {
-            hideSelectors();
-        }
+        if (monthSelector && yearSelector)
+            if (!monthSelector.contains(e.target) && !yearSelector.contains(e.target) &&
+                e.target !== monthLabel && e.target !== yearLabel)
+                    hideSelectors();
     });
 
     renderCalendar();
