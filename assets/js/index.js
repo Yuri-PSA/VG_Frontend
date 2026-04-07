@@ -17,6 +17,9 @@ async function login() {
         };
 
         console.log(data);
+        
+        if(data.usuario === "Yuriana" && data.password === "123456")
+            window.location.href = 'solicitudes.html';
     }); 
 }
 
@@ -69,7 +72,7 @@ const ToastMixin = Swal.mixin({
     },
 });
 
-function Toast(title, imageUrl = './assets/images/Icon_agave.png') {
+function Toast(title, imageUrl = './assets/images/Icon_agave.webp') {
     ToastMixin.fire({
         icon: undefined,
         html: `
