@@ -403,6 +403,7 @@ body {
     .button-login { font-size: 1.8em; }
 }
 
+/* Ordenadores */
 @media(min-width: 1280px) and (max-width: 1366px) {
     .form img { margin-bottom: 2em; }
 
@@ -447,6 +448,8 @@ body {
     .form .field-back input { font-size: 1.3em; }
 
     .button-login { font-size: 1.5em; }
+
+    .button-login:hover::before { animation: shine 2.5s ease-out infinite; }
 }
 
 /* Móviles */
@@ -506,4 +509,6 @@ body {
     .form .field-back .fa-eye-slash { font-size: 1.1em; }
 
     .button-login { font-size: 1.1em; }
+
+    .button-login:hover::before { animation: shine 2.5s ease-out infinite; }
 }
