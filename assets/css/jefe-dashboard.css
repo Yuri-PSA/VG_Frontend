@@ -670,3 +670,111 @@ body {
 @media(min-width: 1920px) {
     
 }
+
+/* Ordenadores */
+@media(min-width: 1025px) and (max-width: 1366px) and (max-resolution: 1.5dppx) {
+    .options,
+    .logout { 
+        font-size: 1.2em; 
+        gap: 0.6em;
+    }
+
+    .options .option,
+    .logout .option { gap: 0.6em; }
+
+    .option img { width: 17px; }
+
+    .option .fa-plane-departure { font-size: 0.8em; }
+
+    .content-container { padding: 1em 1.5em 1em 2.2em; }
+
+    .container { 
+        padding: 1em 1.5em 0.5em 1.5em; 
+        background-size: auto 60%;
+    }
+
+    .content { gap: 1em; }
+
+    .titles .title{ font-size: 3em; }
+
+    .titles .subtitle { font-size: 1.1em; }
+
+    .cards { gap: 1.8em; }
+
+    .card-wrapper { width: 23%; }
+
+    .card-text p { font-size: 0.9em; }
+
+    .card-text .rejected-number,
+    .card-text .approved-number,
+    .card-text .pending-number { font-size: 2.3em; }
+
+    .graph-back.status .graph-wrapper { padding: 0.5em 0; }
+
+    .chartst-container canvas { max-width: 60% !important; }
+
+    .graph-back.status .graph-wrapper p,
+    .graph-back.total .graph-wrapper p { font-size: 1em; }
+
+    .prev,
+    .next { 
+        width: 1.1em;
+        height: 1.1em; 
+    }
+
+    .prev i,
+    .next i { 
+        font-size: 0.65em;
+        transform: translate(-7%, 7%); 
+    }
+
+    .prev.status-button,
+    .next.status-button {
+        height: 1.2em;
+        width: 1.2em;
+    }
+
+    .prev.status-button i,
+    .next.status-button i { 
+        font-size: 0.7em;
+        transform: translateY(-5%); 
+    }
+
+    .prev.request-button i,
+    .next.request-button i { transform: translateY(5%); }
+
+    .center-text .year { font-size: 1.4em; }
+
+    .center-text .month { font-size: 0.7em; }
+
+    .legend-item { font-size: 0.9em; }
+
+    .graph-back.requests,
+    .graph-back.expenses { font-size: 0.8em; }
+
+    .graph-back.total .graph-wrapper .total-money {
+        font-size: 2em;
+        margin-top: 0.1em;
+    }
+
+    .prev.total-button,
+    .next.total-button {
+        width: 1em;
+        height: 1em;
+    }
+
+    .prev.total-button i,
+    .next.total-button i { transform: translateY(-4%); }
+
+    .agave { height: 93%; }
+}
+
+/* Tabletas pequeñas / móviles grandes */
+@media(max-width: 1024px) {
+
+}
+
+/* Móviles */
+@media(max-width: 480px) {
+
+}

@@ -404,7 +404,7 @@ body {
 }
 
 /* Ordenadores */
-@media(min-width: 1280px) and (max-width: 1366px) {
+@media(min-width: 1025px) and (max-width: 1336px) and (max-resolution: 1.5dppx) {
     .form img { margin-bottom: 2em; }
 
     .form .field { margin-top: 5em; }
