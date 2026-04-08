@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+/* ================================ VARIABLES ================================ */
+let trendChart = null;
+
+
 /* ============================== OPTIONS BAR ============================== */
 function optionsBar() {
     const dashboard = document.querySelector('.option.dashboard');
@@ -58,7 +62,7 @@ function statusChart() {
                     '#D65B5B'       // rojo para rechazadas
                 ],
                 borderWidth: 0,
-                hoverOffset: 5,     // hover de separación
+                hoverOffset: 0,     // hover de separación
                 spacing: 0          // espacio entre segmentos
             }]
         },
@@ -79,7 +83,12 @@ function statusChart() {
 function requestChart() {
     const ctx = document.getElementById('trend-chart').getContext('2d');
     
-    new Chart(ctx, {
+    if(trendChart)
+        trendChart.destroy();
+
+    const isMobile = window.innerWidth <= 768;
+
+    trendChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'],
@@ -126,7 +135,7 @@ function requestChart() {
                     },
                     ticks: {
                         stepSize: 50,
-                        font: { size: 11 },
+                        font: { size: isMobile ? 10 : 11 },
                         color: '#000000'
                     }
                 },
@@ -136,7 +145,7 @@ function requestChart() {
                         drawBorder: false
                     },
                     ticks: {
-                        font: { size: 10, weight: 400 },
+                        font: { size: isMobile ? 9 : 10, weight: 400 },
                         color: '#000000'
                     }
                 }
