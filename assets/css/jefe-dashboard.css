@@ -698,7 +698,12 @@ body {
 
     .titles .subtitle { font-size: 1.5em; }
 
-    .cards { gap: 2.5em; }
+    .card-wrapper { width: 17%; }
+
+    .cards { 
+        height: 25%;
+        gap: 2em; 
+    }
     
     .card-text p { font-size: 1em; }
 
