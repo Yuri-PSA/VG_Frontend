@@ -803,7 +803,7 @@ body {
     .content-container { padding: 1em 1.5em 1em 2.2em; }
 
     .content {
-        height: 95%; 
+        height: 85%; 
         gap: 1em; 
         margin-top: 1.4em;
     }
