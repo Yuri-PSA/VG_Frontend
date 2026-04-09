@@ -971,7 +971,34 @@ body {
 
 /* Tabletas pequeñas / móviles grandes */
 @media(max-width: 1024px) {
+    html { background-color: var(--html-back); }
 
+    body { height: -webkit-fill-available; }
+
+    ::-webkit-scrollbar-thumb { background-color: transparent; }
+
+    .option-bar {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 70%;
+        height: 100vh;
+        background: var(--option-bar);
+        z-index: 999;
+        padding: 150px 30px;
+        transform: translateX(-100%);
+        transition: transform 0.4s ease;
+        overflow-y: auto;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        visibility: visible;
+    }
+
+    .option-bar.active { transform: translateX(0); }
+
+    .hamburger { display: block; }
+
+    .hamburger.active { background-image: none; }
 }
 
 /* Móviles */
