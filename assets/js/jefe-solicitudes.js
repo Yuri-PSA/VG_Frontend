@@ -4,9 +4,14 @@ document.addEventListener("DOMContentLoaded", function() {
     searchColab();
     initCalendar();
     setupCalendar();
-    buttonApproved();
     buttonRejected();
+    buttonApproved();
+    buttonInfo();
 });
+
+
+/* ============================== VARIABLE ============================== */
+let motivoRechazo = null;
 
 
 /* ============================== OPTIONS BAR ============================== */
@@ -410,10 +415,91 @@ function setupCalendar() {
 }
 
 
-/* ============================== APPROVE ============================== */
+/* ============================== ACTION BUTTONS ============================== */
+// Change status
+function changeStatus(row, action) {
+    // se reemplaza con la actualización de la tabla
+    const statusDiv = row.querySelector('.status');
+        if(statusDiv) {
+            statusDiv.textContent = action === 'approve' ? 'Aprobada': 'Rechazada';
+            statusDiv.classList.remove('st-pending');
+            statusDiv.classList.add(action === 'approve' ? 'st-approved' : 'st-rejected');
+        }
+
+        const actionsDiv = row.querySelector('.actions');
+        if(actionsDiv) {
+            const checkIcon = actionsDiv.querySelector('.fa-circle-check');
+            const xmarkIcon = actionsDiv.querySelector('.fa-circle-xmark');
+                
+            if(checkIcon) checkIcon.style.display = 'none';
+            if(xmarkIcon) xmarkIcon.style.display = 'none';
+        }
+}
+
+// Calculate travel days
+function calculateDays() {
+    const infoWrapper = document.querySelector('.info-wrapper');
+    if(!infoWrapper) return;
+
+    const departureDate = infoWrapper.querySelector('.departure-date p:last-child');
+    const returnDate = infoWrapper.querySelector('.return-date p:last-child');
+    const days = infoWrapper.querySelector('.total-days span');
+
+    if(!departureDate || !returnDate || !days) return;
+
+    // Obtener textos
+    const startDate = departureDate.textContent.trim();
+    const endDate = returnDate.textContent.trim();
+
+    // Mapeo de meses para cálculo
+    const meses = {
+        'ENE': 0, 'FEB': 1, 'MAR': 2, 'ABR': 3, 'MAY': 4, 'JUN': 5,
+        'JUL': 6, 'AGO': 7, 'SEP': 8, 'OCT': 9, 'NOV': 10, 'DIC': 11
+    };
+
+    function parseDate(dateStr) {
+        const partes = dateStr.split('/').map(p => p.trim());
+        const dia = parseInt(partes[0], 10);
+        const mesAbrev = partes[1].toUpperCase();
+        const year = parseInt(partes[2], 10);
+        const mes = meses[mesAbrev];
+        if(isNaN(dia) || mes === undefined || isNaN(year)) return null;
+        return new Date(year, mes, dia);
+    }
+
+    const salida = parseDate(startDate);
+    const regreso = parseDate(endDate);
+
+    if(salida && regreso && regreso >= salida) {
+        const diffTime = regreso - salida;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        days.textContent = diffDays.toString().padStart(2, '0');
+    } else
+        days.textContent = '00';
+}
+
+// Reject
+function buttonRejected() {
+    const buttons = document.querySelectorAll('.fa-circle-xmark');
+    if(!buttons) return;
+
+    buttons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+
+            const row = button.closest('tr');
+            if(!row) return;
+            const folioCell = row.querySelector('.folio');
+            const folio = folioCell ? folioCell.textContent.trim() : 'desconocido';
+            
+            ToastRejected(folio, row);
+        });
+    });
+}
+
+// Approve
 function buttonApproved() {
     const buttons = document.querySelectorAll('.fa-circle-check');
-
     if(!buttons) return;
 
     buttons.forEach(button => {
@@ -429,43 +515,34 @@ function buttonApproved() {
             const folio = folioCell ? folioCell.textContent.trim() : 'desconocido';
 
             Toast('SOLICITUD APROBADA', `La solicitud con folio ${folio} fue aprobada y notificada al colaborador correctamente`);
-
-            /*const statusDiv = row.querySelector('.status');
-            if(statusDiv) {
-                statusDiv.textContent = 'Aprobada';
-                statusDiv.classList.remove('st-pending');
-                statusDiv.classList.add('st-approved');
-            }
-
-            const actionsDiv = row.querySelector('.actions');
-            if(actionsDiv) {
-                const checkIcon = actionsDiv.querySelector('.fa-circle-check');
-                const xmarkIcon = actionsDiv.querySelector('.fa-circle-xmark');
-                
-                if(checkIcon) checkIcon.style.display = 'none';
-                if(xmarkIcon) xmarkIcon.style.display = 'none';
-            }*/
+            changeStatus(row, 'approve');
         });
     });
 }
 
-
-/* =================================== REJECT =================================== */
-function buttonRejected() {
-    const buttons = document.querySelectorAll('.fa-circle-xmark');
-
+// Information
+function buttonInfo() {
+    const buttons = document.querySelectorAll('.fa-circle-info');
     if(!buttons) return;
 
     buttons.forEach(button => {
         button.addEventListener('click', (e) => {
-            e.stopPropagation(); 
+            e.stopPropagation();
 
-            const row = button.closest('tr');
-            if(!row) return;
-            const folioCell = row.querySelector('.folio');
-            const folio = folioCell ? folioCell.textContent.trim() : 'desconocido';
+            // Llamar al backend
             
-            ToastRejected(folio);
+            const infoCard = document.querySelector('.info-wrapper');
+            const buttonClose = document.querySelector('.arrow-back');
+
+            if(!infoCard || !buttonClose) return;
+
+            infoCard.style.display = 'flex';
+            calculateDays();
+
+            buttonClose.addEventListener('click', (e) => {
+                e.stopPropagation();
+                infoCard.style.display = 'none';
+            });
         });
     });
 }
@@ -505,10 +582,12 @@ function Toast(title, content, imageUrl = './assets/images/Icon_agave.webp') {
 }
 
 // Rejected
-function ToastRejected(folio) {
+function ToastRejected(folio, row, imageLeft = './assets/images/Icon_agave1.webp', imageRight = './assets/images/Icon_agave2.webp') {
     Swal.fire({
         title: 'SOLICITUD RECHAZADA',
         html: `
+            <img src="${imageLeft}" alt="Agave" class="agave-half left">
+            <img src="${imageRight}" alt="Agave" class="agave-half right">
             <div>
                 <textarea id="motivo-rechazo" class="swal2-textarea" placeholder="Por favor, escribe el motivo de tu rechazo"></textarea>
             </div>
@@ -541,10 +620,9 @@ function ToastRejected(folio) {
         }
     }).then((result) => {
         if(result.isConfirmed) {
-            const motivoRechazo = result.value;
-            console.log('Motivo del rechazo:', motivoRechazo);
-
+            motivoRechazo = result.value;
             Toast('SOLICITUD RECHAZADA', `La solicitud con folio ${folio} fue rechazada y notificada al colaborador correctamente`);
+            changeStatus(row, 'reject');
         }
     });
 }
