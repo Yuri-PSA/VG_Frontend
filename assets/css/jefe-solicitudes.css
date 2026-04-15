@@ -2296,12 +2296,19 @@ body {
 
 /* Móviles */
 @media(max-width: 765px) {
+    /* TOAST */
+    .colored-toast span { font-size: 0.9em; } 
+
+    .agave-icon { height: 4.5em; }
+
+    /* BODY */
     html { background-color: var(--html-back); }
 
     body { height: -webkit-fill-available; }
 
     ::-webkit-scrollbar-thumb { background-color: transparent; }
 
+    /* OPTION BAR */
     .option-bar {
         display: flex;
         position: fixed;
@@ -2348,6 +2355,7 @@ body {
         width: 15px; 
     }
 
+    /* CONTAINER */
     .background { flex-direction: column; }
 
     .content-container {
@@ -2432,6 +2440,12 @@ body {
         font-size: 1em; 
     }
 
+    .amount {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7em;
+    }
+
     .search { width: 100%; }
 
     .search-back i { font-size: 1.1em; }
@@ -2443,6 +2457,7 @@ body {
 
     .table-background { display: none; }
 
+    /* TABLE -> CARDS */
     .cards-mobile {
         display: flex;
         flex-direction: column;
@@ -2485,8 +2500,13 @@ body {
     }
 
     .folio-mobile { 
-        font-size: 1.2em; 
+        font-size: 1.3em; 
         font-weight: 600;
+    }
+
+    .status.st-mobile {
+        font-size: 0.9em;
+        padding: 0.6em 1em;
     }
 
     .complete-info {
@@ -2511,7 +2531,7 @@ body {
 
     .info-mobile .destiny,
     .info-mobile .amount-mobile { 
-        font-size: 1.2em; 
+        font-size: 1.3em; 
         font-weight: 600;
     }
 
@@ -2529,6 +2549,7 @@ body {
         font-size: 0.8em;
         font-weight: 700;
         color: var(--passport-gray);
+        margin-bottom: 0.5em;
     }
 
     .map-img { 
@@ -2536,7 +2557,7 @@ body {
         justify-content: center;
         align-items: center;
         width: 100%;
-        height: 3em;
+        height: 5em;
         overflow: hidden;
         margin-bottom: 0.8em;
     }
@@ -2554,7 +2575,10 @@ body {
         width: 100%;
         gap: 1.5em;
         color: var(--icons);
-        font-size: 1.3em;
+        font-size: 1.4em;
         margin-top: 1em;
     }
+
+    /* PAGE */
+
 }
