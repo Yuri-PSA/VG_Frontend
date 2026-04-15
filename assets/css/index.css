@@ -213,11 +213,22 @@ h5 { font-family: 'CenturyGothic', sans-serif; }
     border-radius: 30px !important;
 }
 
-.colored-toast span { 
-    color: var(--white); 
-    font-size: 1rem;
-    padding: 12px 20px 12px 0 !important;
+.colored-toast .text {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: var(--white);
+    padding: 12px 30px 15px 0 !important;
+    text-align: center
 }
+
+.colored-toast p {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 0.5em;
+}
+
+.colored-toast span { font-size: 1.1em; }
 
 .agave-icon {
     height: 6.5em; 
@@ -263,6 +274,7 @@ body {
 }
 
 .agave:first-child { background-position: right center; }
+
 .agave:last-child { background-position: left center; }
 
 .form {
@@ -386,53 +398,112 @@ body {
 }
 
 
-/* ======================== RESPONSIVE DESKTOP FIRST ======================== */
-/* Escritorio */
-@media(min-width: 1920px) {
-    .colored-toast span { 
-        font-size: 1.5em; 
-        padding: 18px 21px 18px 0 !important;
+/* ============================== RESPONSIVIDAD ============================== */
+/* Escritorios grandes (1920px) */
+@media(min-width: 1801px) {
+    /* TOAST */
+    body.swal2-toast-shown .swal2-container.swal2-top-end, 
+    body.swal2-toast-shown .swal2-container.swal2-top-right { width: 680px !important; }
+
+    .colored-toast p { font-size: 1.5em; }
+
+    .colored-toast span { font-size: 1.4em; }
+
+    .agave-icon { height: 7.5em; }
+
+    /* CONTENT */
+    .agave { background-size: auto 110%; }
+
+    .form img { margin-bottom: 1.5em; }
+
+    .form h1 { font-size: 5.7em; }
+
+    .form p { font-size: 1.6em; }
+
+    .form .field { 
+        height: 4.3em; 
+        margin-top: 7em;
     }
 
-    .swal2-container.swal2-top-end.swal2-backdrop-show { width: 650px !important; }
+    .form .field.second { margin-top: 2.5em; }
 
-    .agave-icon { height: 8em; }
+    .form .field-back input { font-size: 1.5em; }
 
-    .form h1 { font-size: 7em; }
+    .form .field-back i { font-size: 1.4em; }
 
-    .form p { font-size: 2em; }
-
-    .form .field { height: 5.5em; }
-
-    .form .field-back { padding: 1.5em; }
-
-    .form .field-back i,
     .form .field-back .fa-eye,
-    .form .field-back .fa-eye-slash { font-size: 1.6em; }
+    .form .field-back .fa-eye-slash { font-size: 1.4em; }
 
-    .form .field-back input { font-size: 1.8em; }
-
-    .button-login { font-size: 1.8em; }
+    .button-login { font-size: 1.6em; }
 }
 
-/* Ordenadores */
-@media(min-width: 1025px) and (max-width: 1336px) and (max-resolution: 1.5dppx) {
-    .form img { margin-bottom: 1em; }
+/* Laptops */
+@media(min-width: 1251px) and (max-width: 1367px) and (max-resolution: 1.5dppx) {
+    /* TOAST */
+    body.swal2-toast-shown .swal2-container.swal2-top-end, 
+    body.swal2-toast-shown .swal2-container.swal2-top-right { width: 520px !important; }
+
+    .colored-toast span { font-size: 0.95em; }
+
+    .colored-toast p { font-size: 1em; }
+
+    /* CONTAINER */
+    .form h1 { font-size: 4.5em; }
+
+    .form p { font-size: 1.2em; }
 
     .form .field { margin-top: 5em; }
+ 
+    .form .field-back input { font-size: 1.1em; }
+
+    .form .field-back i { font-size: 1em; }
+
+    .form .field-back .fa-eye,
+    .form .field-back .fa-eye-slash { font-size: 1.1em }
+
+    .button-login { font-size: 1.1em;}
 }
 
+/* Laptops pequeñas (1024px - 1299px) */
+@media(min-width: 1024px) and (max-width: 1250px) {
+    /* TOAST */
+    body.swal2-toast-shown .swal2-container.swal2-top-end, 
+    body.swal2-toast-shown .swal2-container.swal2-top-right { width: 500px !important; }
 
-/* Tabletas pequeñas / móviles grandes */
-@media(max-width: 1024px) {
-    .colored-toast span { font-size: 1.1em; }
+    .colored-toast p { font-size: 1em; }
 
+    .colored-toast span { font-size: 0.9em; }
+
+    .agave-icon { height: 6em; }
+
+    /* CONTAINER */
+    .form img { width: 40%; }
+
+    .form h1 { font-size: 4em; }
+
+    .form p { font-size: 1.1em; }
+
+    .form .field { margin-top: 5em; }
+
+    .form .field-back input { font-size: 1.1em; }
+
+    .form .field-back i { font-size: 1em; }
+
+    .form .field-back .fa-eye,
+    .form .field-back .fa-eye-slash { font-size: 1.1em; }
+
+    .button-login { font-size: 1.2em; }
+}
+
+@media (min-width: 766px) and (max-width: 1023px) {
+    /* BODY */
     html { background-color: var(--html-back); }
 
     body { height: -webkit-fill-available; }
 
     ::-webkit-scrollbar-thumb { background-color: transparent; }
 
+    /* CONTENT */
     .background {
         grid-template-columns: 1fr;
         grid-template-rows: 3.5fr 1fr;
@@ -440,42 +511,58 @@ body {
         height: -webkit-fill-available;
     }
 
-    .agave { 
+    .agave {
         position: absolute;
         bottom: -45%;
         width: 50%;
         height: 100%;
         background-repeat: no-repeat;
-        background-size: auto 40%; ;
+        background-size: auto 40%;
     }
 
     .agave:first-child { left: -2%; }
 
     .agave:last-child { right: -2%; }
 
-    .form p { font-size: 1.5em; }
+    .form img { 
+        width: 25%; 
+        margin-bottom: 4em;
+    }
 
-    .form .field-back i { font-size: 1.2em; }
+    .form p { font-size: 1.4em; }
+
+    .form .field { margin-top: 8em; }
 
     .form .field-back input { font-size: 1.3em; }
 
-    .button-login { font-size: 1.5em; }
+    .button-login {
+        font-size: 1.4em;
+        margin-top: 4em;
+    }
 
     .button-login:hover::before { animation: shine 2.5s ease-out infinite; }
 }
 
-/* Móviles */
-@media(max-width: 480px) {
-    .colored-toast span { font-size: 0.9rem; }
-
-    .agave-icon { height: 4.5em; }
-
+@media(max-width: 765px) {
+    /* BODY */
     html { background-color: var(--html-back); }
 
     body { height: -webkit-fill-available; }
 
     ::-webkit-scrollbar-thumb { background-color: transparent; }
 
+    /* TOAST */
+    .swal2-toast { margin: 0 !important; }
+
+    .colored-toast .text { padding: 12px 10px 15px 0 !important; }
+
+    .colored-toast p { font-size: 1em; }
+
+    .colored-toast span { font-size: 0.9em; }
+
+    .agave-icon { height: 6em; }
+
+    /* CONTAINER */
     .background {
         grid-template-columns: 1fr;
         grid-template-rows: 3.5fr 1fr;
