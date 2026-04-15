@@ -2301,8 +2301,32 @@ body {
 
     .swal2-popup.swal2-modal.custom-reject-modal.swal2-show { margin: 0 !important; }
 
-    .agave-icon { width: 5em; }
+    .colored-toast .text { padding: 12px 10px 15px 0 !important; }
 
+    .agave-icon { width: 6em; }
+
+    .colored-toast p,
+    .reject-title { font-size: 1em; }
+
+    .colored-toast span { font-size: 0.9em; }
+
+    .swal2-textarea {
+        width: 80% !important;
+        font-size: 0.9em;
+    }
+
+    .reject-question { font-size: 0.9em; }
+
+    .swal-confirm-btn, 
+    .swal-cancel-btn { font-size: 0.85em; }
+
+    .swal2-validation-message { 
+        width: 80%;
+        font-size: 0.8em; 
+    }
+
+    .agave-half { height: 13em; }
+    
     /* BODY */
     html { background-color: var(--html-back); }
 
