@@ -62,7 +62,7 @@ const ToastMixin = Swal.mixin({
     showConfirmButton: false,
     timer: 4000,
     timerProgressBar: true,
-    width: '500px',
+    width: '570px',
     customClass: {
         popup: 'colored-toast'
     },
@@ -72,13 +72,16 @@ const ToastMixin = Swal.mixin({
     },
 });
 
-function Toast(title, imageUrl = './assets/images/Icon_agave.webp') {
+function Toast(content, title = 'ERROR AL INICIAR SESIÓN', imageUrl = './assets/images/Icon_agave.webp') {
     ToastMixin.fire({
         icon: undefined,
         html: `
             <div style="display: flex; align-items: center; gap: 20px;">
                 <img src="${imageUrl}" alt="Agave" class="agave-icon">
-                <span>${title}</span>
+                <div class="text">
+                    <p>${title}</p>
+                    <span>${content}</span>
+                </div>
             </div>
         `
     });
