@@ -2538,6 +2538,13 @@ body {
         min-height: calc(100vh - 90px);
     }
 
+    .content-header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2.5em;
+    }
+
     .titles {
         align-items: center;
         text-align: center;
@@ -2553,8 +2560,14 @@ body {
     .titles .subtitle {
         font-size: 1.1em;
         line-height: 1.5em;
-        margin-bottom: 1.7em;
     }
+
+    .button-create { 
+        margin: 0 0 3em 0;
+        font-size: 0.7em; 
+    }
+
+    .button-create:hover::before { animation: shine 2.5s ease-out infinite; }
 
     .tab-header {
         flex-direction: column-reverse;
@@ -2599,30 +2612,19 @@ body {
 
     .tab.selected p { font-size: 1.2em; }
 
-    .amount.selected { 
-        width: 30px;
-        height: 30px;
-        font-size: 1em; 
-    }
-
-    .amount {
-        width: 20px;
-        height: 20px;
-        font-size: 0.7em;
-    }
-
     .search { width: 100%; }
 
     .search-back i { font-size: 1.1em; }
     
+    /* CALENDAR */
     .datepicker-wrapper { 
         width: 100%; 
         top: 35%;
     }
 
+    /* TABLE -> CARDS */
     .table-background { display: none; }
 
-    /* TABLE -> CARDS */
     .cards-mobile {
         display: flex;
         flex-direction: column;
@@ -2667,6 +2669,14 @@ body {
     .folio-mobile { 
         font-size: 1.3em; 
         font-weight: 600;
+    }
+
+    .both-status-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 1.5em;
     }
 
     .status.st-mobile {
@@ -2715,6 +2725,17 @@ body {
         font-weight: 700;
         color: var(--passport-gray);
         margin-bottom: 0.5em;
+    }
+
+    .info-mobile .amount-mobile-currency { font-size: 0.7em; }
+
+    .info-mobile .amount-mobile-currency img { 
+        width: 14px; 
+        height: 14px;
+        border-radius: 50%;
+        object-fit: cover;
+        transform: translateY(20%);
+        margin-right: 0.3em;
     }
 
     .map-img { 
