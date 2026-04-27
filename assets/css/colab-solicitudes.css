@@ -1663,7 +1663,7 @@ body {
 }
 
 /* Escritorios medianos (1440px + 1800px) */
-@media(min-width: 1440px) and (max-width: 1800px) and (max-resolution: 1.5dppx){
+@media(min-width: 1440px) and (max-width: 1800px) and (max-resolution: 1.5dppx) {
     /* TOAST */ 
     body.swal2-toast-shown .swal2-container { width: 530px !important; }
 
@@ -2543,7 +2543,7 @@ body {
 
     .hamburger.active { background-image: none; }
 
-    .logo { padding-left: 10px; }
+    .logo { padding-left: 0; }
 
     .logo .name { font-size: 1em; }
 
@@ -2556,6 +2556,7 @@ body {
 
     .options .option,
     .logout .option { 
+        width: 100%;
         gap: 0.5em; 
         padding: 0.6em 0.7em;
     }

@@ -5,7 +5,14 @@ document.addEventListener("DOMContentLoaded", function() {
     initCalendar();
     currencyOptions();
     paymentOptions();
+    sendButton();
+    cancelButton();
 });
+
+
+/* ============================== PHONE MENU ============================== */
+let globalStartDate = null;
+let globalEndDate = null;
 
 
 /* ============================== PHONE MENU ============================== */
@@ -124,11 +131,99 @@ function cancelButton() {
 
     cancelButton.addEventListener('click', (e) => {
         e.stopPropagation();
+        window.location.href = 'colab-solicitudes.html';
     });
 }
 
+// Send
 function sendButton() {
-    const destination = document.getElementById('ans-destination').value;
+    const sendButton = document.querySelector('.button.send');
+    if(!sendButton) return;
+
+    sendButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if(!validateForm()) return;
+
+        // Recopilar datos
+        // const usuario_id
+        const inicio_viaje = formatDate(globalStartDate);
+        const fin_viaje = formatDate(globalEndDate);
+        const destinoRaw = document.getElementById('ans-destination')?.value.trim();
+        const destino = destinoRaw 
+                        ? destinoRaw.charAt(0).toUpperCase() + destinoRaw.slice(1).toLowerCase()
+                        : '';
+        const motivo = document.querySelector('.answer.motive textarea')?.value.trim();
+        const monto_solicitado = parseFloat(document.querySelector('.answer.money input')?.value.trim());
+        const monto_moneda = document.querySelector('.currency-selector .flags p')?.textContent.trim();
+        const forma_pago = document.querySelector('.payment-selector p')?.textContent.trim();
+
+        const data = {
+            p_inicio_viaje: inicio_viaje,
+            p_fin_viaje: fin_viaje,
+            p_destino: destino,
+            p_motivo: motivo,
+            p_monto_solicitado: monto_solicitado,
+            p_monto_moneda: monto_moneda,
+            p_forma_pago: forma_pago
+        };
+
+        console.log('Datos a enviar', data);
+        
+        // Implementar loader
+        Toast('SOLICITUD ENVIADA', 'Tu solicitud ha sido enviada y se encuentra en proceso de aprobación');
+        setTimeout(() => {
+            setTimeout(() => {
+                window.location.href = 'colab-solicitudes.html';
+            }, 600);
+        }, 4000);
+    });
+}
+
+// Validation
+function validateForm() {
+    const destination = document.getElementById('ans-destination')?.value.trim();
+    const motive = document.querySelector('.answer.motive textarea')?.value.trim();
+    const amount = document.querySelector('.answer.money input')?.value.trim();
+    
+    if(!destination) {
+        Toast('ERROR AL ENVIAR SOLICITUD', 'Por favor, ingresa la ciudad de destino de tu viaje');
+        return false;
+    }
+
+    if(!globalStartDate || !globalEndDate) {
+        Toast('ERROR AL ENVIAR SOLICITUD', 'Por favor, selecciona ambas fechas de tu viaje');
+        return false;
+    } else if(globalStartDate === globalEndDate) {
+        Toast('ERROR AL ENVIAR SOLICITUD', 'Por favor, selecciona un rango de fechas válido');
+        return false;
+    }
+
+    if(!motive) {
+        Toast('ERROR AL ENVIAR SOLICITUD', 'Por favor, ingresa el motivo de tu viaje');
+        return false;
+    }
+
+    if(!amount) {
+        Toast('ERROR AL ENVIAR SOLICITUD', 'Por favor, ingresa el monto que necesitas para tu viaje');
+        return false;
+    }
+
+    return true;
+}
+
+// Format Date
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    
+    if(isNaN(date.getTime()))
+        return null;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }
 
 
@@ -381,7 +476,9 @@ function initCalendar() {
             if (startDate === null || (startDate && endDate !== null)) {
                 startDate = { year, month, day };
                 endDate = null;
-                console.log(`Rango reiniciado. Inicio: ${day}/${month+1}/${year}`);
+
+                globalStartDate = `${year}-${month+1}-${day}`;
+                globalEndDate = null;
             }
             // Si hay inicio pero no fin, se establece el fin (ordenando las fechas)
             else if (startDate && endDate === null) {
@@ -393,7 +490,8 @@ function initCalendar() {
                 } else
                     endDate = { year, month, day };
                 
-                console.log(`Rango seleccionado: ${startDate.day}/${startDate.month+1}/${startDate.year} - ${endDate.day}/${endDate.month+1}/${endDate.year}`);
+                globalStartDate = `${startDate.year}-${startDate.month+1}-${startDate.day}`;
+                globalEndDate = `${endDate.year}-${endDate.month+1}-${endDate.day}`;
             }
 
             renderCalendar();

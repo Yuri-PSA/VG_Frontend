@@ -1433,7 +1433,7 @@ body {
 /* Escritorios grandes (1920px) */
 @media(min-width: 1801px) {
     /* TOAST */
-    body.swal2-toast-shown .swal2-container { width: 680px !important; }
+    body.swal2-toast-shown .swal2-container { width: 710px !important; }
 
     .swal2-popup.custom-reject-modal { width: 670px !important; }
 
