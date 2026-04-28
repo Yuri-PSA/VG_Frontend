@@ -1496,6 +1496,7 @@ body {
     .container { 
         border-radius: 60px; 
         padding: 2em 1.7em 0 1.7em;
+        background-size: 35% auto;
     }
 
     .titles .title { font-size: 4em; }
@@ -1810,7 +1811,7 @@ body {
     .info-currency p { font-size: 0.8em; }
 }
 
-@media(min-width: 1366px) and (max-width:1469px) {
+@media(min-width: 1366px) and (max-width:1469px) and (max-resolution: 1.5dppx)  {
     /* TOAST */ 
     body.swal2-toast-shown .swal2-container { width: 470px !important; }
 
