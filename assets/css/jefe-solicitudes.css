@@ -1129,7 +1129,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 29em;
-    height: 85%;
+    height: 90%;
     background-color: var(--transparent-blue);
     border-radius: 15px;
     padding: 0.8em;
