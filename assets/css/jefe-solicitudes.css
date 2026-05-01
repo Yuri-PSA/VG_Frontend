@@ -956,7 +956,7 @@ body {
     align-items: center;
     border-radius: 15px;
     font-size: 0.8em;
-    padding: 0.2em 0.6em;
+    padding: 0.3em 0.7em;
     z-index: 1;
 }
 
@@ -1449,17 +1449,16 @@ body {
     .swal2-textarea {
         width: 80% !important;
         height: 7em !important;
-        font-size: 1.1em;
+        font-size: 1.2em;
     }
 
-    .reject-question { font-size: 1.1em; }
-
-    .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 1.2em; }
-
+    .reject-question,
     .swal2-validation-message { font-size: 1.2em; }
 
-    .agave-half { height: 17.9em; }
+    .swal-confirm-btn, 
+    .swal-cancel-btn { font-size: 1.3em; }
+
+    .agave-half { height: 19em; }
 
     /* OPTION BAR */
     .option-bar { padding: 7em 0; }
@@ -1683,11 +1682,10 @@ body {
         font-size: 0.9em;
     }
 
-    .reject-question { font-size: 1em; }
+    .reject-question { font-size: 0.95em; }
 
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 1em; }
-
+    .swal-cancel-btn,
     .swal2-validation-message { font-size: 1em; }
 
     .agave-half { height: 14.4em; }
@@ -1832,10 +1830,10 @@ body {
 
     .swal2-popup.custom-reject-modal { width: 490px !important; }
 
-    .colored-toast span { font-size: 0.95em; }
-
     .colored-toast p,
     .reject-title { font-size: 1em; }
+
+    .colored-toast span { font-size: 0.95em; }
 
     .swal2-textarea { font-size: 0.85em; }
 
@@ -1967,7 +1965,7 @@ body {
     /* TOAST */
     body.swal2-toast-shown .swal2-container { width: 520px !important; }
 
-    .swal2-popup.custom-reject-modal { width: 500px !important; }
+    .swal2-popup.custom-reject-modal { width: 490px !important; }
 
     .colored-toast span { font-size: 0.95em; }
 
@@ -1979,8 +1977,7 @@ body {
     .reject-question { font-size: 0.85em; }
 
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 0.9em; }
-
+    .swal-cancel-btn,
     .swal2-validation-message { font-size: 0.9em; }
 
     .agave-half { height: 12.8em; }
@@ -2118,7 +2115,7 @@ body {
     /* TOAST */
     body.swal2-toast-shown .swal2-container { width: 500px !important; }
 
-    .swal2-popup.custom-reject-modal { width: 450px !important; }
+    .swal2-popup.custom-reject-modal { width: 410px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
@@ -2129,7 +2126,7 @@ body {
 
     .swal2-textarea {
         width: 80% !important;
-        font-size: 0.85em;
+        font-size: 0.8em;
     }
 
     .reject-question { font-size: 0.8em; }
@@ -2139,7 +2136,7 @@ body {
 
     .swal2-validation-message { font-size: 0.9em; }
 
-    .agave-half { height: 12.6em; }
+    .agave-half { height: 12.3em; }
 
     /* OPTION BAR */
     .option-bar { width: 23%; }
@@ -2520,17 +2517,16 @@ body {
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .colored-toast span { font-size: 0.9em; }
+    .colored-toast span,
+    .reject-question { font-size: 0.9em; }
 
     .swal2-textarea {
         width: 80% !important;
         font-size: 0.9em;
     }
 
-    .reject-question { font-size: 0.9em; }
-
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 0.9em; }
+    .swal-cancel-btn { font-size: 0.95em; }
 
     .swal2-validation-message { 
         width: 80%;
