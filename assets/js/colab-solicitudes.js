@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
     activeCards();
     updateCurrency();
     buttonRequest();
+    buttonReceived();
     buttonCanceled();
     buttonInfo();
 });
@@ -584,6 +585,35 @@ function buttonRequest() {
     });
 }
 
+// Money received
+function buttonReceived() {
+    const buttons = document.querySelectorAll('.status.btn-received');
+    if(!buttons) return;
+
+    buttons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            const row = button.closest('tr');
+            const card = button.closest('.card');
+            let folio = 'desconocido';
+            let elemento = null;
+
+            if(row) {
+                const folioCell = row.querySelector('.folio');
+                if(folioCell) folio = folioCell.textContent.trim();
+                elemento = row;
+            } else if(card) {
+                const folioElem = card.querySelector('.folio-mobile');
+                if(folioElem) folio = folioElem.textContent.trim();
+                elemento = card;
+            } else return;
+
+            ToastReceived(folio);
+        });
+    });
+}
+
 // Cancel
 function buttonCanceled() {
     const buttons = document.querySelectorAll('.fa-circle-xmark');
@@ -701,6 +731,39 @@ function ToastCanceled(folio, imageLeft = './assets/images/Icon_agave1.webp', im
         heightAuto: false, 
         customClass: {
             popup: 'custom-reject-modal',
+            title: 'reject-title',
+            confirmButton: 'swal-confirm-btn',
+            cancelButton: 'swal-cancel-btn'
+        }
+    }).then((result) => {
+        if(result.isConfirmed) {
+            Toast('SOLICITUD CANCELADA', 'Ahora puedes consultarla en la pestaña de Canceladas');
+        }
+    });
+}
+
+// Toast -> Buttons
+function ToastReceived(folio, imageLeft = './assets/images/Icon_agave1.webp', imageRight = './assets/images/Icon_agave2.webp') {
+    Swal.fire({
+        title: 'CONFIRMAR RECEPCIÓN DE ANTICIPO',
+        html: `
+            <img src="${imageLeft}" alt="Agave" class="agave-half left">
+            <img src="${imageRight}" alt="Agave" class="agave-half right">
+            <p class="received-text">¿Has recibido el anticipo de viáticos correspondiente a tu solicitud con folio ${folio}?</p>
+        `,
+        position: 'top-end',
+        background: '#00333E',
+        color: '#FFFFFF',
+        showCancelButton: true,
+        cancelButtonText: 'NO, AÚN NO',
+        confirmButtonText: 'SÍ, LO RECIBÍ',
+        backdrop: 'rgba(0, 0, 0, 0)',
+        allowOutsideClick: false,
+        scrollbarPadding: false,
+        width:'595px',
+        heightAuto: false, 
+        customClass: {
+            popup: 'custom-received-modal',
             title: 'reject-title',
             confirmButton: 'swal-confirm-btn',
             cancelButton: 'swal-cancel-btn'

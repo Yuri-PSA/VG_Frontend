@@ -253,7 +253,8 @@ h5 { font-family: 'CenturyGothic', sans-serif; }
 .swal2-popup.swal2-toast.colored-toast.swal2-show { padding: 0; }
 
 .colored-toast,
-.custom-reject-modal { 
+.custom-reject-modal,
+.custom-received-modal { 
     background-color: var(--toast) !important;
     font-family: 'CenturyGothic', sans-serif;
     border-radius: 30px !important;
@@ -279,6 +280,11 @@ h5 { font-family: 'CenturyGothic', sans-serif; }
 }
 
 .colored-toast span { font-size: 1rem; }
+
+.received-text { 
+    padding: 0 4em; 
+    margin-bottom: 1.3em;
+}
 
 .agave-icon {
     height: 6.5em; 
@@ -575,9 +581,11 @@ body {
     overflow: hidden;
 }
 
-.button-create:hover::before { animation: shine 1.5s ease-out infinite; }
+.button-create:hover::before,
+.status.btn-received:hover::before { animation: shine 1.5s ease-out infinite; }
 
-.button-create::before {
+.button-create::before,
+.status.btn-received::before {
     content: '';
     position: absolute;
     width: 100%;
@@ -961,7 +969,7 @@ body {
     align-items: center;
     border-radius: 15px;
     font-size: 0.8em;
-    padding: 0.2em 0.6em;
+    padding: 0.3em 0.7em;
     z-index: 1;
 }
 
@@ -988,6 +996,14 @@ body {
 .st-approved::before { background: var(--status-approved); }
 .st-rejected::before { background: var(--status-rejected); }
 .st-canceled::before { background: var(--status-canceled); }
+
+.status.btn-received { 
+    background-color: var(--icons);
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
 
 .table-body .actions {
     display: flex;
@@ -1457,21 +1473,23 @@ body {
     /* TOAST */
     body.swal2-toast-shown .swal2-container { width: 680px !important; }
 
-    .swal2-popup.custom-reject-modal { width: 695px !important; }
+    .swal2-popup.custom-reject-modal { width: 710px !important; }
+
+    .swal2-popup.custom-received-modal { width: 790px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1.5em; }
 
-    .colored-toast span { font-size: 1.4em; }
+    .colored-toast span,
+    .canceled-text,
+    .received-text { font-size: 1.4em; }
 
     .agave-icon { height: 7.5em; }
 
-    .canceled-text { font-size: 1.2em; }
-
-    .reject-question { font-size: 1.1em; }
+    .reject-question { font-size: 1.3em; }
 
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 1.2em; }
+    .swal-cancel-btn { font-size: 1.3em; }
 
     .agave-half { height: 17.9em; }
 
@@ -1681,13 +1699,13 @@ body {
     .colored-toast p,
     .reject-title { font-size: 1.2em; }
 
-    .colored-toast span { font-size: 1em; }
-
-    .canceled-text { font-size: 0.9em; }
+    .colored-toast span,
+    .canceled-text,
+    .received-text { font-size: 1em; }
 
     .agave-icon { height: 7em; }
 
-    .reject-question { font-size: 1em; }
+    .reject-question { font-size: 1.03em; }
 
     .swal-confirm-btn, 
     .swal-cancel-btn { font-size: 1em; }
@@ -1832,17 +1850,17 @@ body {
 
     .swal2-popup.custom-reject-modal { width: 490px !important; }
 
-    .colored-toast span { font-size: 0.95em; }
-
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .canceled-text { font-size: 0.85em; }
+    .colored-toast span,
+    .canceled-text,
+    .received-text { font-size: 0.95em; }
 
-    .reject-question { font-size: 0.85em; }
+    .reject-question { font-size: 0.93em; }
 
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 0.9em; }
+    .swal-cancel-btn { font-size: 0.91em; }
 
     .agave-half { height: 11.8em; }
 
@@ -1968,17 +1986,16 @@ body {
     /* TOAST */ 
     body.swal2-toast-shown .swal2-container { width: 470px !important; }
 
-    .swal2-popup.custom-reject-modal { width: 440px !important; }
-
-    .colored-toast span { font-size: 0.95em; }
+    .swal2-popup.custom-reject-modal { width: 470px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .canceled-text { font-size: 0.85em; }
+    .colored-toast span,
+    .canceled-text,
+    .received-text { font-size: 0.93em; }
 
-    .reject-question { font-size: 0.85em; }
-
+    .reject-question,
     .swal-confirm-btn, 
     .swal-cancel-btn { font-size: 0.9em; }
 
@@ -2115,25 +2132,25 @@ body {
 /* Laptops pequeñas (1024px - 1250px) */
 @media(min-width: 1025px) and (max-width: 1280px) {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 390px !important; }
+    body.swal2-toast-shown .swal2-container { width: 410px !important; }
 
     .swal2-popup.custom-reject-modal { width: 460px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .colored-toast span { font-size: 0.9em; }
+    .colored-toast span,
+    .canceled-text,
+    .received-text { font-size: 0.9em; }
 
     .agave-icon { height: 6em; }
 
-    .canceled-text { font-size: 0.8em; }
-
-    .reject-question { font-size: 0.8em; }
+    .reject-question { font-size: 0.87em; }
 
     .swal-confirm-btn, 
     .swal-cancel-btn { font-size: 0.85em; }
 
-    .agave-half { height: 11em; }
+    .agave-half { height: 13em; }
 
     /* OPTION BAR */
     .option-bar { width: 23%; }
@@ -2337,7 +2354,8 @@ body {
 
     .button-create { margin: 0; }
 
-    .button-create:hover::before { animation: shine 2.5s ease-out infinite; }
+    .button-create:hover::before,
+    .status.btn-received::before { animation: shine 2.5s ease-out infinite; }
 
     .content { margin-top: 3.5em; }
 
@@ -2529,14 +2547,14 @@ body {
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .colored-toast span { font-size: 0.9em; }
+    .colored-toast span,
+    .reject-question,
+    .received-text { font-size: 0.9em; }
 
     .canceled-text { 
         padding: 0 2em;
         font-size: 0.9em; 
     }
-
-    .reject-question { font-size: 0.9em; }
 
     .swal-confirm-btn, 
     .swal-cancel-btn { font-size: 0.95em; }
@@ -2648,7 +2666,8 @@ body {
         font-size: 0.7em; 
     }
 
-    .button-create:hover::before { animation: shine 2.5s ease-out infinite; }
+    .button-create:hover::before,
+    .status.btn-received::before { animation: shine 2.5s ease-out infinite; }
 
     .tab-header {
         flex-direction: column-reverse;
