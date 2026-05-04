@@ -1292,6 +1292,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     opacity: 0.6;
 }
 
+.button-verification,
+.button-download { font-size: 1.1em; }
+
 @keyframes shine {
     0% { left: -100px; }
     60% { left: 100%; }
@@ -1369,9 +1372,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     display: flex; 
     gap: 1.5em;
 }
-
-.button-verification
-.button-download { font-size: 1.1em; }
 
 .info-icons { 
     position: absolute;
@@ -2259,6 +2259,10 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         margin: 0;
     }
 
+    .button-receipt:hover::before,
+    .button-verification:hover::before,
+    .button-download:hover::before { animation: shine 2.5s ease-out infinite; }
+
     /* AGAVE */
     .agave-mobile {
         display: flex;
@@ -2620,6 +2624,10 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     }
 
     .receipt-container p { padding: 0 1em; }
+
+    .button-receipt:hover::before,
+    .button-verification:hover::before,
+    .button-download:hover::before { animation: shine 2.5s ease-out infinite; }
 
     /* PAGE */
     .tab-buttons { margin-top: 2.5em; }
