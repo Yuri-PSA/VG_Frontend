@@ -459,7 +459,7 @@ body {
 }
 
 .card-wrapper.treasury:nth-child(2) { width: 31%; }
-.card-wrapper.treasury:last-child { width: 28%; }
+.card-wrapper.treasury:last-child { width: 26%; }
 
 .card-background {
     position: absolute;
@@ -496,7 +496,7 @@ body {
     width: 100%;
     height: 100%;
     color: var(--black);
-    padding-top: 0.5em;
+    padding-top: 0.3em;
     z-index: 5;
 }
 
@@ -504,10 +504,13 @@ body {
 
 .card-text .rejected-number,
 .card-text .approved-number,
-.card-text .pending-number { 
+.card-text .pending-number,
+.card-text .advances-number,
+.card-text .expenses-number,
+.card-text .returns-number { 
     display: flex;
     gap: 0.2em;
-    font-size: 3em;
+    font-size: 2.5em;
     font-weight: 500;
     line-height: 1em;
 }
@@ -529,7 +532,6 @@ body {
     display: flex;
     width: 100%;
     height: 100%;
-    padding-bottom: 1em;
 }
 
 .graph-back {
@@ -565,14 +567,16 @@ body {
     overflow: visible !important; 
 }
 
+.graph-back.status .graph-wrapper.treasury { padding: 0.5em 0; }
+
 .graph-back.status .graph-wrapper p { 
-    font-size: 1.2em; 
+    font-size: 1.1em; 
     text-align: center;
 }
 
 .graph-wrapper p { 
     font-weight: 600; 
-    font-size: 0.95em;
+    font-size: 0.9em;
 }
 
 .chartst-container {
@@ -586,7 +590,7 @@ body {
 
 .chartst-container canvas { 
     flex: 1;
-    max-width: 70% !important;
+    max-width: 66% !important;
     height: auto !important;
 }
 
@@ -635,14 +639,14 @@ body {
 
 .center-text .year {
     display: block;
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: 600;
     line-height: 1;
 }
 
 .center-text .month {
     display: block;
-    font-size: 0.8em;
+    font-size: 0.75em;
     font-weight: 600;
 }
 
@@ -657,14 +661,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: left;
-    font-size: 1.1em;
+    font-size: 1em;
 }
 
 .color-dot {
     position: relative;
     display: inline-block;
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
     border-radius: 50%;
     margin-right: 0.5em;
 }
@@ -747,7 +751,7 @@ body {
     z-index: 2;
 }
 
-.graph-back.total.treasury { height: 65%; }
+.graph-back.total.treasury { height: 62%; }
 
 .graph-back.total .graph-wrapper p { font-size: 1.2em; }
 
@@ -763,13 +767,13 @@ body {
 .next.total-button i { font-size: 0.6em; }
 
 .graph-back.total .graph-wrapper .total-money {
-    font-size: 3em;
+    font-size: 2.3em;
     font-weight: 400;
     margin-top: 0.1em;
 }
 
 .graph-back.total .graph-wrapper .expense-subtitle { 
-    font-size: 0.9em; 
+    font-size: 0.85em; 
     color: var(--dark-gray);
     font-weight: 600;
     margin-top: 1.5em;
@@ -789,7 +793,7 @@ body {
 }
 
 .agave.treasury {
-    right: -9em;
+    right: -7.5em;
     bottom: -1em;
 }
 
@@ -839,7 +843,10 @@ body {
 
     .cards { gap: 3em }
 
-    .card-wrapper { width: 22%; }
+    .card-wrapper,
+    .card-wrapper.treasury:last-child { width: 22%; }
+
+    .card-wrapper.treasury:nth-child(2) { width: 27%; }
 
     .card-wrapper,
     .card,
@@ -860,12 +867,17 @@ body {
 
     .card-text .rejected-number,
     .card-text .approved-number,
-    .card-text .pending-number { font-size: 3em; }
+    .card-text .pending-number,
+    .card-text .advances-number,
+    .card-text .expenses-number,
+    .card-text .returns-number { font-size: 3em; }
 
     /* GRAPHS */
     .graph-back { padding: 0.9em; }
 
     .graph-wrapper { border-radius: 15px; }
+
+    .graph-back.status .graph-wrapper.treasury { font-size: 1.3em; }
 
     .graph-back.status .graph-wrapper p,
     .graph-back.total .graph-wrapper p { font-size: 1.5em; }
@@ -918,6 +930,8 @@ body {
     .prev.total-button i,
     .next.total-button i { font-size: 0.9em; }
 
+    .graph-back.total.treasury { height: 68%; }
+
     .graph-back.total .graph-desc { margin-top: 0.7em; }
 
     .graph-back.total .graph-wrapper .total-money {
@@ -929,6 +943,8 @@ body {
         height: 90%;
         right: 0.1em;
     }
+
+    .agave.treasury { right: -8.5em; }
 }
 
 /* Escritorios medianos (1440px + 1800px) */
@@ -955,6 +971,19 @@ body {
     .titles .subtitle { font-size: 1.2em; }
 
     /* GRAPHS */
+    .card-wrapper.treasury:nth-child(2) { width: 29%; }
+
+    .card-wrapper.treasury:last-child { width: 26%; }
+
+    .card-text .rejected-number,
+    .card-text .approved-number,
+    .card-text .pending-number,
+    .card-text .advances-number,
+    .card-text .expenses-number,
+    .card-text .returns-number { font-size: 2.8em; }
+
+    .graph-back.status .graph-wrapper.treasury { font-size: 1.05em; }
+
     .chartst-container { height: 12em; }
 
     .chartst-container canvas { max-width: 60% !important; }
@@ -968,10 +997,9 @@ body {
     .graph-back.requests .graph-wrapper p,
     .graph-back.expenses .graph-wrapper p { font-size: 0.9em; }
 
-    .graph-back.total .graph-wrapper .graph-desc .total-month { font-size: 0.75em; }
+    .graph-back.total.treasury { height: 73%; }
 
-    .prev.total-button i,
-    .next.total-button i { transform: translateY(15%); }
+    .graph-back.total .graph-wrapper .graph-desc .total-month { font-size: 0.75em; }
 
     .graph-back.total .graph-wrapper .total-money { font-size: 2.4em; }
 }
@@ -1004,11 +1032,18 @@ body {
 
     .card-wrapper { width: 22%; }
 
+    .card-wrapper.treasury:nth-child(2) { width: 29%; }
+
+    .card-wrapper.treasury:last-child { width: 24%; }
+
     .card-text p { font-size: 0.9em; }
 
     .card-text .pending-number,
     .card-text .rejected-number,
-    .card-text .approved-number { font-size: 2.1em; }
+    .card-text .approved-number,
+    .card-text .advances-number,
+    .card-text .expenses-number,
+    .card-text .returns-number { font-size: 2.1em; }
 
     /* GRAPHS */
     .graph-back.status .graph-wrapper p,
@@ -1019,14 +1054,14 @@ body {
         gap: 1em; 
     }
 
-    .chartst-container canvas { max-width: 55% !important; }
+    .chartst-container canvas { max-width: 58% !important; }
 
     .prev.status-button i,
     .next.status-button i { transform: translateY(5%); }
 
-    .center-text .year { font-size: 1.1em; }
+    .center-text .year { font-size: 1.2em; }
 
-    .center-text .month { font-size: 0.6em; }
+    .center-text .month { font-size: 0.73em; }
 
     .legend-item { font-size: 0.8em; }
 
@@ -1035,8 +1070,10 @@ body {
         height: 14px;
     }
 
+    .graph-back.status .graph-wrapper.treasury { font-size: 0.96em; }
+
     .graph-back.requests .graph-wrapper p,
-    .graph-back.expenses .graph-wrapper p { font-size: 0.7em; }
+    .graph-back.expenses .graph-wrapper p { font-size: 0.76em; }
 
     .prev,
     .next {
@@ -1058,12 +1095,18 @@ body {
     .prev.total-button i,
     .next.total-button i { font-size: 0.55em; }
 
-    .graph-back.total .graph-wrapper .total-money { font-size: 2.2em; }
+    .graph-back.total.treasury { height: 76%; }
+
+    .graph-back.total .graph-wrapper .expense-subtitle { font-size: 0.75em; }
+
+    .graph-back.total .graph-wrapper .total-money { font-size: 2em; }
 
     .agave {
         height: 90%;
         right: -0.1em;
     }
+
+    .agave.treasury { right: -6em; }
 }
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx) {
@@ -1097,14 +1140,23 @@ body {
 
     .card-wrapper { width: 21%; }
 
+    .card-wrapper.treasury:nth-child(2) { width: 26%; }
+
+    .card-wrapper.treasury:last-child { width: 23%; }
+
     .card-text p { font-size: 0.8em; }
 
     .card-text .pending-number,
     .card-text .rejected-number,
-    .card-text .approved-number { font-size: 2em; }
+    .card-text .approved-number,
+    .card-text .advances-number,
+    .card-text .expenses-number,
+    .card-text .returns-number { font-size: 2em; }
 
     /* GRAPHS */
     .graph-back.status .graph-wrapper { padding: 0.5em 0; }
+
+    .graph-back.status .graph-wrapper.treasury { font-size: 0.95em; }
 
     .graph-back.status .graph-wrapper p,
     .graph-back.total .graph-wrapper p { font-size: 1em; }
@@ -1114,14 +1166,14 @@ body {
         gap: 1.2em; 
     }
 
-    .chartst-container canvas { max-width: 55% !important; }
+    .chartst-container canvas { max-width: 64% !important; }
 
     .prev.status-button i,
     .next.status-button i { transform: translateY(5%); }
 
-    .center-text .year { font-size: 1em; }
+    .center-text .year { font-size: 1.2em; }
 
-    .center-text .month { font-size: 0.6em; }
+    .center-text .month { font-size: 0.7em; }
 
     .legend-item { font-size: 0.8em; }
 
@@ -1131,7 +1183,7 @@ body {
     }
 
     .graph-back.requests .graph-wrapper p,
-    .graph-back.expenses .graph-wrapper p { font-size: 0.7em; }
+    .graph-back.expenses .graph-wrapper p { font-size: 0.8em; }
 
     .prev,
     .next {
@@ -1143,7 +1195,9 @@ body {
     .next i { font-size: 0.5em; }
 
     .prev.expense-button i,
-    .next.expense-button i { transform: translateY(15%); }
+    .next.expense-button i,
+    .prev.request-button i,
+    .next.request-button i { transform: translateY(15%); }
 
     .graph-back.total .graph-desc p {
         width: 25%;
@@ -1159,11 +1213,18 @@ body {
     .prev.total-button i,
     .next.total-button i { font-size: 0.5em; }
 
-    .graph-back.total .graph-wrapper .total-money { font-size: 2.1em; }
+    .graph-back.total.treasury { height: 70%; }
+
+    .graph-back.total .graph-wrapper .total-money { font-size: 2em; }
 
     .agave {
         height: 90%;
         right: 0.1em;
+    }
+
+    .agave.treasury {
+        right: -6em;
+        bottom: 0em;
     }
 }
 
@@ -1210,27 +1271,41 @@ body {
 
     .card-wrapper { width: 22%; }
 
+    .card-wrapper.treasury:nth-child(2) { width: 27%; }
+
+    .card-wrapper.treasury:last-child { width: 25%; }
+
     .card-text { padding-top: 0; }
 
     .card-text p { font-size: 0.8em; }
 
     .card-text .pending-number,
     .card-text .rejected-number,
-    .card-text .approved-number { font-size: 1.7em; }
+    .card-text .approved-number,
+    .card-text .advances-number,
+    .card-text .expenses-number,
+    .card-text .returns-number { font-size: 1.7em; }
 
     /* GRAPHS */
-    .graphs { height: 77%; }
+    .graphs { 
+        height: 77%; 
+        padding-bottom: 1em;
+    }
 
     .graph-back.status { height: 100%; }
 
     .graph-back.status .graph-wrapper { padding: 0.5em 0; }
+
+    .graph-back.status .graph-wrapper.treasury { font-size: 0.9em; }
+
+    .graph-back.status .graph-wrapper.treasury p { font-size: 0.9em; }
 
     .graph-back.status .graph-wrapper p,
     .graph-back.total .graph-wrapper p { font-size: 1em; }
 
     .chartst-container { height: 6em; }
 
-    .chartst-container canvas { max-width: 65% !important; }
+    .chartst-container canvas { max-width: 59% !important; }
 
     .center-text .year { font-size: 1.2em; }
 
@@ -1258,6 +1333,12 @@ body {
     .prev.total-button i,
     .next.total-button i { font-size: 0.5em; }
 
+    .prev.status-button i,
+    .next.status-button i { transform: translateY(10%); }
+
+    .prev.request-button i,
+    .next.request-button i { transform: translateY(15%); }
+
     .graph-back.expenses .graph-wrapper p,
     .graph-back.requests .graph-wrapper p { font-size: 0.7em; }
 
@@ -1266,12 +1347,16 @@ body {
         font-size: 0.85em; 
     }
 
-    .graph-back.total .graph-wrapper .total-money { font-size: 2.1em; }
+    .graph-back.total .graph-wrapper .total-money { font-size: 1.9em; }
+
+    .graph-back.total.treasury { height: 75%; }
 
     .agave {
         height: 93%;
         right: 0.2em;
     }
+
+    .agave.treasury { right: -5.5em; }
 }
 
 /* Tabletas */
@@ -1354,7 +1439,9 @@ body {
         align-items: stretch;
     }
 
-    .card-wrapper { width: 50%; }
+    .card-wrapper,
+    .card-wrapper.treasury:nth-child(2),
+    .card-wrapper.treasury:last-child { width: 50%; }
 
     .card-wrapper:first-child {
         align-self: flex-start;
@@ -1556,7 +1643,9 @@ body {
 
     .cards { flex-direction: column; }
 
-    .card-wrapper { width: 90%; }
+    .card-wrapper,
+    .card-wrapper.treasury:nth-child(2),
+    .card-wrapper.treasury:last-child { width: 90%; }
 
     .card-text { 
         font-size: 1.1em; 
@@ -1565,7 +1654,10 @@ body {
 
     .card-text .pending-number,
     .card-text .rejected-number,
-    .card-text .approved-number { 
+    .card-text .approved-number,
+    .card-text .advances-number,
+    .card-text .expenses-number,
+    .card-text .returns-number { 
         font-size: 2em;
         margin-top: 0.2em;
     }

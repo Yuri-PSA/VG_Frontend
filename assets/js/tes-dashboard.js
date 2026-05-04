@@ -222,6 +222,8 @@ function trendsChart() {
                     align: 'center',
                     labels: {
                         usePointStyle: true,
+                        boxWidth: isDesktop ? 6 : 9,
+                        boxHeight: isDesktop ? 6 : 9,
                         padding: 15,
                         font: { size: isDesktop ? 15 : 12 },
                         color: '#000000'
