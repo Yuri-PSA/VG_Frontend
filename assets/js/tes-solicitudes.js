@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
     buttonInfoDelivered();
     buttonPreview();
     buttonDownload();
+    cardIcons();
 });
 
 
@@ -870,7 +871,7 @@ function buttonPreview() {
         if(img && img.src) 
             previewReceipt(img.src);
         else 
-            Toast('DESCARGAR COMPROBANTE', 'Lo siento, no existe un comprobante para descargar');
+            Toast('ENTREGA DE ANTICIPO', 'Lo siento, no existe un comprobante para mostrar');
     });
 }
 
@@ -897,6 +898,56 @@ function buttonDownload() {
             downloadReceipt(img.src, `Comprobante de Solicitud ${folio}.jpg`);
         } else 
             Toast('DESCARGAR COMPROBANTE', 'Lo siento, no existe un comprobante para descargar');
+    });
+}
+
+// Preview and Download icons
+function cardIcons() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const folioElement = card.querySelector('.folio-mobile');
+        if(!folioElement) return;
+        const folio = folioElement.textContent.trim(); 
+
+        const viewIcons = card.querySelectorAll('.fa-image');
+        const downloadIcons = card.querySelectorAll('.fa-cloud-arrow-down');
+
+        // Preview
+        if(viewIcons) {
+            viewIcons.forEach(viewIcon => {
+                viewIcon.removeEventListener('click', handleView);
+                viewIcon.addEventListener('click', handleView);
+
+                function handleView(e) {
+                    e.stopPropagation();
+
+                    // MODIFICAR CON EL BACKEND
+                    const imgSrc = './assets/images/Transfer.jpg';
+
+                    if(imgSrc) previewReceipt(imgSrc);
+                    else Toast('DESCARGAR COMPROBANTE', 'Lo siento, no existe un comprobante para mostrar');
+                }
+            });  
+        }
+
+        if(downloadIcons) {
+            downloadIcons.forEach(downloadIcon => {
+                downloadIcon.removeEventListener('click', handleDownload);
+                downloadIcon.addEventListener('click', handleDownload);
+
+                function handleDownload(e) {
+                    e.stopPropagation();
+
+                    // MODIFICAR CON EL BACKEND
+                    const imgSrc = './assets/images/Transfer.jpg';
+                    const filename = `Comprobante de Solicitud ${folio}.jpg`;
+                    if(imgSrc && filename)
+                        downloadReceipt(imgSrc, filename);
+                    else
+                        Toast('ENTREGA DE ANTICIPO', 'Lo siento, no existe un comprobante para descargar');
+                }
+            });
+        }
     });
 }
 

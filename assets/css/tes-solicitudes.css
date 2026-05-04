@@ -1340,9 +1340,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 0.95em; 
+    font-size: 0.87em; 
     line-height: 1.7em;
-    padding: 0.9em 0 1.5em 0;
+    padding: 0.9em 0;
 }
 
 .info-text span { font-weight: 600; }
@@ -1369,6 +1369,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     display: flex; 
     gap: 1.5em;
 }
+
+.button-verification
+.button-download { font-size: 1.1em; }
 
 .info-icons { 
     position: absolute;
@@ -1558,9 +1561,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .transfer-ver { margin: 2em 0 2.5em 0; }
 
-    .button-verification,
-    .button-download { font-size: 1em; }
-
     .info-agave { height: 6em; }
 
     .top-decor.bottom { border-radius: 0 0 15px 15px; }
@@ -1585,6 +1585,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .swal-cancel-btn { font-size: 1em; }
 
     .agave-half { height: 13em; }
+
+    /* PREVIEW MODAL */
+    .receipt-preview .swal2-image { height: 85% !important; }
 
     /* OPTION BAR */
     .logo .name { font-size: 1.1em; }
@@ -1671,6 +1674,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .swal-cancel-btn { font-size: 0.91em; }
 
     .agave-half { height: 11.8em; }
+
+    /* PREVIEW MODAL */
+    .receipt-preview .swal2-image { height: 80% !important; }
 
     /* OPTION BAR */
     .logo .name { font-size: 1.1em; }
@@ -1760,6 +1766,13 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .receipt-container { font-size: 0.87em; }
 
     .button-receipt { font-size: 1em; }
+
+    .info-text { font-size: 0.84em; }
+
+    .transfer-ver { height: 11em; }
+
+    .button-verification
+    .button-download { font-size: 1.05em; }
 }
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx) {
@@ -1778,6 +1791,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .swal-cancel-btn { font-size: 0.9em; }
 
     .agave-half { height: 11.8em; }
+
+    /* PREVIEW MODAL */
+    .receipt-preview .swal2-image { height: 80% !important; }
 
     /* OPTION BAR */
     .logo .name { font-size: 1em; }
@@ -1873,6 +1889,13 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .receipt-container { font-size: 0.8em; }
 
     .button-receipt { font-size: 0.9em; }
+
+    .info-text { font-size: 0.75em; }
+
+    .transfer-ver { height: 10em; }
+
+    .button-verification
+    .button-download { font-size: 1em; }
 }
 
 /* Laptops pequeñas (1024px - 1299px) */
@@ -1997,10 +2020,29 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .receipt-container { font-size: 0.8em; }
 
     .button-receipt { font-size: 0.9em; }
+
+    .info-text { font-size: 0.7em; }
+
+    .info-agave { height: 4.5em; }
+
+    .transfer-ver { height: 10em; }
 }
 
 /* Tabletas */
-@media (min-width: 766px) and (max-width: 1024px) {    
+@media (min-width: 766px) and (max-width: 1024px) {
+    /* PREVIEW MODAL */
+    .receipt-preview {
+        width: 95vw !important;
+        height: 95vh !important;
+    }
+
+    .receipt-preview .swal2-image {
+        max-width: 95% !important;
+        max-height: 90vh !important;
+    }
+
+    .receipt-preview .swal2-close { font-size: 3em; }
+
     /* BODY */
     html { background-color: var(--html-back); }
 
@@ -2158,7 +2200,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .first-column,
     .second-column { border-right: 1.5px solid var(--tabs-hover); }
 
-    .second-column { gap: 1.2em; }
+    .first-column,
+    .second-column,
+    .third-column { gap: 1.2em; }
 
     .info-mobile p { font-size: 1.2em; }
 
@@ -2173,8 +2217,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .info-mobile .amount-mobile { font-size: 1.4em; }
 
     .info-mobile.return { text-align: right; }
-
-    .third-column { gap: 1.6em; }
 
     .first-column .info-mobile,
     .second-column .info-mobile,
@@ -2191,18 +2233,16 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         margin-right: 0.3em;
     }
 
-    .buttons-mobile {
-        display: flex;
-        justify-content: flex-end;
-        align-items: end;
-        height: 100%;
-        width: 100%;
-        gap: 0.7em;
+    .buttons-mobile { display: none; }
+
+    .info-mobile i {
         color: var(--icons);
         font-size: 1.5em;
+        cursor: pointer;
+        margin-top: 0.5em;
     }
 
-    .buttons-mobile i { cursor: pointer; }
+    .info-mobile .fa-image { margin-right: 0.7em; }
 
     .tab-buttons { margin-top: 2em; }
 
@@ -2261,6 +2301,20 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .agave-half.left { left: -11%; }
 
     .agave-half.right { right: -11%; }
+
+    /* PREVIEW MODAL */
+    .receipt-preview {
+        width: 89vw !important;
+        height: 98vh !important;
+    }
+
+    .receipt-preview .swal2-image {
+        max-width: 100% !important;
+        max-height: 85vh !important;
+        width: auto !important;
+    }
+
+    .receipt-preview .swal2-close { font-size: 2.5em !important; }
     
     /* BODY */
     html { background-color: var(--html-back); }
@@ -2514,6 +2568,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         transform: translateY(15%);
         margin-right: 0.3em;
     }
+
+    .info-mobile.tranfer-rec { display: none; }
 
     .buttons-mobile {
         display: flex;
