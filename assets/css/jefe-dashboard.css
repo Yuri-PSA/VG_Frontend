@@ -5,7 +5,7 @@
     --white: #FFFFFF;
     --red: #D65B5B;
     --green: #97BD13;
-    --yellow: #C9C867;
+    --yellow: #bfbe64;
     --graphs: #2A5156;
     --gray: #919A9B;
     --dark-gray: #5C5F60;
@@ -522,7 +522,10 @@ body {
     transform: translateY(-15%);
 }
 
-.pending-number span i { background-color: var(--yellow); }
+.pending-number span i,
+.advances-number span i,
+.expenses-number span i,
+.returns-number span i { background-color: var(--yellow); }
 
 .approved-number span i { background-color: var(--green); }
 
@@ -877,7 +880,9 @@ body {
 
     .graph-wrapper { border-radius: 15px; }
 
-    .graph-back.status .graph-wrapper.treasury { font-size: 1.3em; }
+    .graph-back.status .graph-wrapper.treasury { padding: 1em 0; }
+
+    .graph-back.status .graph-wrapper.treasury p { font-size: 1.3em; }
 
     .graph-back.status .graph-wrapper p,
     .graph-back.total .graph-wrapper p { font-size: 1.5em; }
@@ -896,7 +901,7 @@ body {
     }
 
     .prev.status-button i,
-    .next.status-button i { font-size: 1.2em; }
+    .next.status-button i { font-size: 1.1em; }
 
     .center-text .year { font-size: 1.8em; }
 
@@ -916,7 +921,7 @@ body {
     }
 
     .prev i,
-    .next i { font-size: 0.8em; }
+    .next i { font-size: 0.75em; }
 
     .graph-back.requests,
     .graph-back.expenses { font-size: 1.1em; }
@@ -928,7 +933,10 @@ body {
     }
 
     .prev.total-button i,
-    .next.total-button i { font-size: 0.9em; }
+    .next.total-button i { 
+        font-size: 0.9em; 
+        transform: translateY(5%);
+    }
 
     .graph-back.total.treasury { height: 68%; }
 
@@ -940,7 +948,7 @@ body {
     }
 
     .agave {
-        height: 90%;
+        height: 94%;
         right: 0.1em;
     }
 
@@ -990,7 +998,17 @@ body {
 
     .center-text .year { font-size: 1.4em; }
 
-    .center-text .month { font-size: 0.7em; }
+    .center-text .month { font-size: 0.8em; }
+
+    .prev i,
+    .next i { font-size: 0.65em; }
+
+    .prev.request-button i,
+    .next.request-button i,
+    .prev.expense-button i,
+    .next.expense-button i,
+    .prev.total-button i,
+    .next.total-button i { transform: translateY(10%); }
 
     .legend-item { font-size: 0.9em; }
 
@@ -1021,7 +1039,7 @@ body {
 
     .container { 
         background-size: 30% auto; 
-        padding: 1.5em 1.3em 0 1.3em;
+        padding: 1em 1.3em 0 1.3em;
     }
 
     .content { margin-top: 1.3em; }
@@ -1046,6 +1064,8 @@ body {
     .card-text .returns-number { font-size: 2.1em; }
 
     /* GRAPHS */
+    .graph-back.status .graph-wrapper.treasury { padding: 1em 0; }
+
     .graph-back.status .graph-wrapper p,
     .graph-back.total .graph-wrapper p { font-size: 1em; }
 
@@ -1055,6 +1075,9 @@ body {
     }
 
     .chartst-container canvas { max-width: 58% !important; }
+
+    .graph-wrapper.treasury .chartst-container .prev.status-button i,
+    .graph-wrapper.treasury .chartst-container .next.status-button i { transform: translateY(0); }
 
     .prev.status-button i,
     .next.status-button i { transform: translateY(5%); }
@@ -1093,16 +1116,19 @@ body {
     }
 
     .prev.total-button i,
-    .next.total-button i { font-size: 0.55em; }
+    .next.total-button i { 
+        font-size: 0.55em; 
+        transform: translateY(15%);
+    }
 
-    .graph-back.total.treasury { height: 76%; }
+    .graph-back.total.treasury { height: 72%; }
 
     .graph-back.total .graph-wrapper .expense-subtitle { font-size: 0.75em; }
 
     .graph-back.total .graph-wrapper .total-money { font-size: 2em; }
 
     .agave {
-        height: 90%;
+        height: 94%;
         right: -0.1em;
     }
 
@@ -1154,7 +1180,8 @@ body {
     .card-text .returns-number { font-size: 2em; }
 
     /* GRAPHS */
-    .graph-back.status .graph-wrapper { padding: 0.5em 0; }
+    .graph-back.status .graph-wrapper.treasury,
+    .graph-back.status .graph-wrapper { padding: 1em 0; }
 
     .graph-back.status .graph-wrapper.treasury { font-size: 0.95em; }
 
@@ -1296,7 +1323,7 @@ body {
 
     .graph-back.status .graph-wrapper { padding: 0.5em 0; }
 
-    .graph-back.status .graph-wrapper.treasury { font-size: 0.9em; }
+    .graph-back.status .graph-wrapper.treasury { padding: 0.7em 0; }
 
     .graph-back.status .graph-wrapper.treasury p { font-size: 0.9em; }
 
@@ -1337,7 +1364,9 @@ body {
     .next.status-button i { transform: translateY(10%); }
 
     .prev.request-button i,
-    .next.request-button i { transform: translateY(15%); }
+    .next.request-button i,
+    .prev.expense-button i,
+    .next.expense-button i { transform: translateY(15%); }
 
     .graph-back.expenses .graph-wrapper p,
     .graph-back.requests .graph-wrapper p { font-size: 0.7em; }
@@ -1645,11 +1674,11 @@ body {
 
     .card-wrapper,
     .card-wrapper.treasury:nth-child(2),
-    .card-wrapper.treasury:last-child { width: 90%; }
+    .card-wrapper.treasury:last-child { width: 100%; }
 
     .card-text { 
         font-size: 1.1em; 
-        padding-bottom: 0.5em;
+        padding: 0.2em 0;
     }
 
     .card-text .pending-number,
@@ -1742,6 +1771,8 @@ body {
 
     .prev.total-button i,
     .next.total-button i { font-size: 0.75em; }
+
+    .graph-back.total .graph-wrapper .total-money.treasury { margin-top: 0.1em; }
 
     .graph-back.total .graph-wrapper .total-money { margin-top: 0.5em; }
 
