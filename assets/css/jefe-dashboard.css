@@ -1015,7 +1015,7 @@ body {
     .graph-back.requests .graph-wrapper p,
     .graph-back.expenses .graph-wrapper p { font-size: 0.9em; }
 
-    .graph-back.total.treasury { height: 73%; }
+    .graph-back.total.treasury { height: 69%; }
 
     .graph-back.total .graph-wrapper .graph-desc .total-month { font-size: 0.75em; }
 
@@ -1076,9 +1076,6 @@ body {
 
     .chartst-container canvas { max-width: 58% !important; }
 
-    .graph-wrapper.treasury .chartst-container .prev.status-button i,
-    .graph-wrapper.treasury .chartst-container .next.status-button i { transform: translateY(0); }
-
     .prev.status-button i,
     .next.status-button i { transform: translateY(5%); }
 
@@ -1093,7 +1090,7 @@ body {
         height: 14px;
     }
 
-    .graph-back.status .graph-wrapper.treasury { font-size: 0.96em; }
+    .graph-back.status .graph-wrapper.treasury p { font-size: 0.96em; }
 
     .graph-back.requests .graph-wrapper p,
     .graph-back.expenses .graph-wrapper p { font-size: 0.76em; }
@@ -1121,9 +1118,9 @@ body {
         transform: translateY(15%);
     }
 
-    .graph-back.total.treasury { height: 72%; }
+    .graph-back.total.treasury { height: 70%; }
 
-    .graph-back.total .graph-wrapper .expense-subtitle { font-size: 0.75em; }
+    .graph-back.total .graph-wrapper .expense-subtitle { font-size: 0.7em; }
 
     .graph-back.total .graph-wrapper .total-money { font-size: 2em; }
 
@@ -1183,7 +1180,7 @@ body {
     .graph-back.status .graph-wrapper.treasury,
     .graph-back.status .graph-wrapper { padding: 1em 0; }
 
-    .graph-back.status .graph-wrapper.treasury { font-size: 0.95em; }
+    .graph-back.status .graph-wrapper.treasury p { font-size: 0.95em; }
 
     .graph-back.status .graph-wrapper p,
     .graph-back.total .graph-wrapper p { font-size: 1em; }
@@ -1244,8 +1241,10 @@ body {
 
     .graph-back.total .graph-wrapper .total-money { font-size: 2em; }
 
+    .graph-back.total .graph-wrapper .expense-subtitle { font-size: 0.75em; }
+
     .agave {
-        height: 90%;
+        height: 99%;
         right: 0.1em;
     }
 
@@ -1378,10 +1377,12 @@ body {
 
     .graph-back.total .graph-wrapper .total-money { font-size: 1.9em; }
 
-    .graph-back.total.treasury { height: 75%; }
+    .graph-back.total.treasury { height: 70%; }
+
+    .graph-back.total .graph-wrapper .expense-subtitle { font-size: 0.7em; }
 
     .agave {
-        height: 93%;
+        height: 95%;
         right: 0.2em;
     }
 
@@ -1619,7 +1620,7 @@ body {
     .logout {
         padding-left: 0;
         font-size: 1.2em;
-        gap: 1.5em;
+        gap: 0.7em;
     }
 
     .options .option,
@@ -1678,7 +1679,7 @@ body {
 
     .card-text { 
         font-size: 1.1em; 
-        padding: 0.2em 0;
+        padding: 0.5em 0 0.2em 0;
     }
 
     .card-text .pending-number,
