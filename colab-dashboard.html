@@ -41,7 +41,7 @@
                 </div>
             </div>
 
-            <div class="options">
+            <div class="options treasury">
                 <div class="option dashboard">
                     <img src="./assets/images/Grid.webp" alt="Grid">
                     <p>Panel Principal</p>
@@ -51,9 +51,19 @@
                     <i class="fa-solid fa-plane-departure"></i>
                     <p>Solicitudes</p>
                 </div>
+
+                <div class="option expenses">
+                    <img src="./assets/images/Payment.webp" alt="Payment">
+                    <p>Comprobaciones</p>
+                </div>
+
+                <div class="option liquidation">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <p>Liquidaciones</p>
+                </div>
             </div>
 
-            <div class="logout">
+            <div class="logout treasury">
                 <div class="option log-out">
                     <i class="fa-solid fa-arrow-right-from-bracket fa-rotate-180"></i>
                     <p>Cerrar sesión</p>
@@ -67,40 +77,28 @@
                 <!-- ==================== CONTENT HEADER ==================== -->
                 <div class="content-header">
                     <div class="titles">
-                        <h1 class="title">RESUMEN DE VIÁTICOS</h1>
-                        <p class="subtitle">Visualiza métricas y tendencias de las solicitudes de tu equipo</p>
+                        <h1 class="title">MIS VIÁTICOS</h1>
+                        <p class="subtitle">Consulta el estado y seguimiento de tus solicitudes, anticipos y comprobaciones</p>
                     </div>
                 </div>
 
                 <div class="content">
                     <div class="cards">
-                        <!-- CARD PENDIENTES -->
-                        <div class="card-wrapper" data-tab="pending">
+                        <div class="card-wrapper">
                             <div class="card-background"></div>
                             <div class="card pending-card"></div>
                             <div class="card-text">
-                                <p>SOLICITUDES PENDIENTES</p>
-                                <p class="pending-number"><span><i class="fa-regular fa-clock"></i></span>18</p>
+                                <p>REEMBOLSOS PENDIENTES</p>
+                                <p class="refund-number"><span><i class="fa-regular fa-clock"></i></span>$40,000</p>
                             </div>
                         </div>
 
-                        <!-- CARD APROBADAS -->
-                        <div class="card-wrapper" data-tab="approved">
+                        <div class="card-wrapper">
                             <div class="card-background"></div>
-                            <div class="card approved-card"></div>
+                            <div class="card pending-card"></div>
                             <div class="card-text">
-                                <p>SOLICITUDES APROBADAS</p>
-                                <p class="approved-number"><span><i class="fa-regular fa-circle-check"></i></span>23</p>
-                            </div>
-                        </div>
-
-                        <!-- CARD RECHAZADAS -->
-                        <div class="card-wrapper" data-tab="rejected">
-                            <div class="card-background"></div>
-                            <div class="card rejected-card"></div>
-                            <div class="card-text">
-                                <p>SOLICITUDES RECHAZADAS</p>
-                                <p class="rejected-number"><span><i class="fa-regular fa-circle-xmark"></i></span>05</p>
+                                <p>DEVOLUCIONES PENDIENTES</p>
+                                <p class="return-number"><span><i class="fa-regular fa-clock"></i></span>$40,000</p>
                             </div>
                         </div>
                     </div>
@@ -142,23 +140,30 @@
                                         <span class="dots"></span>
                                         <span class="percentage">10%</span>
                                     </div>
+
+                                    <div class="legend-item">
+                                        <span class="color-dot canceled"></span>
+                                        <span class="label">Canceladas</span>
+                                        <span class="dots"></span>
+                                        <span class="percentage">31%</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="month-requests">
+                        <div class="month-requests colab">
                             <div class="graph-back requests">
                                 <div class="graph-wrapper">
                                     <div class="graph-desc">
                                         <div class="prev request-button"><i class="fa-solid fa-caret-left"></i></div>
                                         
-                                        <p>TENDENCIA DE SOLICITUDES MENSUAL <span class="request-year">2026</span></p>
+                                        <p>TOTAL DE ANTICIPOS APROBADOS <span class="request-year">2026</span></p>
                                         
                                         <div class="next disabled request-button"><i class="fa-solid fa-caret-right"></i></div>
                                     </div>
 
                                     <div class="chart-container">
-                                        <canvas id="trend-chart"></canvas>
+                                        <canvas id="request-chart"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -168,7 +173,7 @@
                                     <div class="graph-desc">
                                         <div class="prev expense-button"><i class="fa-solid fa-caret-left"></i></div>
 
-                                        <p>GASTO MENSUAL <span class="expense-year">2026</span></p>
+                                        <p>TOTAL COMPROBADO <span class="expense-year">2026</span></p>
 
                                         <div class="next disabled expense-button"><i class="fa-solid fa-caret-right"></i></div>
                                     </div>
@@ -180,24 +185,48 @@
                             </div>
                         </div>
 
-                        <div class="graph-back total">
-                            <div class="graph-wrapper">
-                                <p>GASTO TOTAL <span class="total-year">2026</span></p>
+                        <div class="graph-back comp">
+                            <div class="graph-wrapper treasury">
+                                <p>COMPROBACIONES POR ESTADO</p>
 
-                                <div class="graph-desc">
-                                    <div class="prev total-button"><i class="fa-solid fa-caret-left"></i></div>
+                                <div class="chartst-container">
+                                    <div class="prev comp-button"><i class="fa-solid fa-caret-left"></i></div>
+                                    <canvas id="comp-chart"></canvas>
+                                    <div class="next disabled comp-button"><i class="fa-solid fa-caret-right"></i></div>
 
-                                    <p><span class="total-month">DICIEMBRE</span></p>
-
-                                    <div class="next disabled total-button"><i class="fa-solid fa-caret-right"></i></div>
+                                    <div class="center-text">
+                                        <span class="year">2026</span>
+                                        <span class="month">SEPTIEMBRE</span>
+                                    </div>
                                 </div>
 
-                                <p class="total-money">$<span class="total-amount">900,000</span></p>
+                                <div class="legend">
+                                    <div class="legend-item">
+                                        <span class="color-dot pending"></span>
+                                        <span class="label">Pendientes</span>
+                                        <span class="dots"></span>
+                                        <span class="percentage">39%</span>
+                                    </div>
+
+                                    <div class="legend-item">
+                                        <span class="color-dot approved"></span>
+                                        <span class="label">Aprobadas</span>
+                                        <span class="dots"></span>
+                                        <span class="percentage">20%</span>
+                                    </div>
+
+                                    <div class="legend-item">
+                                        <span class="color-dot rejected"></span>
+                                        <span class="label">Rechazadas</span>
+                                        <span class="dots"></span>
+                                        <span class="percentage">10%</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <img src="./assets/images/Agave_back.webp" alt="Agave" class="agave">
+                    <img src="./assets/images/Agave_back_tr.webp" alt="Agave" class="agave treasury">
                 </div>
 
                 <div class="agave-mobile">
@@ -208,6 +237,6 @@
     </div>
 
     <script src="./assets/js/session.js"></script>
-    <script src="./assets/js/jefe-dashboard.js"></script>
+    <script src="./assets/js/colab-dashboard.js"></script>
 </body>
 </html>

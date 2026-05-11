@@ -119,8 +119,13 @@ function optionsBar() {
         window.location.href = 'colab-comprobaciones.html';
     });
 
-    logout.addEventListener('click', (e) => {
+    logout.addEventListener('click', async(e) => {
         e.stopPropagation();
+
+        await fetch('http://localhost:3000/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+        });
         window.location.href = 'index.html';
     });
 }
@@ -138,11 +143,11 @@ function cancelButton() {
 }
 
 // Send
-function sendButton() {
+async function sendButton() {
     const sendButton = document.querySelector('.button.send');
     if(!sendButton) return;
 
-    sendButton.addEventListener('click', (e) => {
+    sendButton.addEventListener('click', async (e) => {
         e.stopPropagation();
 
         if(!validateForm(false)) return;
@@ -161,9 +166,7 @@ function sendButton() {
         const monto_moneda = document.querySelector('.currency-selector .flags p')?.textContent.trim();
         const forma_pago = document.querySelector('.payment-selector p')?.textContent.trim();
 
-        // CORREGIR USUARIO_ID
         const data = {
-            usuario_id: 2,
             inicio_viaje: inicio_viaje,
             fin_viaje: fin_viaje,
             destino: destino,
@@ -172,12 +175,15 @@ function sendButton() {
             monto_moneda: monto_moneda,
             forma_pago: forma_pago
         };
+        const token = Session.getToken();
         
-        // Implementar loader
-
-        /*fetch('http://localhost:3002/solicitudes', {
+        await fetch('http://127.0.0.1:3000/api/solicitudes', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include',
             body: JSON.stringify(data)
         })
         .then(response => {
@@ -186,7 +192,7 @@ function sendButton() {
             return response.json();
         })
         .then(result => {
-            Toast('SOLICITUD ENVIADA', 'Tu solicitud ha sido enviada y se encuentra en proceso de aprobación');
+            Toast('SOLICITUD ENVIADA', result.message);
             setTimeout(() => {
                 setTimeout(() => {
                     window.location.href = 'colab-solicitudes.html';
@@ -195,7 +201,7 @@ function sendButton() {
         })
         .catch(error => {
             Toast('ERROR AL ENVIAR SOLICITUD', error.message);
-        });*/
+        });
     });
 }
 

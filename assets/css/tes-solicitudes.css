@@ -1042,7 +1042,10 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     background-color: var(--transparent-blue);
 }
 
-.back-buttons.disabled { background-color: var(--transparent-gray); }
+.back-buttons.disabled { 
+    color: var(--gray);
+    background-color: var(--transparent-gray); 
+}
 
 .back-buttons.disabled .prev,
 .back-buttons.disabled .next { cursor: default; }
@@ -2428,7 +2431,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .logout {
         padding-left: 0;
         font-size: 1.2em;
-        gap: 1.5em;
+        gap: 0.7em;
     }
 
     .options .option,

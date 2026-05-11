@@ -4,22 +4,65 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-/* ============================== LOGIN ============================== */
+/* =================================== LOADER =================================== */
+function showLoader() {
+    document.querySelector('.loader-overlay').style.display = 'flex';
+}
+
+function hideLoader() {
+    document.querySelector('.loader-overlay').style.display = 'none';
+}
+
+
+/* =================================== LOGIN =================================== */
 async function login() {
     document.querySelector('.button-login').addEventListener('click', async(e) => {
         e.stopPropagation();
 
         if(!loginValidation()) return;
 
-        const data = {
-            usuario: document.getElementById('user').value,
-            password: document.getElementById('password').value
-        };
-
-        console.log(data);
+        const correo = document.getElementById('user').value;
+        const password = document.getElementById('password').value;
         
-        if(data.usuario === "Yuriana" && data.password === "123456")
-            window.location.href = 'jefe-dashboard.html';
+        try {
+            showLoader();
+
+            const response = await fetch('http://127.0.0.1:3000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ correo, password }),
+            });
+
+            if(!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || 'Error desconocido');
+            }
+
+            const data = await response.json();
+            Session.setToken(data.access_token);
+
+            hideLoader();
+
+            // Redirigir acorde el rol
+            const rol = data.usuario.rol;
+            switch(rol) {
+                case 'Jefe':
+                    window.location.href = 'jefe-dashboard.html';
+                    break;
+                case 'Tesorería':
+                    window.location.href = 'tes-dashboard.html';
+                    break;
+                case 'Colaborador':
+                    window.location.href = 'colab-solicitudes.html';
+                    break;
+                default:
+                    window.location.href = 'index.html';    // fallback
+            }
+        } catch(error) {
+            hideLoader();
+            Toast(error.message);
+        }
     }); 
 }
 
@@ -48,7 +91,6 @@ function loginValidation() {
         return false;
     }
     if(password === "" || password.trim() === "") {
-        //Toast('Credenciales incorrectas. Por favor, verifica tu correo y contraseña');
         Toast('Por favor, ingresa tu correo y contraseña');
         return false;
     }
