@@ -513,7 +513,8 @@ body {
 .option .fa-plane-departure { font-size: 0.7em; }
 
 .option .fa-clock-rotate-left,
-.option .fa-arrow-right-from-bracket { font-size: 0.85em; }
+.option .fa-arrow-right-from-bracket,
+.option .fa-hand-holding-dollar { font-size: 0.85em; }
 
 
 /* ============================== CONTAINER ============================== */
@@ -1040,7 +1041,10 @@ body {
     background-color: var(--transparent-blue);
 }
 
-.back-buttons.disabled { background-color: var(--transparent-gray); }
+.back-buttons.disabled { 
+    color: var(--gray);
+    background-color: var(--transparent-gray); 
+}
 
 .back-buttons.disabled .prev,
 .back-buttons.disabled .next { cursor: default; }
@@ -1520,7 +1524,8 @@ body {
 
     .option .fa-plane-departure { font-size: 0.8em; }
 
-    .option .fa-arrow-right-from-bracket { font-size: 0.9em; }
+    .option .fa-arrow-right-from-bracket,
+    .option .fa-hand-holding-dollar { font-size: 0.9em; }
 
     /* CONTAINER */
     .content-container { padding: 2.5em 2em 2.5em 2.5em; }
@@ -1886,6 +1891,11 @@ body {
         width: 17px;
         transform: translateY(5%); 
     }
+
+    .option .fa-plane-departure { font-size: 0.75em; }
+
+    .option .fa-hand-holding-dollar,
+    .option .fa-arrow-right-from-bracket { font-size: 0.9em; }
 
     /* CONTAINER */
     .content-container { padding: 1.3em 1.2em 1.3em 1.5em; }

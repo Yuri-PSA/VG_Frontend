@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     phoneMenu();
     initMobileScroll();
     optionsBar();
+    tableInformation({ estado: 'Pendiente' });
     tabSelected();
     cardLinks();
     searchColab();
@@ -17,6 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* ============================== VARIABLES ============================== */
 let motivoRechazo = null;
+let globalStartDate = null;
+let globalEndDate = null;
+let swapped = false;    // false = folio | true = colaborador
+
+
+/* ================================= LOADER ================================= */
+function showLoader() {
+    document.querySelector('.loader-overlay').style.display = 'flex';
+}
+
+function hideLoader() {
+    document.querySelector('.loader-overlay').style.display = 'none';
+}
 
 
 /* ============================== PHONE MENU ============================== */
@@ -121,6 +135,166 @@ function optionsBar() {
 }
 
 
+/* =========================== TABLE INFORMATION =========================== */
+// Status
+function getActiveStatus() {
+    const tabActiva = document.querySelector('.tab.selected');
+
+    if(!tabActiva) 
+        return null;
+    if(tabActiva.classList.contains('pending')) 
+        return 'Pendiente';
+    if(tabActiva.classList.contains('approved')) 
+        return 'Aprobada';
+    if(tabActiva.classList.contains('rejected')) 
+        return 'Rechazada';
+
+    return null;
+}
+
+async function tableInformation(filtros = {}) {
+    const token = localStorage.getItem('token')
+    showLoader();
+
+    // Limpiar tabla en caso de estar vacío
+    renderTable([]);
+    //document.querySelector('.cards-mobile').innerHTML = '';
+
+    // Construir query string
+    const params = new URLSearchParams();
+    if(filtros.estado) params.append('estado', filtros.estado);
+    if(filtros.folio) params.append('folio', filtros.folio);
+    if(filtros.colaborador) params.append('colaborador', filtros.colaborador);
+    if(filtros.fechaIni) params.append('fechaIni', filtros.fechaIni);
+    if(filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+    if(filtros.limit) params.append('limit', filtros.limit);
+    if(filtros.offset) params.append('offset', filtros.offset);
+    if(filtros.orden) params.append('orden', filtros.orden);
+    if(filtros.ordenMonto) params.append('ordenMonto', filtros.ordenMonto);
+
+    try {
+        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/listar?${params.toString()}`, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include'
+        });
+
+        if(!response.ok) {
+            renderTable([]);
+            // document.querySelector('.cards-mobile').innerHTML = '';
+            throw new Error('Error al obtener solicitudes');
+        }
+
+        const data = await response.json();
+
+        // Verificar si la respuesta trae un mensaje de "no encontrado" desde el backend
+        if(data.mensaje) {
+            renderTable([]);
+            document.querySelector('.cards-mobile').innerHTML = '';
+            Toast('ERROR AL MOSTRAR SOLICITUDES', data.mensaje);
+            return;
+        }
+
+        renderTable(data.solicitudes);
+        //renderCards(data.solicitudes);
+        updateCounters(data.pendientes, data.sinEntrega);
+        updatePagination(data.paginacion);
+    } catch(error) {
+        console.log(error);
+        renderTable([]);
+        // document.querySelector('.cards-mobile').innerHTML = '';
+        Toast('ERROR AL MOSTRAR SOLICITUDES', 'No se pudieron cargar las solicitudes. Por favor, intenta de nuevo');
+    } finally {
+        hideLoader();
+    }
+}
+
+function renderTable(solicitudes) {
+    const tbody = document.querySelector('.table-body');
+    tbody.innerHTML = '';
+
+    if(solicitudes.length === 0) return;
+
+    const statusClass = {
+        'Pendiente': 'st-pending',
+        'Aprobada': 'st-approved',
+        'Rechazada': 'st-rejected'
+    };
+
+    const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+    solicitudes.forEach(sol => {
+        const tr = document.createElement('tr');
+
+        // Formatear fecha
+        const fechaObj = new Date(sol.inicio_viaje);
+        const dia = fechaObj.getDate().toString().padStart(2, '0');
+        const mes = meses[fechaObj.getMonth()];
+        const year = fechaObj.getFullYear();
+        const fecha = `${dia} / ${mes} / ${year}`;
+
+        const simbolo = obtenerSimboloMoneda(sol.moneda);
+        const montoFormateado = new Intl.NumberFormat('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(sol.monto);
+        const estadoClass = statusClass[sol.estado] || '';
+
+        tr.innerHTML = `
+            <td class="folio"><p>${sol.folio}</p></td>
+            <td><p>${sol.nombre || '—'}</p></td>
+            <td><p>${fecha}</p></td>
+            <td><p>${sol.destino || '—'}</p></td>
+            <td class="monto-cell">
+                <div class="monto-content">
+                    <img src="./assets/images/${sol.moneda}.webp" alt="${sol.moneda}">
+                    <p><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
+                </div>
+            </td>
+            <td><div class="status ${estadoClass}">${sol.estado || '—'}</div></td>
+            <td>
+                <div class="actions">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <i class="fa-solid fa-circle-check"></i>
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    buttonRejected();
+    buttonApproved();
+    buttonInfo();
+}
+
+function updateCounters(pendientes, sinEntrega) {
+    const pendingTab = document.querySelector('.tab.pending .amount');
+    if(pendientes !== null && pendingTab) 
+        pendingTab.textContent = pendientes;
+}
+
+function updatePagination(paginacion) {
+    const pageDiv = document.querySelector('.page');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+
+    if(pageDiv) pageDiv.textContent = paginacion.paginaActual;
+
+    // Habilitar / deshabilitar botones
+    if(prevBtn) prevBtn.parentElement.classList.toggle('disabled', paginacion.paginaActual <= 1);
+    if(nextBtn) nextBtn.parentElement.classList.toggle('disabled', paginacion.paginaActual >= paginacion.totalPaginas);
+}
+
+function obtenerSimboloMoneda(codigo) {
+    const simbolos = { MXN: '$', USD: '$', EUR: '€', JPY: '¥' };
+    return simbolos[codigo] || '$';
+}
+
+
 /* ============================== TABLE TABS ============================== */
 // Selección manual
 function tabSelected() {
@@ -128,6 +302,10 @@ function tabSelected() {
 
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
+            const estado = this.classList.contains('pending') ? 'Pendiente'  :
+                           this.classList.contains('approved') ? 'Aprobada' :
+                           this.classList.contains('rejected') ? 'Rechazada' : null;
+
             document.querySelectorAll('.tab').forEach(t => {
                 t.classList.remove('selected');
                 t.querySelector('.amount')?.classList.remove('selected');
@@ -135,6 +313,8 @@ function tabSelected() {
 
             this.classList.add('selected');
             this.querySelector('.amount')?.classList.add('selected');
+
+            tableInformation({ estado });
         });
     });
 }
@@ -173,8 +353,6 @@ function searchColab() {
 
     if(!glass || !user || !calendar || !input) return;
 
-    let swapped = false;
-
     function swapIcons() {
         const parent = search;
 
@@ -186,13 +364,14 @@ function searchColab() {
             parent.insertBefore(userRemoved, input);
             parent.insertBefore(glassRemoved, calendar.nextSibling);
             input.placeholder = "Colaborador. . .";
+            swapped = true;
         } else {
             parent.insertBefore(glassRemoved, input);
             parent.insertBefore(userRemoved, calendar.nextSibling);
             input.placeholder = "Folio. . .";
+            swapped = false;
         }
-
-        swapped = !swapped;
+        input.value = ''
     }
 
     function fadeAndSwap(shouldSwap) {
@@ -210,16 +389,51 @@ function searchColab() {
         }, 200);
     }
 
+    // Debounce para búsqueda al escribir
+    let debounceTimer;
+    function doSearch() {
+        const valor = input.value.trim();
+        const estado = getActiveStatus();
+        const filtros = { estado };
+        if(swapped)
+            filtros.colaborador = valor;
+        else
+            filtros.folio = valor;
+
+        // Fechas 
+        if(globalStartDate) {
+            filtros.fechaIni = globalStartDate;
+            
+            if(globalEndDate) 
+                filtros.fechaFin = globalEndDate;
+        }
+
+        tableInformation(filtros);
+    }
+
+    // ENTER keypress
+    input.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+            clearTimeout(debounceTimer);
+            doSearch();
+        }
+    });
+
+    input.addEventListener('input', (e) => {
+        if(input.value.trim() === '') {
+            clearTimeout(debounceTimer);
+            tableInformation([]);
+        }
+    });
+
     glass.addEventListener('click', (e) => {
         e.stopPropagation();
-        const shouldSwap = swapped;
-        fadeAndSwap(shouldSwap);
+        fadeAndSwap(swapped);
     });
 
     user.addEventListener('click', (e) => {
         e.stopPropagation();
-        const shouldSwap = !swapped;
-        fadeAndSwap(shouldSwap);
+        fadeAndSwap(!swapped);
     });
 }
 
@@ -257,7 +471,7 @@ function initCalendar() {
     }
 
     function toTimestamp(date) {
-        if (!date) return null;
+        if(!date) return null;
         return new Date(date.year, date.month, date.day).getTime();
     }
 
@@ -337,7 +551,9 @@ function initCalendar() {
             if (startDate === null || (startDate && endDate !== null)) {
                 startDate = { year, month, day };
                 endDate = null;
-                console.log(`Rango reiniciado. Inicio: ${day}/${month+1}/${year}`);
+                
+                globalStartDate = `${year}-${month+1}-${day}`;
+                globalEndDate = null;
             }
             // Si hay inicio pero no fin, se establece el fin (ordenando las fechas)
             else if (startDate && endDate === null) {
@@ -349,9 +565,17 @@ function initCalendar() {
                 } else
                     endDate = { year, month, day };
                 
-                console.log(`Rango seleccionado: ${startDate.day}/${startDate.month+1}/${startDate.year} - ${endDate.day}/${endDate.month+1}/${endDate.year}`);
+                globalStartDate = `${startDate.year}-${startDate.month+1}-${startDate.day}`;
+                globalEndDate = `${endDate.year}-${endDate.month+1}-${endDate.day}`;
             }
 
+            function parseGlobalDate(dateStr) {
+                if (!dateStr) return null;
+                const [year, month, day] = dateStr.split('-').map(Number);
+                return { year, month: month - 1, day };
+            }
+            startDate = parseGlobalDate(globalStartDate);
+            endDate = parseGlobalDate(globalEndDate);
             renderCalendar();
         });
         return cell;
@@ -491,23 +715,25 @@ function initCalendar() {
 function setupCalendar() {
     const calendarIcon = document.querySelector('.fa-calendar');
     const datepicker = document.querySelector('.datepicker-wrapper');
+    const clearDate = document.querySelector('.date-button.clear-date');
+    const searchDate = document.querySelector('.date-button.search-date');
 
-    if(!calendarIcon || !datepicker) return;
+    if(!calendarIcon || !datepicker || !clearDate || !searchDate) return;
 
     function clearRangeSelect() {
         const dates = document.querySelectorAll('.date-cell.in-range');
-        const startDate = document.querySelector('.date-cell.start');
-        const endDate = document.querySelector('.date-cell.end');
+        const startCell = document.querySelector('.date-cell.start');
+        const endCell = document.querySelector('.date-cell.end');
 
-        dates.forEach(date => {
-            if (date && date.classList) 
-                date.classList.remove('in-range');
-        });
-        if(startDate && startDate.classList) 
-            startDate.classList.remove('start');
-        if(endDate && endDate.classList) 
-            endDate.classList.remove('end');
+        dates.forEach(date => date.classList.remove('in-range'));
+        
+        if(startCell) 
+            startCell.classList.remove('start');
+        if(endCell) 
+            endCell.classList.remove('end');
 
+        globalStarDate = null;
+        globalEndDate = null;
         window.dispatchEvent(new CustomEvent('calendar-closed'));
     }
 
@@ -516,7 +742,6 @@ function setupCalendar() {
 
         const isVisible = datepicker.style.display === 'block';
         if(isVisible) {
-            clearRangeSelect();
             calendarIcon.classList.remove('icon-active');
             datepicker.style.display = 'none';
         } else {
@@ -531,10 +756,54 @@ function setupCalendar() {
 
     document.addEventListener('click', (e) => {
         if(!datepicker.contains(e.target) && e.target !== calendarIcon) {
-            clearRangeSelect();
             calendarIcon.classList.remove('icon-active');
             datepicker.style.display = 'none';
         }
+    });
+
+    clearDate.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearRangeSelect();
+
+        const estado = getActiveStatus();
+        const valor = document.querySelector('.search-back input').value.trim();
+        const filtros = { estado };
+        
+        if (swapped) 
+            filtros.colaborador = valor;
+        else 
+            filtros.folio = valor;
+        
+        tableInformation(filtros);
+        calendarIcon.classList.remove('icon-active');
+        datepicker.style.display = 'none';
+    });
+
+    searchDate.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if(!globalStartDate && !globalEndDate) {
+            Toast('SELECCIÓN DE FECHA', 'Por favor, selecciona al menos una fecha para poder buscar');
+            return;
+        }
+        const estado = getActiveStatus();
+        const valor = document.querySelector('.search-back input').value.trim();
+        const filtros = { estado };
+
+        if(swapped) 
+            filtros.colaborador = valor;
+        else 
+            filtros.folio = valor;
+        
+        if(globalStartDate) {
+            filtros.fechaIni = globalStartDate;
+            if(globalEndDate) 
+                filtros.fechaFin = globalEndDate;
+        }
+        
+        tableInformation(filtros);
+        calendarIcon.classList.remove('icon-active');
+        datepicker.style.display = 'none';
     });
 }
 
