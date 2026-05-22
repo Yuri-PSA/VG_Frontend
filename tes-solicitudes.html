@@ -20,6 +20,21 @@
 </head>
 
 <body>
+    <!-- ======================= LOADER ======================= -->
+    <div class="loader-overlay">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <!-- ======================= CONTENT ======================= -->
     <div class="background">
         <!-- ======================= PHONE MENU ======================= -->
         <div class="mobile-nav">
@@ -85,7 +100,7 @@
                         <div class="tabs">
                             <div class="tab pending selected">
                                 <p class="tab-selected">Pendientes</p>
-                                <div class="amount selected">6</div>
+                                <div class="amount selected"></div>
                             </div>
 
                             <div class="tab delivered"><p>Entregados</p></div>
@@ -126,6 +141,11 @@
                                 </div>
 
                                 <div class="dates"></div>
+
+                                <div class="datepicker-bottom">
+                                    <div class="date-button clear-date">LIMPIAR</div>
+                                    <div class="date-button search-date">BUSCAR</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -133,547 +153,19 @@
                     <div class="table-background">
                         <div class="table-container">
                             <table>
-                                <thead class="table-head">
-                                    <tr>
-                                        <th>
-                                            <div class="order-div">
-                                                <div class="order">
-                                                    <i class="fa-solid fa-angle-up"></i>
-                                                    <i class="fa-solid fa-angle-down"></i>
-                                                </div>
-                                                Folio
-                                            </div>
-                                        </th>
-                                        <th>Colaborador</th>
-                                        <th>Fecha</th>
-                                        <th>
-                                            <div class="order-div">
-                                                <div class="order">
-                                                    <i class="fa-solid fa-angle-up"></i>
-                                                    <i class="fa-solid fa-angle-down"></i>
-                                                </div>
-                                                Monto
-                                            </div>
-                                        </th>
-                                        <th>Pago</th>
-                                        <th>Financiero</th>
-                                    </tr>
-                                </thead>
+                                <thead class="table-head"></thead>
 
-                                <tbody class="table-body">
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-001</p></td>
-                                        <td><p>Yuriana Ibarra Granados</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/EUR.webp" alt="EUR">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Transferencia</td>
-                                        <td><div class="status st-liquidated">
-                                            Liquidada
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-hand-holding-dollar"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-002</p></td>
-                                        <td><p>Yuriana Ibarra Granados</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/JPY.webp" alt="JPY">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Efectivo</td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-005</p></td>
-                                        <td><p>Giovanni Martínez Zavala</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Efectivo</td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-info delivered"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-007</p></td>
-                                        <td><p>Estefanía Cabrera Quintana</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Transferencia</td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-info delivered"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-008</p></td>
-                                        <td><p>Joahan Mota Sandoval</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Transferencia</td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-info delivered"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-010</p></td>
-                                        <td><p>Yuriana Ibarra Granados</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Efectivo</td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-info delivered"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-015</p></td>
-                                        <td><p>Teresa Hernández Campos</p></td>
-                                        <td><p>16 / ABR / 2026</p></td>
-                                        <td class="monto-cell">
-                                            <div class="monto-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="payment">Transferencia</td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-info delivered"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                <tbody class="table-body"></tbody>
                             </table>
                         </div>
                     </div>
 
-                    <div class="cards-mobile">
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card active">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FINANCIERO</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="info-mobile tranfer-rec">
-                                        <p class="subt-mobile">COMPROBANTE</p>
-                                        <i class="fa-solid fa-image"></i>
-                                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/MXN.webp" alt="MXN">MXN</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE ENTREGA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
-                                        <p>20 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-image"></i>
-                                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FINANCIERO</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="map-img">
-                                        <img src="./assets/images/Icon_map.webp" alt="Map">
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Efectivo</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE ENTREGA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
-                                        <p>20 / ABR / 2026</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/JPY.webp" alt="JPY">JPY</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Efectivo</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/MXN.webp" alt="MXN">MXN</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="cards-mobile"></div>
 
                     <!-- ==================== PAGES ==================== -->
                     <div class="tab-buttons">
                         <div class="back-buttons disabled">
-                            <div class="prev disabled">
+                            <div class="prev">
                                 <svg class="icon default-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="15 18 9 12 15 6"></polyline>
                                 </svg>
@@ -736,8 +228,8 @@
                             </div>
 
                             <div class="info-text">
-                                <p><span>FECHA DE ENTREGA: </span>16 / ABR / 2026</p>
-                                <p><span>FECHA DE CONFIRMACIÓN: </span>20 / ABR / 2026</p>
+                                <p class="cash-entrega">FECHA DE ENTREGA: <span></span></p>
+                                <p class="cash-confir">FECHA DE CONFIRMACIÓN: <span></span></p>
                             </div>
 
                             <div class="info-agave right">
@@ -747,12 +239,10 @@
 
                         <div class="bottom-decor transfer">
                             <div class="info-text transfer">
-                                <p><span>FECHA DE ENTREGA: </span>16 / ABR / 2026</p>
-                                <p><span>FECHA DE CONFIRMACIÓN: </span>20 / ABR / 2026</p>
+                                <p class="transfer-entrega">FECHA DE ENTREGA: <span></span></p>
+                                <p class="transfer-confir">FECHA DE CONFIRMACIÓN: <span></span></p>
 
-                                <div class="transfer-ver">
-                                    <img src="./assets/images/Transfer.jpg" alt="Transfer">
-                                </div>
+                                <div class="transfer-ver"><img></div>
 
                                 <div class="buttons-info">
                                     <div class="button-verification">VER COMPROBANTE</div>

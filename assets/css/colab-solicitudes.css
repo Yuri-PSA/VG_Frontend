@@ -1406,6 +1406,7 @@ body {
 .payment-date { 
     font-size: 0.8em; 
     font-weight: 700;
+    gap: 0.4em;
 }
 
 .info-folio span,
@@ -1868,19 +1869,11 @@ body {
 
     .titles .title { font-size: 2.9em; }
 
-    .titles .subtitle { font-size: 1.2em; }
-
     .button-create { font-size: 0.9em; }
 
     .tab p { font-size: 1em; }
 
-    .tab.selected p { font-size: 1.1em; }
-
-    .search { height: 2.5em; }
-
-    .search-back input { font-size: 1em; }
-
-    .search-back i { font-size: 0.9em; }
+    .tab.selected p { font-size: 1.15em; }
 
     .datepicker-header { font-size: 1em; }
 
@@ -1895,13 +1888,13 @@ body {
 
     .table-head th { font-size: 1.35em; }
 
-    .table-body td { font-size: 1em; }
+    .table-body td { font-size: 0.95em; }
 
-    .table-body .folio { font-size: 1.1em; }
+    .table-body .folio { font-size: 1.05em; }
 
     .monto-content img {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 
     .back-buttons {
@@ -2007,14 +2000,14 @@ body {
     .agave-half { height: 11.8em; }
 
     /* OPTION BAR */
-    .logo .name { font-size: 1.1em; }
+    .logo .name { font-size: 0.97em; }
 
     .options,
-    .logout { font-size: 1.2em; }
+    .logout { font-size: 1.05em; }
 
     .options img { 
-        width: 17px;
-        transform: translateY(5%); 
+        width: 15px;
+        transform: translateY(10%); 
     }
 
     .option .fa-plane-departure { font-size: 0.75em; }
@@ -2034,7 +2027,7 @@ body {
 
     .titles .title { font-size: 3em; }
 
-    .titles .subtitle { font-size: 1.2em; }
+    .titles .subtitle { font-size: 1.05em; }
 
     .button-create { font-size: 0.85em; }
 
@@ -2042,15 +2035,13 @@ body {
 
     .tab.selected { padding: 0.7em 0em 0.7em 1.5em; }
 
-    .tab p { font-size: 1em; }
+    .tab p { font-size: 0.95em; }
 
-    .tab.selected p { font-size: 1.2em; }
+    .tab.selected p { font-size: 1.05em; }
 
-    .search { height: 2.5em; }
+    .search input { font-size: 1em; }
 
-    .search input { font-size: 1.1em; }
-
-    .search i { font-size: 1em; }
+    .search i { font-size: 0.95em; }
 
     /* CALENDAR */
     .datepicker-wrapper { width: 29%; }
@@ -2066,11 +2057,16 @@ body {
     .date-button { font-size: 0.75em; }
 
     /* TABLE */
-    .table-head th { font-size: 1.2em; }
+    .table-head th { font-size: 1.15em; }
 
-    .table-body .folio { font-size: 1em; }
+    .table-body .folio { font-size: 0.97em; }
 
-    .table-body td { font-size: 0.9em; }
+    .table-body td { font-size: 0.85em; }
+
+    .monto-content img {
+        width: 15px;
+        height: 15px; 
+    }
 
     .status { 
         font-size: 0.9em; 
@@ -2286,7 +2282,7 @@ body {
 /* Laptops pequeñas (1024px - 1250px) */
 @media(min-width: 1025px) and (max-width: 1280px) {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 430px !important; }
+    body.swal2-toast-shown .swal2-container { width: 470px !important; }
 
     .swal2-popup.custom-reject-modal { width: 460px !important; }
 
@@ -2336,23 +2332,27 @@ body {
         background-size: 31% auto; 
     }
 
-    .titles .title { font-size: 2.3em; }
+    .titles .title { font-size: 2.5em; }
 
-    .titles .subtitle { font-size: 1.1em; }
+    .titles .subtitle { font-size: 1em; }
 
-    .button-create { font-size: 0.7em; }
+    .button-create { 
+        width: 12.5em;
+        font-size: 0.75em; 
+    }
 
     .tab { padding: 0.6em 0em 0.6em 1.5em; }
 
     .tab.selected { padding: 0.8em 0 0.8em 1.5em; }
 
-    .tab p { font-size: 0.85em; }
+    .tab p { font-size: 0.8em; }
 
-    .tab.selected p { font-size: 1em; }
+    .tab.selected p { font-size: 0.97em; }
 
     .search { 
         width: 30%;
         margin-bottom: 2em; 
+        height: 2.3em;
     }
 
     .search-back i { font-size: 0.85em; }
@@ -2868,7 +2868,7 @@ body {
 
     .tab-header {
         flex-direction: column-reverse;
-        gap: 1em;
+        gap: 0em;
     }
 
     .tabs {

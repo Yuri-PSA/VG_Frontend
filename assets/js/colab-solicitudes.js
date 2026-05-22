@@ -136,7 +136,7 @@ async function logoutReset() {
     } catch(error) {
         console.error('Error al cerrar sesión:', error);
     } finally {
-        Session.clearToken();
+        Session.clearAll();
         window.location.href = 'index.html';
     }
 }
@@ -145,6 +145,7 @@ function optionsBar() {
     const dashboard = document.querySelector('.option.dashboard');
     const request = document.querySelector('.option.request');
     const expenses = document.querySelector('.option.expenses');
+    const liquidations = document.querySelector('.option.liquidation');
     const logout = document.querySelector('.option.log-out');
 
     function setActiveOption() {
@@ -157,10 +158,12 @@ function optionsBar() {
 
         if(currentPath.includes('colab-dashboard.html'))
             dashboard.classList.add('active');
-        else if(currentPath.includes('colab-solicitudes.html'))
+        else if(currentPath.includes('colab-solicitudes.html') || currentPath.includes('crear-solicitud.html') || currentPath.includes('editar-solicitud.html'))
             request.classList.add('active');
-        else if(currentPath.includes('colab-comprobaciones.html'))
+        else if(currentPath.includes('colab-comprobaciones.html') || currentPath.includes('crear-comprobacion.html') || currentPath.includes('editar-comprobacion.html'))
             expenses.classList.add('active');
+        else if(currentPath.includes('colab-liquidaciones.html'))
+            liquidations.classList.add('active');
     }
 
     setActiveOption();
@@ -178,6 +181,11 @@ function optionsBar() {
     expenses.addEventListener('click', (e) => {
         e.stopPropagation();
         window.location.href = 'colab-comprobaciones.html';
+    });
+
+    liquidations.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = 'colab-liquidaciones.html';
     });
 
     logout.addEventListener('click', (e) => {
@@ -217,6 +225,24 @@ function getActiveTabId() {
     if(activeTab.classList.contains('canceled')) return 'canceled';
 
     return 'all';
+}
+
+function toastStatus() {
+    const tabActive = document.querySelector('.tab.selected');
+
+    if(!tabActive)
+        return null;
+
+    if(tabActive.classList.contains('pending'))
+        return 'pendientes';
+    if(tabActive.classList.contains('approved'))
+        return 'aprobadas';
+    if(tabActive.classList.contains('rejected'))
+        return 'rechazadas';
+    if(tabActive.classList.contains('canceled'))
+        return 'canceladas';
+
+    return null;
 }
 
 // Filters
@@ -279,7 +305,7 @@ async function tableInformation(filtros = {}, page = 1) {
         if(data.mensaje) {
             renderTable([]);
             renderCards([]);
-            Toast('ERROR AL MOSTRAR SOLICITUDES', data.mensaje);
+            Toast(`SIN SOLICITUDES ${toastStatus().toUpperCase()}`, `No tienes solicitudes ${toastStatus()} para mostrar en este momento`);
             return;
         }
 
@@ -319,13 +345,13 @@ function buildThead(tab) {
 
         if(col.hasOrder) {
             th.innerHTML = `
-                    <div class="order-div" data-column="${col.title.toLowerCase()}">
-                        <div class="order">
-                            <i class="fa-solid fa-angle-up"></i>
-                            <i class="fa-solid fa-angle-down"></i>
-                        </div>
-                        ${col.title}
-                    </div>`;
+                <div class="order-div" data-column="${col.title.toLowerCase()}">
+                    <div class="order">
+                        <i class="fa-solid fa-angle-up"></i>
+                        <i class="fa-solid fa-angle-down"></i>
+                    </div>
+                    ${col.title}
+                </div>`;
         } else
             th.textContent = col.title;
 
@@ -438,9 +464,9 @@ function renderTable(solicitudes, tab = 'all') {
             let finanzasHtml = '';
             
             if(sol.estado === 'Aprobada') {
-                if(sol.estado_finanzas) {
-                    const estadoFinClass = statusClass[sol.estado_finanzas] || '';
-                    finanzasHtml = `<div class="status ${estadoFinClass}">${sol.estado_finanzas}</div>`;
+                if(sol.estado_financiero) {
+                    const estadoFinClass = statusClass[sol.estado_financiero] || '';
+                    finanzasHtml = `<div class="status ${estadoFinClass}">${sol.estado_financiero}</div>`;
                 }
                 else
                     finanzasHtml = `<div class="status btn-received">¿Recibido?</div>`;
@@ -453,7 +479,7 @@ function renderTable(solicitudes, tab = 'all') {
             html += `<td></td>`;
 
         // Columna de acciones
-        const acciones = getActionIcons(sol.estado, sol.estado_finanzas, tab);
+        const acciones = getActionIcons(sol.estado, sol.estado_financiero, tab);
         html += `<td><div class="actions">${acciones}</div></td>`;
 
         tr.innerHTML = html;
@@ -506,7 +532,7 @@ function renderCards(solicitudes) {
 
         const estado = sol.estado || '—';
         const estadoClass = statusClass[estado] || '';
-        const estadoFinanzas = sol.estado_finanzas;
+        const estadoFinanzas = sol.estado_financiero;
 
         // Bloque both-status
         let bothStatusHtml = `
@@ -1052,7 +1078,7 @@ async function loadCardDetails(card) {
         llenarInfoCard(card, data);
         card.setAttribute('data-loaded', 'true');
     } catch(error) {
-        completeInfo.innerHTML = `<p class="error">${error.message}</p>`;
+        Toast("ERROR", error.message);
     }
 }
 
@@ -1062,7 +1088,8 @@ function activeCards() {
 
     cards.forEach(card => {
         card.addEventListener('click', async (e) => {
-            if(e.target.closest('.complete-info, .fa-circle-check, .fa-circle-xmark, .fa-pen-to-square, .fa-money-check-dollar, .buttons-mobile')) return;
+            if(e.target.closest('.status.btn-received.st-mobile, .complete-info, .fa-circle-check, .fa-circle-xmark, .fa-pen-to-square, .fa-money-check-dollar, .buttons-mobile')) 
+                return;
             
             e.stopPropagation();
 
@@ -1092,10 +1119,18 @@ function activeCards() {
 
 function llenarInfoCard(card, data) {
     const completeInfo = card.querySelector('.complete-info');
+    if(!completeInfo) return;
 
     const simbolo = obtenerSimboloMoneda(data.monto_moneda);
     const montoFormateado = new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2 }).format(data.monto_solicitado || 0);
-    const buttons = getCardActionIcons(data.estado, data.estado_finanzas);
+    const buttons = getCardActionIcons(data.estado, data.estado_financiero);
+
+    const fechaPagoHtml = data.fecha_entrega ? `
+        <div class="info-mobile">
+            <p class="subt-mobile">FECHA DE PAGO</p>
+            <p>${formatDate(data.fecha_entrega)}</p>
+        </div>
+    ` : '';
 
     completeInfo.innerHTML = `
         <div class="first-column">
@@ -1140,10 +1175,7 @@ function llenarInfoCard(card, data) {
                 <p>${formatDate(data.fecha_recepcion)}</p>
             </div>
 
-            <div class="info-mobile">
-                <p class="subt-mobile">FECHA DE PAGO</p>
-                <p>08 / ABR / 2026</p>
-            </div>
+            ${fechaPagoHtml}
 
             <div class="info-mobile">
                 <p class="subt-mobile">FECHA DE ACTUALIZACIÓN</p>
@@ -1198,7 +1230,6 @@ function buttonRequest() {
 
     button.addEventListener('click', (e) => {
         e.stopPropagation();
-
         window.location.href = 'crear-solicitud.html';
     });
 }
@@ -1240,7 +1271,7 @@ async function moneyReceived(folio, confirmado) {
 
     const body = { folio };
     if(confirmado) {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = new Date().toLocaleDateString('sv-SE');
         body.fechaConfirmacion = today;
         body.noRecibido = false;
     } else
@@ -1495,7 +1526,7 @@ function populateInfoPanel(data) {
     if(!bothContainer) return;
 
     let secondStatusDiv = bothContainer.querySelector('.second');
-    const estadoFinanzas = data.estado_finanzas;
+    const estadoFinanzas = data.estado_financiero;
 
     if(estadoFinanzas) {
         if(!secondStatusDiv) {
@@ -1548,8 +1579,13 @@ function populateInfoPanel(data) {
     document.querySelector('.info-payment').textContent = data.forma_pago || '—';
 
     // Fecha de entrega y actualización
-    if(data.fecha_entrega)
-        document.querySelector('.payment-date span').textContent = formatDate(data.fecha_entrega);
+    if(data.fecha_entrega) {
+        const paymentPara = document.querySelector('.payment-date');
+        if(paymentPara) {
+            paymentPara.innerHTML = `FECHA DE PAGO:<span>${formatDate(data.fecha_entrega)}</span>`;
+            paymentPara.style.display = 'flex';
+        }
+    }
     else
         document.querySelector('.payment-date').style.display = 'none';
     

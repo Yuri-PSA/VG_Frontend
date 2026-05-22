@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+    menuUser();
     phoneMenu();
     initMobileScroll();
     optionsBar();
@@ -6,7 +7,44 @@ document.addEventListener("DOMContentLoaded", function() {
     initCalendar();
     setupCalendar();
     activeCards();
+    buttonComp();
 });
+
+
+/* ============================== VARIABLES ============================== */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+
+
+/* ================================= FUNCIONES ================================= */
+const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+function formatDate(dateStr) {
+    const fechaISO = new Date(dateStr).toISOString().slice(0, 10);
+    const [year, monthNum, day] = fechaISO.split('-');
+    const dia = day;
+    const mes = meses[parseInt(monthNum, 10) - 1];
+    return `${dia} / ${mes} / ${year}`;
+}
+
+
+/* ================================= LOADER ================================= */
+function showLoader() {
+    document.querySelector('.loader-overlay').style.display = 'flex';
+}
+
+function hideLoader() {
+    document.querySelector('.loader-overlay').style.display = 'none';
+}
+
+
+/* ============================== MENU NAME ============================== */
+function menuUser() {
+    const user = document.querySelector('.option-bar .name p');
+    user.innerHTML = '';
+    user.innerHTML = logoUser;
+}
 
 
 /* ============================== PHONE MENU ============================== */
@@ -73,10 +111,25 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+async function logoutReset() {
+    try {
+        await fetch('http://127.0.0.1:3000/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch(error) {
+        console.error('Error al cerrar sesión:', error);
+    } finally {
+        Session.clearAll();
+        window.location.href = 'index.html';
+    }
+}
+
 function optionsBar() {
     const dashboard = document.querySelector('.option.dashboard');
     const request = document.querySelector('.option.request');
     const expenses = document.querySelector('.option.expenses');
+    const liquidations = document.querySelector('.option.liquidation');
     const logout = document.querySelector('.option.log-out');
 
     function setActiveOption() {
@@ -89,10 +142,12 @@ function optionsBar() {
 
         if(currentPath.includes('colab-dashboard.html'))
             dashboard.classList.add('active');
-        else if(currentPath.includes('colab-solicitudes.html'))
+        else if(currentPath.includes('colab-solicitudes.html') || currentPath.includes('crear-solicitud.html') || currentPath.includes('editar-solicitud.html'))
             request.classList.add('active');
-        else if(currentPath.includes('colab-comprobaciones.html'))
+        else if(currentPath.includes('colab-comprobaciones.html') || currentPath.includes('crear-comprobacion.html') || currentPath.includes('editar-comprobacion.html'))
             expenses.classList.add('active');
+        else if(currentPath.includes('colab-liquidaciones.html'))
+            liquidations.classList.add('active');
     }
 
     setActiveOption();
@@ -112,9 +167,14 @@ function optionsBar() {
         window.location.href = 'colab-comprobaciones.html';
     });
 
+    liquidations.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = 'colab-liquidaciones.html';
+    });
+
     logout.addEventListener('click', (e) => {
         e.stopPropagation();
-        window.location.href = 'index.html';
+        logoutReset();
     });
 }
 
@@ -463,5 +523,17 @@ function activeCards() {
             cards.forEach(c => c.classList.remove('active'));
             card.classList.add('active')
         });
+    });
+}
+
+
+/* ============================== ACTION BUTTONS ============================== */
+function buttonComp() {
+    const button = document.querySelector('.button-create');
+    if(!button) return;
+
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = 'crear-comprobacion.html';
     });
 }

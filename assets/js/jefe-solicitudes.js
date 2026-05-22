@@ -4,7 +4,12 @@ document.addEventListener('DOMContentLoaded', function() {
     phoneMenu();
     initMobileScroll();
     optionsBar();
-    tableInformation({ estado: 'Pendiente' });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if(!tabParam)
+        tableInformation(getCurrentFilters());
+    
     setupSorting();
     tabSelected();
     cardLinks();
@@ -18,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 /* ============================== VARIABLES ============================== */
+// Table information
 let motivoRechazo = null;
 let globalStartDate = null;
 let globalEndDate = null;
@@ -31,6 +37,10 @@ const limitPerPage = 7;
 let currentFolio = 'ASC';
 let currentMonto = null;
 
+// Pending amount
+let lastKnownCount = 0;
+
+// Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
 
@@ -139,7 +149,7 @@ async function logoutReset() {
     } catch(error) {
         console.error('Error al cerrar sesión:', error);
     } finally {
-        Session.clearToken();
+        Session.clearAll();
         window.location.href = 'index.html';
     }
 }
@@ -190,12 +200,28 @@ function getActiveStatus() {
     if(!tabActiva) 
         return null;
 
-    if(tabActiva.classList.contains('pending')) 
+    if(tabActiva.classList.contains('pending'))
         return 'Pendiente';
     if(tabActiva.classList.contains('approved')) 
         return 'Aprobada';
     if(tabActiva.classList.contains('rejected')) 
         return 'Rechazada';
+
+    return null;
+}
+
+function toastStatus() {
+    const tabActiva = document.querySelector('.tab.selected');
+
+    if(!tabActiva) 
+        return null;
+
+    if(tabActiva.classList.contains('pending'))
+        return 'pendientes';
+    if(tabActiva.classList.contains('approved')) 
+        return 'aprobadas';
+    if(tabActiva.classList.contains('rejected')) 
+        return 'rechazadas';
 
     return null;
 }
@@ -243,7 +269,7 @@ async function tableInformation(filtros = {}, page = 1) {
     params.append('limit', limitPerPage);
     params.append('offset', offset);
     params.append('orden', currentFolio);
-    params.append('ordenMonto', currentMonto);
+    if(currentMonto) params.append('ordenMonto', currentMonto);
 
     try {
         const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/listar?${params.toString()}`, {
@@ -258,6 +284,7 @@ async function tableInformation(filtros = {}, page = 1) {
         if(!response.ok) {
             renderTable([]);
             renderCards([]);
+            updateCounters(0, 0);
             throw new Error('Error al obtener solicitudes');
         }
 
@@ -266,18 +293,23 @@ async function tableInformation(filtros = {}, page = 1) {
         if(data.mensaje) {
             renderTable([]);
             renderCards([]);
-            Toast('ERROR AL MOSTRAR SOLICITUDES', data.mensaje);
+            updateCounters(0, 0);
+            Toast(`SIN SOLICITUDES ${toastStatus().toUpperCase()}`, `No tienes solicitudes ${toastStatus()} para mostrar en este momento`);
             return;
         }
 
         renderTable(data.solicitudes);
         renderCards(data.solicitudes);
-        updateCounters(data.pendientes, data.sinEntrega);
+        updateCounters(
+            data.pendientes ?? 0, 
+            data.sinEntrega ?? 0
+        );
         updatePagination(data.paginacion);
         currentPage = data.paginacion.paginaActual;
     } catch(error) {
         renderTable([]);
         renderCards([]);
+        updateCounters(0, 0);
         Toast('ERROR AL MOSTRAR SOLICITUDES', 'No se pudieron cargar las solicitudes. Por favor, intenta de nuevo');
     } finally {
         hideLoader();
@@ -385,14 +417,26 @@ function renderCards(solicitudes) {
     });
 
     activeCards();
-    buttonsAction();
 }
 
 // Pending amount
 function updateCounters(pendientes, sinEntrega) {
     const pendingTab = document.querySelector('.tab.pending .amount');
-    if(pendientes !== null && pendingTab) 
-        pendingTab.textContent = pendientes;
+    if(!pendingTab) return;
+
+    const valor = pendientes ?? null;
+    
+    if(valor !== null && valor > 0) {
+        // Caso normal -> actualizar y guardar cantidad
+        pendingTab.textContent = valor;
+        pendingTab.classList.add('has-number');
+        lastKnownCount = valor;
+    } else if(lastKnownCount > 0) {
+        // Hubo error o no hay datos -> última cantidad conocida
+        pendingTab.textContent = lastKnownCount;
+        pendingTab.classList.add('has-number');
+    } else
+        pendingTab.classList.remove('has-number');
 }
 
 // Pagination
@@ -985,7 +1029,7 @@ async function loadCardDetails(card) {
         llenarInfoCard(card, data);
         card.setAttribute('data-loaded', 'true');
     } catch (error) {
-        completeInfo.innerHTML = `<p class="error">${error.message}</p>`;
+        Toast("ERROR", error.message);
     }
 }
 
@@ -995,7 +1039,8 @@ function activeCards() {
 
     cards.forEach(card => {
         card.addEventListener('click', async (e) => {
-            if(e.target.closest('.fa-circle-check, .fa-circle-xmark, .buttons-mobile')) return;
+            if(e.target.closest('.complete-info, .fa-circle-check, .fa-circle-xmark, .buttons-mobile')) 
+                return;
 
             e.stopPropagation();
             
@@ -1120,6 +1165,8 @@ function setupSorting() {
 
 /* ============================== ACTION BUTTONS ============================== */
 // Reject && Aprove
+let handleActionButtons;
+
 async function changeState(folio, accion, motivoRechazo = '') {
     if(!token) {
         Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
@@ -1144,14 +1191,32 @@ async function changeState(folio, accion, motivoRechazo = '') {
         }
 
         const data = await response.json();
-        
-        const filtros = getCurrentFilters();
-        tableInformation(filtros, currentPage);
 
         Toast(
             `SOLICITUD ${accion === 'Aprobar' ? 'APROBADA' : 'RECHAZADA'}`,
             `La solicitud con folio ${folio} fue ${accion === 'Aprobar' ? 'aprobada' : 'rechazada'} y notificada al colaborador correctamente`
         );
+
+        // Reinicio de tabla en caso de quedarse vacía
+        const activeTab = document.querySelector('.tab.selected');
+        const isPendingTab = activeTab && activeTab.classList.contains('pending');
+        
+        const filtros = getCurrentFilters();
+
+        if(isPendingTab) {
+            const tempResponse = await fetch(`http://127.0.0.1:3000/api/solicitudes/listar?estado=Pendiente&limit=1`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                credentials: 'include'
+            });
+            const tempData = await tempResponse.json();
+
+            if(!tempData.solicitudes || tempData.solicitudes.length === 0) {
+                lastKnownCount  = 0;
+                updateCounters(0, 0);
+            }
+        }
+
+        tableInformation(filtros, currentPage);
     } catch(error) {
         Toast('ERROR', error.message || 'Error al procesar la acción');
     } finally {
@@ -1160,13 +1225,15 @@ async function changeState(folio, accion, motivoRechazo = '') {
 }
 
 function buttonsAction() {
-    document.removeEventListener('click', handleActionButtons);
+    if(handleActionButtons)
+        document.removeEventListener('click', handleActionButtons);
 
-    function handleActionButtons(e) {
+    handleActionButtons = function(e) {
         const target = e.target;
+        
         // Aprobar
         if(target.classList.contains('fa-circle-check')) {
-            e.stopPropagation();
+            e.stopImmediatePropagation();
             const row = target.closest('tr') || target.closest('.card');
             if(!row) return;
 
@@ -1178,7 +1245,7 @@ function buttonsAction() {
 
         // Rechazar
         if(target.classList.contains('fa-circle-xmark')) {
-            e.stopPropagation();
+            e.stopImmediatePropagation();
             const row = target.closest('tr') || target.closest('.card');
             if(!row) return;
 
@@ -1187,7 +1254,7 @@ function buttonsAction() {
             
             if(folio) ToastRejected(folio, changeState);
         }
-    }
+    };
 
     document.addEventListener('click', handleActionButtons);
 }
