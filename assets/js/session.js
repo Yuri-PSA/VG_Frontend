@@ -19,12 +19,8 @@ const Session = (function() {
       }
       return null;
     },
-    
-    clearToken: function() {
-      token = null;
-      localStorage.removeItem('jwt');
-    },
 
+    
     // USER
     setUser: function(newUser) {
       user = newUser;
@@ -40,10 +36,14 @@ const Session = (function() {
       }
       return null;
     },
-    
-    clearUser: function() {
+
+
+    // CLEAN
+    clearAll: function() {
       user = null;
+      token = null;
+      localStorage.removeItem('jwt');
       localStorage.removeItem('user');
-    }
+    },
   };
 })();

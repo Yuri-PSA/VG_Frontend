@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
 let globalStartDate = null;
 let globalEndDate = null;
 
+// Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
 
@@ -107,10 +108,25 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+async function logoutReset() {
+    try {
+        await fetch('http://127.0.0.1:3000/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch(error) {
+        console.error('Error al cerrar sesión:', error);
+    } finally {
+        Session.clearAll();
+        window.location.href = 'index.html';
+    }
+}
+
 function optionsBar() {
     const dashboard = document.querySelector('.option.dashboard');
     const request = document.querySelector('.option.requests');
     const expenses = document.querySelector('.option.expenses');
+    const liquidations = document.querySelector('.option.liquidation');
     const logout = document.querySelector('.option.log-out');
 
     function setActiveOption() {
@@ -125,8 +141,10 @@ function optionsBar() {
             dashboard.classList.add('active');
         else if(currentPath.includes('colab-solicitudes.html') || currentPath.includes('crear-solicitud.html') || currentPath.includes('editar-solicitud.html'))
             request.classList.add('active');
-        else if(currentPath.includes('colab-comprobaciones.html'))
+        else if(currentPath.includes('colab-comprobaciones.html') || currentPath.includes('crear-comprobacion.html') || currentPath.includes('editar-comprobacion.html'))
             expenses.classList.add('active');
+        else if(currentPath.includes('colab-liquidaciones.html'))
+            liquidations.classList.add('active');
     }
 
     setActiveOption();
@@ -146,14 +164,14 @@ function optionsBar() {
         window.location.href = 'colab-comprobaciones.html';
     });
 
+    liquidations.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = 'colab-liquidaciones.html';
+    });
+
     logout.addEventListener('click', async(e) => {
         e.stopPropagation();
-
-        await fetch('http://localhost:3000/auth/logout', {
-            method: 'POST',
-            credentials: 'include',
-        });
-        window.location.href = 'index.html';
+        logoutReset();
     });
 }
 

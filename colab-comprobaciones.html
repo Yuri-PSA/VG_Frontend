@@ -20,6 +20,21 @@
 </head>
 
 <body>
+    <!-- ======================= LOADER ======================= -->
+    <div class="loader-overlay">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <!-- ======================= CONTENT ======================= -->
     <div class="background">
         <!-- ======================= PHONE MENU ======================= -->
         <div class="mobile-nav">
@@ -36,9 +51,7 @@
         <div class="option-bar" id="optionBar">
             <div class="logo">
                 <img src="./assets/images/White_logo.webp" alt="Grupo | PSA">
-                <div class="name">
-                    <p>Yuriana Ibarra</p>
-                </div>
+                <div class="name"><p></p></div>
             </div>
 
             <div class="options">
@@ -55,6 +68,11 @@
                 <div class="option expenses">
                     <img src="./assets/images/Payment.webp" alt="Payment">
                     <p>Comprobaciones</p>
+                </div>
+
+                <div class="option liquidation">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <p>Liquidaciones</p>
                 </div>
             </div>
 
@@ -123,6 +141,11 @@
                                 </div>
 
                                 <div class="dates"></div>
+
+                                <div class="datepicker-bottom">
+                                    <div class="date-button clear-date">LIMPIAR</div>
+                                    <div class="date-button search-date">BUSCAR</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -141,19 +164,35 @@
                                                 Folio
                                             </div>
                                         </th>
-                                        <th>Fecha</th>
-                                        <th>Destino</th>
                                         <th>
                                             <div class="order-div">
                                                 <div class="order">
                                                     <i class="fa-solid fa-angle-up"></i>
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </div>
-                                                Monto
+                                                Solicitud
+                                            </div>
+                                        </th>
+                                        <th>Fecha</th>
+                                        <th>
+                                            <div class="order-div">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Total
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="order-div">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Saldo
                                             </div>
                                         </th>
                                         <th>Estado</th>
-                                        <th>Finanzas</th>
                                     </tr>
                                 </thead>
 
@@ -1017,6 +1056,7 @@
         </div>
     </div>
 
+    <script src="./assets/js/session.js"></script>
     <script src="./assets/js/colab-comprobaciones.js"></script>
 </body>
 </html>

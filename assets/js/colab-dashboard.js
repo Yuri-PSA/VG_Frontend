@@ -93,6 +93,7 @@ function optionsBar() {
     const dashboard = document.querySelector('.option.dashboard');
     const request = document.querySelector('.option.request');
     const expenses = document.querySelector('.option.expenses');
+    const liquidations = document.querySelector('.option.liquidation');
     const logout = document.querySelector('.option.log-out');
 
     function setActiveOption() {
@@ -105,10 +106,12 @@ function optionsBar() {
 
         if(currentPath.includes('colab-dashboard.html'))
             dashboard.classList.add('active');
-        else if(currentPath.includes('colab-solicitudes.html'))
+        else if(currentPath.includes('colab-solicitudes.html') || currentPath.includes('crear-solicitud.html') || currentPath.includes('editar-solicitud.html'))
             request.classList.add('active');
-        else if(currentPath.includes('colab-comprobaciones.html'))
+        else if(currentPath.includes('colab-comprobaciones.html') || currentPath.includes('crear-comprobacion.html') || currentPath.includes('editar-comprobacion.html'))
             expenses.classList.add('active');
+        else if(currentPath.includes('colab-liquidaciones.html'))
+            liquidations.classList.add('active');
     }
 
     setActiveOption();
@@ -126,6 +129,11 @@ function optionsBar() {
     expenses.addEventListener('click', (e) => {
         e.stopPropagation();
         window.location.href = 'colab-comprobaciones.html';
+    });
+
+    liquidations.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = 'colab-liquidaciones.html';
     });
 
     logout.addEventListener('click', (e) => {

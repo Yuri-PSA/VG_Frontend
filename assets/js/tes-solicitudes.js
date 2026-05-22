@@ -1,21 +1,21 @@
 document.addEventListener("DOMContentLoaded", function() {
+    setupPaginationEvents();
     menuUser();
     phoneMenu();
     initMobileScroll();
     optionsBar();
+    tableInformation(getCurrentFilters());
     tabSelected();
     cardLinks();
     searchColab();
     initCalendar();
     setupCalendar();
     activeCards();
-    updateCurrency();
     buttonTransfer();
     initReceiptUpload();
     buttonInfoDelivered();
     buttonPreview();
     buttonDownload();
-    cardIcons();
 });
 
 
@@ -24,9 +24,49 @@ document.addEventListener("DOMContentLoaded", function() {
 let selectedFile = null;
 let isUploading = false;
 let uploadComplete = false;
+let uploadedFilePath = null;
 
+// Table information
+let globalStartDate = null;
+let globalEndDate = null;
+let swapped = false;
+let currentPage = 1;
+let paginacionGlobal = {
+    paginaActual: 1,
+    totalPaginas: 1
+};
+const limitPerPage = 7;
+let currentFolio = 'ASC';
+let currentMonto = null;
+
+// Pending amount
+let lastKnownCount = 0;
+
+// Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
+
+
+/* ================================= FUNCIONES ================================= */
+const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+function formatDate(dateStr) {
+    const fechaISO = new Date(dateStr).toISOString().slice(0, 10);
+    const [year, monthNum, day] = fechaISO.split('-');
+    const dia = day;
+    const mes = meses[parseInt(monthNum, 10) - 1];
+    return `${dia} / ${mes} / ${year}`;
+}
+
+
+/* ================================= LOADER ================================= */
+function showLoader() {
+    document.querySelector('.loader-overlay').style.display = 'flex';
+}
+
+function hideLoader() {
+    document.querySelector('.loader-overlay').style.display = 'none';
+}
 
 
 /* ============================== MENU NAME ============================== */
@@ -101,6 +141,21 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+// Logout
+async function logoutReset() {
+    try {
+        await fetch('http://127.0.0.1:3000/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+    } catch(error) {
+        console.error('Error al cerrar sesión:', error);
+    } finally {
+        Session.clearAll();
+        window.location.href = 'index.html';
+    }
+}
+
 function optionsBar() {
     const dashboard = document.querySelector('.option.dashboard');
     const request = document.querySelector('.option.request');
@@ -150,8 +205,413 @@ function optionsBar() {
 
     logout.addEventListener('click', (e) => {
         e.stopPropagation();
-        window.location.href = 'index.html';
+        logoutReset();
     });
+}
+
+
+/* =========================== TABLE INFORMATION =========================== */
+// Status tabs
+function getFinancialStatus() {
+    const activeTab = document.querySelector('.tab.selected');
+    if(!activeTab) return null;
+
+    if(activeTab.classList.contains('pending')) 
+        return 'Pendientes';
+    if(activeTab.classList.contains('delivered')) 
+        return 'Entregados';
+    if(activeTab.classList.contains('settled'))
+        return 'Liquidados';
+    
+    return null;
+}
+
+function getActiveTabId() {
+    const activeTab = document.querySelector('.tab.selected');
+    if(!activeTab) return 'pending';
+
+    if(activeTab.classList.contains('delivered')) return 'delivered';
+    if(activeTab.classList.contains('settled')) return 'settled';
+
+    return 'pending';
+}
+
+function toastStatus() {
+    const tabActiva = document.querySelector('.tab.selected');
+    if(!tabActiva) return null;
+
+    if(tabActiva.classList.contains('pending'))
+        return 'pendientes de entrega'
+    if(tabActiva.classList.contains('delivered')) 
+        return 'entregados';
+    if(tabActiva.classList.contains('settled')) 
+        return 'liquidados';
+
+    return null;
+}
+
+// Filters
+function getCurrentFilters(){
+    const input = document.querySelector('.search-back input');
+    const valor = input ? input.value.trim() : '';
+    const filtros = {};
+
+    if(swapped)
+        filtros.colaborador = valor;
+    else
+        filtros.folio = valor;
+
+    if(globalStartDate) {
+        filtros.fechaIni = globalStartDate;
+        if(globalEndDate) 
+            filtros.fechaFin = globalEndDate;
+    }
+
+    const estadoFinanciero = getFinancialStatus();
+    if(estadoFinanciero !== null) filtros.estado = estadoFinanciero;
+    filtros.orden = currentFolio;
+    if(currentMonto) filtros.currentMonto = currentMonto;
+
+    return filtros;
+}
+
+// Backend query
+async function tableInformation(filtros = {}, page = 1) {
+    showLoader();
+    renderTable([]);
+    renderCards([]);
+
+    // Calcula el offset basado en la página
+    const offset = (page - 1) * limitPerPage;
+
+    // Construir query string
+    const params = new URLSearchParams();
+    if(filtros.estado) params.append('estado', filtros.estado);
+    if(filtros.folio) params.append('folio', filtros.folio);
+    if(filtros.colaborador) params.append('colaborador', filtros.colaborador);
+    if(filtros.fechaIni) params.append('fechaIni', filtros.fechaIni);
+    if(filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+    params.append('limit', limitPerPage);
+    params.append('offset', offset);
+    params.append('orden', currentFolio);
+    if(currentMonto) params.append('ordenMonto', currentMonto);
+
+    try {
+        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/listar?${params.toString()}`, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include'
+        });
+
+        if(!response.ok) {
+            renderTable([]);
+            renderCards([]);
+            updateCounters(0, 0);
+            throw new Error('Error al obtener solicitudes');
+            return;
+        }
+
+        const data = await response.json();
+        
+        if(data.mensaje) {
+            renderTable([]);
+            renderCards([]);
+            updateCounters(0, 0);
+            Toast(`SIN ANTICIPOS ${toastStatus().toUpperCase()}`, `No tienes anticipos ${toastStatus()} para mostrar en este momento`);
+            return;
+        }
+
+        renderTable(data.solicitudes, getActiveTabId());
+        renderCards(data.solicitudes, getActiveTabId());
+        updateCounters(
+            data.pendientes ?? 0, 
+            data.sinEntrega ?? 0
+        );
+        updatePagination(data.paginacion);
+        currentPage = data.paginacion.paginaActual;
+    } catch(error) {
+        renderTable([]);
+        renderCards([]);
+        updateCounters(0, 0);
+        Toast('ERROR AL MOSTRAR SOLICITUDES', 'No se pudieron cargar las solicitudes. Por favor, intenta de nuevo');
+    } finally {
+        hideLoader();
+    }
+}
+
+// Table information
+function buildThead(tab) {
+    const thead = document.querySelector('.table-head');
+    if(!thead) return;
+
+    const columnas= [
+        { title: 'Folio', hasOrder: true },
+        { title: 'Colaborador' },
+        { title: 'Fecha' },
+        { title: 'Monto', hasOrder: true },
+        { title: 'Pago' }, 
+    ];
+
+    if(tab === 'pending')
+        columnas.push({ title: 'Entrega' });
+    else
+        columnas.push({ title: 'Financiero' });
+
+    const headerRow = document.createElement('tr');
+    columnas.forEach(col => {
+        const th = document.createElement('th');
+
+        if(col.hasOrder) {
+            th.innerHTML = `
+                <div class="order-div" data-column="${col.title.toLowerCase()}">
+                    <div class="order">
+                        <i class="fa-solid fa-angle-up"></i>
+                        <i class="fa-solid fa-angle-down"></i>
+                    </div>
+                    ${col.title}
+                </div>`;
+        } else 
+            th.textContent = col.title;
+
+        headerRow.appendChild(th);
+    });
+
+    const thAcciones = document.createElement('th');
+    thAcciones.textContent = '';
+    headerRow.appendChild(thAcciones);
+
+    thead.innerHTML = '';
+    thead.appendChild(headerRow);
+    setupSorting();
+}
+
+function getActionIcons(estado, fechaEntrega) {
+    if(estado === 'Pendiente')
+        return `<i class="fa-solid fa-circle-info"></i>`;
+    else if(estado === 'Liquidada') {
+        return `
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+            <i class="fa-solid fa-circle-info"></i>
+        `;
+    }
+    else {
+        if(fechaEntrega !== null)
+            return `<i class="fa-solid fa-circle-info"></i>`;
+        else
+            return `<i class="fa-solid fa-circle-dollar-to-slot"></i>`;
+    }
+}
+
+function renderTable(solicitudes, tab = null) {
+    const tbody = document.querySelector('.table-body');
+    if(!tbody) return;
+    
+    const currentTab = tab || getActiveTabId();
+    buildThead(currentTab);
+    tbody.innerHTML = '';
+
+    if(solicitudes.length === 0) return;
+
+    const statusClass = {
+        'Pendiente': 'st-pending',
+        'Liquidada': 'st-liquidated'
+    };
+
+    solicitudes.forEach(sol =>  {
+        const tr = document.createElement('tr');
+
+        const simbolo = obtenerSimboloMoneda(sol.moneda);
+        const montoFormateado = new Intl.NumberFormat('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(sol.monto);
+        const estadoClass = statusClass[sol.estado_financiero] || 'st-pending';
+
+        // Columna Entrega o Financiero
+        let estadoFinanciero = sol.estado_financiero;
+        let textoMostrar = '';
+        let claseMostrar = '';
+
+        if(currentTab === 'pending') {
+            textoMostrar = 'Pendiente';
+            claseMostrar = 'st-pending';
+        } else if(currentTab === 'delivered') {
+            if(!estadoFinanciero) {
+                textoMostrar = 'Por confirmar';
+                claseMostrar = 'st-received';
+            } else {
+                textoMostrar = estadoFinanciero;
+                claseMostrar = statusClass[estadoFinanciero];
+            }
+        } else if(currentTab === 'settled') {
+            textoMostrar = estadoFinanciero;
+            claseMostrar = statusClass[textoMostrar];
+        }
+
+        // Celda de estado y acciones
+        let statusHtml = `<td><div class="status ${claseMostrar}">${textoMostrar}</div></td>`;
+        const acciones = getActionIcons(sol.estado_financiero, sol.fecha_entrega);
+
+        let html = `
+            <td class="folio"><p>${sol.folio}</p></td>
+            <td><p>${sol.nombre || '—'}</p></td>
+            <td><p>${formatDate(sol.inicio_viaje)}</p></td>
+            <td class="monto-cell">
+                <div class="monto-content">
+                    <img src="./assets/images/${sol.moneda}.webp" alt="${sol.moneda}">
+                    <p><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
+                </div>
+            </td>
+            <td class="payment">${sol.forma_pago}</td>
+            ${statusHtml}
+            <td><div class="actions">${acciones}</div></td>
+        `;
+
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+
+    const rowsActuales = solicitudes.length;
+    for(let i = rowsActuales; i < limitPerPage; i++) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `<td><p class="empty-row">Empty</p></td><td></td><td></td><td></td><td></td><td></td><td></td>`;
+        tbody.appendChild(emptyRow);
+    }
+
+    buttonInfoDelivered();
+}
+
+// Cards Information
+function renderCards(solicitudes, tab = null) {
+    const currentTab = tab || getActiveTabId();
+    const container = document.querySelector('.cards-mobile');
+    if(!container) return;
+    
+    container.innerHTML = '';
+
+    const statusClass = {
+        'Pendiente': 'st-pending',
+        'Liquidada': 'st-liquidated'
+    };
+
+    solicitudes.forEach(sol => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.setAttribute('data-folio', sol.folio);
+        card.setAttribute('data-loaded', 'false');
+
+        let estadoFinanciero = sol.estado_financiero;
+        let textoMostrar = '';
+        let claseMostrar = '';
+
+        if(currentTab === 'pending') {
+            textoMostrar = 'Pendiente';
+            claseMostrar = 'st-pending';
+        } else if(currentTab === 'delivered') {
+            if(!estadoFinanciero) {
+                textoMostrar = 'Por confirmar';
+                claseMostrar = 'st-received';
+            } else {
+                textoMostrar = estadoFinanciero;
+                claseMostrar = statusClass[estadoFinanciero];
+            }
+        } else if(currentTab === 'settled') {
+            textoMostrar = estadoFinanciero;
+            claseMostrar = statusClass[textoMostrar];
+        }
+        
+        // Estructura
+        card.innerHTML = `
+            <div class="first-info">
+                <div class="info-mobile">
+                    <p class="subt-mobile">FOLIO</p>
+                    <p class="folio-mobile">${sol.folio}</p>
+                </div> 
+                <div class="info-mobile">
+                    <p class="subt-mobile">COLABORADOR</p>
+                    <p>${sol.nombre_completo || sol.nombre || '—'}</p>
+                </div>
+                <div class="info-mobile">
+                    <p class="subt-mobile">${currentTab === 'pending' ? 'ENTREGA' : 'FINANCIERO' }</p>
+                    <p class="status ${claseMostrar} st-mobile">${textoMostrar}</p>
+                </div>
+            </div>
+
+            <div class="complete-info"></div>
+        `;
+
+        container.appendChild(card);
+    });
+
+    activeCards();
+}
+
+// Pending amount
+function updateCounters(pendientes, sinEntrega) {
+    const pendingTab = document.querySelector('.tab.pending .amount');
+    if(!pendingTab) return;
+
+    const valor = sinEntrega ?? null;
+
+    if(valor !== null && valor > 0) {
+        // Caso normal -> actualizar y guardar cantidad
+        pendingTab.textContent = valor;
+        pendingTab.classList.add('has-number');
+        lastKnownCount = valor;
+    } else if(lastKnownCount > 0) {
+        // Hubo error o no hay datos -> última cantidad conocida
+        pendingTab.textContent = lastKnownCount;
+        pendingTab.classList.add('has-number');
+    } else
+        pendingTab.classList.remove('has-number');
+}
+
+// Pagination
+function updatePagination(paginacion) {
+    const pageDiv = document.querySelector('.page');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+
+    if(pageDiv) pageDiv.textContent = paginacion.paginaActual;
+    paginacionGlobal = paginacion;
+
+    // Habilitar / deshabilitar botones
+    if(prevBtn) prevBtn.parentElement.classList.toggle('disabled', paginacion.paginaActual <= 1);
+    if(nextBtn) nextBtn.parentElement.classList.toggle('disabled', paginacion.paginaActual >= paginacion.totalPaginas);
+}
+
+function setupPaginationEvents() {
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    if(!prevBtn || !nextBtn) return;
+
+    const prevParent = prevBtn.parentElement;
+    const nextParent = nextBtn.parentElement;
+
+    prevParent.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (paginacionGlobal.paginaActual <= 1 || prevParent.classList.contains('disabled')) return;
+        currentPage--;
+        const filtros = getCurrentFilters();
+        tableInformation(filtros, currentPage);
+    });
+
+    nextParent.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (paginacionGlobal.paginaActual >= paginacionGlobal.totalPaginas || nextParent.classList.contains('disabled')) return;
+        currentPage++;
+        const filtros = getCurrentFilters();
+        tableInformation(filtros, currentPage);
+    });
+}
+
+// Currency
+function obtenerSimboloMoneda(codigo) {
+    const simbolos = { MXN: '$', USD: '$', EUR: '€', JPY: '¥' };
+    return simbolos[codigo] || '$';
 }
 
 
@@ -169,6 +629,10 @@ function tabSelected() {
 
             this.classList.add('selected');
             this.querySelector('.amount')?.classList.add('selected');
+
+            currentPage = 1;
+            const filtros = getCurrentFilters();
+            tableInformation(filtros);
         });
     });
 }
@@ -177,20 +641,30 @@ function tabSelected() {
 function cardLinks() {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
+    if(!tabParam) return;
 
-    if(tabParam) {
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.classList.remove('selected');
-            const amount = tab.querySelector('.amount');
-            if(amount) amount.classList.remove('selected');
-        });
+    const estadoMap = {
+        'pending': 'pending',
+        'delivered': 'delivered',
+        'settled': 'settled'
+    };
 
-        const activeTab = document.querySelector(`.tab.${tabParam}`);
-        if(activeTab) {
-            activeTab.classList.add('selected');
-            const amount = activeTab.querySelector('.amount');
-            if(amount) amount.classList.add('selected');
-        }
+    const tabToActivate = estadoMap[tabParam];
+    if(!tabToActivate) return;
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('selected');
+        tab.querySelector('.amount')?.classList.remove('selected');
+    });
+
+    const activeTab = document.querySelector(`.tab.${tabToActivate}`);
+    if(activeTab) {
+        activeTab.classList.add('selected');
+        activeTab.querySelector('.amount')?.classList.add('selected');
+
+        currentPage = 1;
+        const filtros = getCurrentFilters();
+        tableInformation(filtros);
     }
 }
 
@@ -205,8 +679,6 @@ function searchColab() {
 
     if(!glass || !user || !calendar || !input) return;
 
-    let swapped = false;
-
     function swapIcons() {
         const parent = search;
 
@@ -218,13 +690,14 @@ function searchColab() {
             parent.insertBefore(userRemoved, input);
             parent.insertBefore(glassRemoved, calendar.nextSibling);
             input.placeholder = "Colaborador. . .";
+            swapped = true;
         } else {
             parent.insertBefore(glassRemoved, input);
             parent.insertBefore(userRemoved, calendar.nextSibling);
             input.placeholder = "Folio. . .";
+            swapped = false;
         }
-
-        swapped = !swapped;
+        input.value = '';
     }
 
     function fadeAndSwap(shouldSwap) {
@@ -242,16 +715,53 @@ function searchColab() {
         }, 200);
     }
 
+    let debounceTimer;
+
+    function doSearch() {
+        const valor = input.value.trim();
+        const filtros = getCurrentFilters();
+        if(swapped) {
+            filtros.colaborador = valor;
+            delete filtros.folio;
+        } else {
+            filtros.folio = valor;
+            delete filtros.colaborador;
+        }
+
+        currentPage = 1;
+        tableInformation(filtros);
+    }
+
+    // ENTER keypress
+    input.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+            clearTimeout(debounceTimer);
+            currentPage = 1;
+            doSearch();
+        }
+    });
+
+    input.addEventListener('input', (e) => {
+        if(input.value.trim() === '') {
+            clearTimeout(debounceTimer);
+            const filtros = getCurrentFilters();
+
+            delete filtros.folio;
+            delete filtros.colaborador;
+
+            currentPage = 1;
+            tableInformation(filtros);
+        }
+    });
+
     glass.addEventListener('click', (e) => {
         e.stopPropagation();
-        const shouldSwap = swapped;
-        fadeAndSwap(shouldSwap);
+        fadeAndSwap(swapped);
     });
 
     user.addEventListener('click', (e) => {
         e.stopPropagation();
-        const shouldSwap = !swapped;
-        fadeAndSwap(shouldSwap);
+        fadeAndSwap(!swapped);
     });
 }
 
@@ -369,7 +879,9 @@ function initCalendar() {
             if (startDate === null || (startDate && endDate !== null)) {
                 startDate = { year, month, day };
                 endDate = null;
-                console.log(`Rango reiniciado. Inicio: ${day}/${month+1}/${year}`);
+                
+                globalStartDate = `${year}-${month+1}-${day}`;
+                globalEndDate = null;
             }
             // Si hay inicio pero no fin, se establece el fin (ordenando las fechas)
             else if (startDate && endDate === null) {
@@ -380,9 +892,18 @@ function initCalendar() {
                     startDate = { year, month, day };
                 } else
                     endDate = { year, month, day };
-                
-                console.log(`Rango seleccionado: ${startDate.day}/${startDate.month+1}/${startDate.year} - ${endDate.day}/${endDate.month+1}/${endDate.year}`);
+
+                globalStartDate = `${startDate.year}-${startDate.month+1}-${startDate.day}`;
+                globalEndDate = `${endDate.year}-${endDate.month+1}-${endDate.day}`;                
             }
+
+            function parseGlobalDate(dateStr) {
+                if (!dateStr) return null;
+                const [year, month, day] = dateStr.split('-').map(Number);
+                return { year, month: month - 1, day };
+            }
+            startDate = parseGlobalDate(globalStartDate);
+            endDate = parseGlobalDate(globalEndDate);
 
             renderCalendar();
         });
@@ -523,23 +1044,25 @@ function initCalendar() {
 function setupCalendar() {
     const calendarIcon = document.querySelector('.fa-calendar');
     const datepicker = document.querySelector('.datepicker-wrapper');
+    const clearDate = document.querySelector('.date-button.clear-date');
+    const searchDate = document.querySelector('.date-button.search-date');
 
-    if(!calendarIcon || !datepicker) return;
+    if(!calendarIcon || !datepicker || !clearDate || !searchDate) return;
 
     function clearRangeSelect() {
         const dates = document.querySelectorAll('.date-cell.in-range');
         const startDate = document.querySelector('.date-cell.start');
         const endDate = document.querySelector('.date-cell.end');
 
-        dates.forEach(date => {
-            if (date && date.classList) 
-                date.classList.remove('in-range');
-        });
-        if(startDate && startDate.classList) 
+        dates.forEach(date => date.classList.remove('in-range'));
+
+        if(startDate) 
             startDate.classList.remove('start');
-        if(endDate && endDate.classList) 
+        if(endDate) 
             endDate.classList.remove('end');
 
+        globalStartDate = null;
+        globalEndDate = null;
         window.dispatchEvent(new CustomEvent('calendar-closed'));
     }
 
@@ -548,7 +1071,6 @@ function setupCalendar() {
 
         const isVisible = datepicker.style.display === 'block';
         if(isVisible) {
-            clearRangeSelect();
             calendarIcon.classList.remove('icon-active');
             datepicker.style.display = 'none';
         } else {
@@ -563,122 +1085,416 @@ function setupCalendar() {
 
     document.addEventListener('click', (e) => {
         if(!datepicker.contains(e.target) && e.target !== calendarIcon) {
-            clearRangeSelect();
             calendarIcon.classList.remove('icon-active');
             datepicker.style.display = 'none';
         }
+    });
+
+    clearDate.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearRangeSelect();
+
+        const filtros = getCurrentFilters();
+        delete filtros.fechaIni;
+        delete filtros.fechaFin;
+
+        currentPage = 1;
+        tableInformation(filtros);
+        calendarIcon.classList.remove('icon-active');
+        datepicker.style.display = 'none';
+    });
+
+    searchDate.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if(!globalStartDate && !globalEndDate) {
+            Toast('SELECCIÓN DE FECHA', 'Por favor, selecciona al menos una fecha para poder buscar');
+            return;
+        }
+
+        const filtros = getCurrentFilters();
+        currentPage = 1;
+        tableInformation(filtros);
+
+        calendarIcon.classList.remove('icon-active');
+        datepicker.style.display = 'none';
     });
 }
 
 
 /* ============================= ACTIVE CARD ============================= */
+async function loadCardDetails(card) {
+    const folio = card.getAttribute('data-folio');
+    if(!folio) return;
+
+    try {
+        if(!token) {
+            Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+            return;
+        }
+
+        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        if(!response.ok) {
+            const err = await response.json().catch(() => ({ message: 'Error al cargar los detalles' }));
+            throw new Error(err.message || 'Error al obtener detalles');
+        }
+
+        const data = await response.json();
+        llenarInfoCard(card, data);
+        card.setAttribute('data-loaded', 'true');
+    } catch(error) {
+        Toast("ERROR", error.message);
+    }
+}
+
 function activeCards() {
     const cards = document.querySelectorAll('.cards-mobile .card');
     if(!cards.length) return;
 
     cards.forEach(card => {
-        card.addEventListener('click', (e) => {
+        card.addEventListener('click', async (e) => {
+            if(e.target.closest('.complete-info, .fa-circle-dollar-to-slot, .fa-image, .fa-cloud-arrow-down, .fa-hand-holding-dollar, .buttons-mobile')) 
+                return;
+
             e.stopPropagation();
 
-            if(e.target.closest('.fa-circle-dollar-to-slot, .fa-solid fa-image, .fa-solid fa-cloud-arrow-down, .buttons-mobile')) return;
-            cards.forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
+            const completeInfo = card.querySelector('.complete-info');
+            const wasActive = card.classList.contains('active');
+
+            if(wasActive)
+                card.classList.remove('active');
+            else {
+                cards.forEach(c => {
+                    c.classList.remove('active');
+                });
+                card.classList.add('active');
+
+                // Cargar información
+                if(card.getAttribute('data-loaded') === 'false')
+                    await loadCardDetails(card);
+            }
         });
     });
+
+    const firstCard = cards[0];
+    
+    firstCard.classList.add('active');
+    if(firstCard.getAttribute('data-loaded') === 'false')
+        loadCardDetails(firstCard);
+}
+
+function llenarInfoCard(card, data) {
+    const completeInfo = card.querySelector('.complete-info');
+    if(!completeInfo) return;
+
+    const currentTab = getActiveTabId();
+    const moneda = data.monto_moneda;
+    const simbolo = obtenerSimboloMoneda(data.monto_moneda);
+    const montoFormateado = new Intl.NumberFormat('es-MX', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(data.monto_solicitado || 0);
+
+    const formaPago = data.forma_pago || '—';
+    const fechaViaje = formatDate(data.inicio_viaje);
+    const fechaEntrega = data.fecha_entrega ? formatDate(data.fecha_entrega) : '—';
+    const fechaConfirmacion = data.fecha_confirmacion ? formatDate(data.fecha_confirmacion) : '—';
+    const comprobante = !!data.ruta_comprobante;
+    const fullImageUrl = comprobante ? `http://127.0.0.1:3000/${data.ruta_comprobante}` : '';
+
+    card.setAttribute('data-comprobante-url', fullImageUrl);
+
+    let html = '';
+
+    let firstColumn = `
+        <div class="first-column">
+            <div class="info-mobile">
+                <p class="subt-mobile">FECHA</p>
+                <p>${fechaViaje}</p>
+            </div>
+    `;
+
+    if(currentTab === 'pending') {
+        firstColumn += `</div>`;
+
+        const secondColumn = `
+            <div class="second-column">
+                <div class="info-mobile">
+                    <p class="subt-mobile">MONTO</p>
+                    <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
+                    <p class="amount-mobile-currency"><img src="./assets/images/${moneda}.webp" alt="${moneda}">${moneda}</p>
+                </div>
+            </div>
+        `;
+
+        const thirdColumn = `
+            <div class="third-column">
+                <div class="info-mobile">
+                    <p class="subt-mobile">FORMA DE PAGO</p>
+                    <p class="payment-mobile">${formaPago}</p>
+                </div>
+
+                <div class="buttons-mobile">
+                    <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                </div>
+            </div>
+        `;
+
+        html = `${firstColumn}${secondColumn}${thirdColumn}`;
+    } else if(currentTab === 'delivered') {
+        if(comprobante) {
+            firstColumn += `
+                <div class="info-mobile tranfer-rec">
+                    <p class="subt-mobile">COMPROBANTE</p>
+                    <i class="fa-solid fa-image"></i>
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                </div>
+            `;
+        } else {
+            firstColumn += `
+                <div class="map-img">
+                    <img src="./assets/images/Icon_map.webp" alt="Map">
+                </div>
+            `;
+        }
+        firstColumn += `</div>`;
+
+        const secondColumn = `
+            <div class="second-column">
+                <div class="info-mobile">
+                    <p class="subt-mobile">MONTO</p>
+                    <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
+                    <p class="amount-mobile-currency"><img src="./assets/images/${moneda}.webp" alt="${moneda}">${moneda}</p>
+                </div>
+                <div class="info-mobile">
+                    <p class="subt-mobile">FORMA DE PAGO</p>
+                    <p class="payment-mobile">${formaPago}</p>
+                </div>
+            </div>
+        `;
+
+        const thirdColumn = `
+            <div class="third-column">
+                <div class="info-mobile">
+                    <p class="subt-mobile">FECHA DE ENTREGA</p>
+                    <p>${fechaEntrega}</p>
+                </div>
+                <div class="info-mobile">
+                    <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
+                    <p>${fechaConfirmacion}</p>
+                </div>
+            </div>
+        `;
+
+        html = `${firstColumn}${secondColumn}${thirdColumn}`;
+    } else if(currentTab === 'settled') {
+        if(comprobante)
+            firstColumn += `
+                <div class="info-mobile tranfer-rec">
+                    <p class="subt-mobile">COMPROBANTE</p>
+                    <i class="fa-solid fa-image"></i>
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                </div>
+            `;
+        else
+            firstColumn += `
+                <div class="map-img">
+                    <img src="./assets/images/Icon_map.webp" alt="Map">
+                </div>
+            `;
+        
+        firstColumn += `</div>`;
+
+        const secondColumn = `
+            <div class="second-column">
+                <div class="info-mobile">
+                    <p class="subt-mobile">MONTO</p>
+                    <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
+                    <p class="amount-mobile-currency"><img src="./assets/images/${moneda}.webp" alt="${moneda}">${moneda}</p>
+                </div>
+                <div class="info-mobile">
+                    <p class="subt-mobile">FORMA DE PAGO</p>
+                    <p class="payment-mobile">${formaPago}</p>
+                </div>
+            </div>
+        `;
+
+        const thirdColumn = `
+            <div class="third-column">
+                <div class="info-mobile">
+                    <p class="subt-mobile">FECHA DE ENTREGA</p>
+                    <p>${fechaEntrega}</p>
+                </div>
+                <div class="info-mobile">
+                    <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
+                    <p>${fechaConfirmacion}</p>
+                </div>
+                <div class="buttons-mobile">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+            </div>
+        `;
+
+        html = `${firstColumn}${secondColumn}${thirdColumn}`;
+    }
+
+    completeInfo.innerHTML = html;
+
+    // Image
+    if(comprobante) {
+        const viewIcons = completeInfo.querySelectorAll('.fa-image');
+        const downloadIcons = completeInfo.querySelectorAll('.fa-cloud-arrow-down');
+
+        viewIcons.forEach(icon => {
+            icon.removeEventListener('click', handleView);
+            icon.addEventListener('click', handleView);
+            function handleView(e) {
+                e.stopPropagation();
+                previewReceipt(fullImageUrl);
+            }
+        });
+
+        downloadIcons.forEach(icon => {
+            icon.removeEventListener('click', handleDownload);
+            icon.addEventListener('click', handleDownload);
+            function handleDownload(e) {
+                e.stopPropagation();
+                const folio = card.querySelector('.folio-mobile')?.textContent || 'comprobante';
+                downloadReceipt(fullImageUrl, `Comprobante de Solicitud ${folio}.jpg`);
+            }
+        });
+    }
 }
 
 
-/* ============================== FLAG CURRENCY ============================== */
-function updateCurrency() {
-    const currencies = [
-        { code: 'MXN', flag: './assets/images/MXN.webp', symbol: '$' },
-        { code: 'USD', flag: './assets/images/USD.webp', symbol: '$' },
-        { code: 'EUR', flag: './assets/images/EUR.webp', symbol: '€' },
-        { code: 'JPY', flag: './assets/images/JPY.webp',  symbol: '¥' }
-    ];
+/* ============================== CLASSIFICATION ============================== */
+function setupSorting() {
+    const orderDivs = document.querySelectorAll('.order-div[data-column]');
+    
+    orderDivs.forEach(div => {
+        const orderIcons = div.querySelector('.order');
+        if(!orderIcons) return;
 
-    // TABLE
-    const tableRows = document.querySelectorAll('.table-body tr');
-    tableRows.forEach(row => {
-        const montoCell = row.querySelector('.monto-cell');
-        const img = montoCell.querySelector('img');
-        const symbolSpan = montoCell.querySelector('.symbol-money');
+        orderIcons.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const column = div.dataset.column;
 
-        if(!montoCell || !img || !symbolSpan) return;
-        
-        let currencyCode = img.getAttribute('alt')?.toUpperCase();
-        const currency = currencies.find(c => c.code === currencyCode);
-        if(!currency) return;
+            if(column === 'folio') {
+                currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
+                currentMonto = null;
+            } else if(column === 'monto') {
+                if(currentMonto === 'DESC')
+                    currentMonto = null;
+                else
+                    currentMonto = currentMonto === 'ASC' ? 'DESC' : 'ASC';
 
-        symbolSpan.textContent = currency.symbol;
+                // Cuando ordenamos por monto, mantenemos el folio en ASC
+                currentFolio = 'ASC';
+            }
+
+            currentPage = 1;
+            const filtros = getCurrentFilters();
+            tableInformation(filtros);
+        });
     });
-
-
-    // CARDS
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const amountMobile = card.querySelector('.amount-mobile');
-        const img = card.querySelector('img');
-        const symbolSpan = amountMobile.querySelector('.symbol-money');
-
-        if(!amountMobile || !img || !symbolSpan) return;
-
-        let currencyCode = img.getAttribute('alt')?.toUpperCase();
-        const currency = currencies.find(c => c.code === currencyCode);
-        if(!currency) return;
-
-        symbolSpan.textContent = currency.symbol;
-    }); 
 }
 
 
 /* ============================== TABLE BUTTONS ============================== */
 // Transfer Receipt -> Pending Tab
-function buttonTransfer() {
-    const buttons = document.querySelectorAll('.fa-circle-dollar-to-slot');
-    const container = document.querySelector('.container');
-    if(!buttons) return;
+async function gestionarAnticipo(folio, fechaEntrega = null, fechaConfirmacion = null, rutaComprobante = null, noRecibido = false) {
+    const body = { folio };
+    if(fechaEntrega) body.fechaEntrega = fechaEntrega;
+    if(fechaConfirmacion) body.fechaConfirmacion = fechaConfirmacion;
+    if(rutaComprobante) body.rutaComprobante = rutaComprobante;
+    if(noRecibido) body.noRecibido = noRecibido;
 
-    buttons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-
-            const row = button.closest('tr');
-            const card = button.closest('.card');
-            let folio;
-            let payment;
-
-            if(row) {
-                const paymentCell = row.querySelector('.payment');
-                const folioCell = row.querySelector('.folio');
-
-                if(paymentCell) payment = paymentCell.textContent.trim();
-                if(folioCell) folio = folioCell.textContent.trim();
-            } else if(card) {
-                const paymentCell = card.querySelector('.payment-mobile');
-                const folioCell = card.querySelector('.folio-mobile');
-
-                if(paymentCell) payment = paymentCell.textContent.trim();
-                if(folioCell) folio = folioCell.textContent.trim();
-            } else return;
-
-            if(payment === 'Transferencia') {
-                const receipt = document.querySelector('.transfer-wrapper');
-                const buttonClose = receipt.querySelector('.top-decor i');
-                if(!receipt || !buttonClose) return;
-
-                receipt.style.display = 'flex';
-                container.classList.add('modal-open');
-
-                buttonClose.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    receipt.style.display = 'none';
-                    container.classList.remove('modal-open');
-                });
-            } else 
-                ToastButtons(folio);
-        });
+    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/anticipo', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include',
+        body: JSON.stringify(body)
     });
+
+    if(!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Error al gestionar anticipo');
+    }
+
+    return await response.json();
+}
+
+async function buttonTransfer() {
+    const container = document.querySelector('.container');
+    if(!container) return;
+
+    document.body.addEventListener('click', async (e) => {
+        const button = e.target.closest('.fa-circle-dollar-to-slot');
+        if(!button) return;
+
+        e.stopPropagation();
+
+        const row = button.closest('tr');
+        const card = button.closest('.card');
+        let folio;
+        let payment;
+
+        if(row) {
+            const paymentCell = row.querySelector('.payment');
+            const folioCell = row.querySelector('.folio');
+
+            if(paymentCell) payment = paymentCell.textContent.trim();
+            if(folioCell) folio = folioCell.textContent.trim();
+        } else if(card) {
+            const paymentCell = card.querySelector('.payment-mobile');
+            const folioCell = card.querySelector('.folio-mobile');
+
+            if(paymentCell) payment = paymentCell.textContent.trim();
+            if(folioCell) folio = folioCell.textContent.trim();
+        } else return;
+
+        if(payment === 'Transferencia') {
+            const receipt = document.querySelector('.transfer-wrapper');
+            receipt.dataset.folio = folio;
+            const buttonClose = receipt.querySelector('.top-decor i');
+            if(!receipt || !buttonClose) return;
+
+            receipt.style.display = 'flex';
+            container.classList.add('modal-open');
+        } else 
+            ToastButtons(folio);
+    });
+}
+
+async function uploadReceiptFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload-comprobante', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
+        body: formData
+    });
+
+    if(!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Error al subir el comprobante');
+    }
+
+    const data = await response.json();
+    return data.ruta;
 }
 
 function initReceiptUpload() {
@@ -696,6 +1512,8 @@ function initReceiptUpload() {
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
 
+    let isConfirming = false;
+
     // Original
     function resetContainer() {
         receiptContainer.innerHTML = `
@@ -710,6 +1528,8 @@ function initReceiptUpload() {
         selectedFile = null;
         isUploading = false;
         uploadComplete = false;
+        uploadedFilePath = null;
+        isConfirming = false;
     }
 
     // Loader
@@ -729,42 +1549,85 @@ function initReceiptUpload() {
         receiptContainer.style.border = 'none';
         receiptContainer.classList.add('has-image');
 
-        uploadComplete = true;
-        isUploading = false;
-
         const removeText = receiptContainer.querySelector('p');
         if(removeText) removeText.remove();
     }
 
-    function handleFile(file) {
+    function previewFile(file) {
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
         if(!validTypes.includes(file.type)) {
             Toast('FORMATO DE ARCHIVO INVÁLIDO', 'Solo se permiten archivos en formato JPG o PNG');
             resetContainer();
-            return;
+            return false;
         }
 
         selectedFile = file;
-        receiptContainer.style.backgroundImage = '';
-        receiptContainer.style.border = '2px dashed var(--line-gray)';
-        receiptContainer.classList.remove('has-image');
+        uploadComplete = false;
+        isUploading = false;
+        uploadedFilePath = null;
+
+        // Preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            showUploadedImage(e.target.result);
+        };
+        reader.readAsDataURL(file);
+
+        return true;
+    }
+
+    async function uploadAndConfirm(folio) {
+        if(isConfirming) {
+            Toast('ACHIVO EN PROCESO', 'Ya se está subiendo un archivo. Por favor, espera');
+            return false;
+        }
+
+        if(!selectedFile) {
+            Toast('COMPROBANTE REQUERIDO', 'Debes adjuntar un comprobante');
+            return false;
+        }
+
+        if(isUploading) {
+            Toast('ACHIVO EN PROCESO', 'Ya se está subiendo un archivo. Por favor, espera');
+            return false;
+        }
+
+        isConfirming = true;
+        isUploading = true;
         showLoaderReceipt();
 
-        isUploading = true;
-        uploadComplete = false;
+        try {
+            const ruta = await uploadReceiptFile(selectedFile);
+            uploadedFilePath = ruta;
+            uploadComplete = true;
+            isUploading = false;
 
-        setTimeout(() => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                showUploadedImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }, 2000);
+            const hoy = new Date().toLocaleDateString('sv-SE');
+            await gestionarAnticipo(folio, hoy, null, uploadedFilePath);
+            Toast('COMPROBANTE CARGADO', '¡Listo! Hemos notificado al colaborador para que confirme la recepción del anticipo');
+
+            const filtros = getCurrentFilters();
+            await tableInformation(filtros, currentPage);
+            receiptModal.style.display = 'none';
+            container.classList.remove('modal-open');
+            resetContainer();
+            return true;
+        } catch(error) {
+            Toast('ERROR', error.message);
+            resetContainer();
+            return false;
+        } finally {
+            isConfirming = false;
+            isUploading = false;
+        }
     }
 
     function openFileSelector() {
-        if(!isUploading)
-            fileInput.click();
+        if(isUploading || isConfirming) {
+            Toast('ACHIVO EN PROCESO', 'Ya se está subiendo un archivo. Por favor, espera');
+            return;
+        }
+        fileInput.click();
     }
 
     receiptContainer.addEventListener('click', openFileSelector);
@@ -783,36 +1646,35 @@ function initReceiptUpload() {
         receiptContainer.classList.remove('dragover');
 
         const file = e.dataTransfer.files[0];
-        if(file)
-            handleFile(file);
-    });
-
-    uploadButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        if(uploadComplete) {
-            Toast('COMPROBANTE CARGADO', '¡Listo! Hemos notificado al colaborador para que confirme la recepción del anticipo');
-
-            setTimeout(() => {
-                receiptModal.style.display = 'none';
-                container.classList.remove('modal-open');
-                resetContainer();
-            }, 2000);
-        } else if(selectedFile === null && !isUploading)
-                Toast('COMPROBANTE REQUERIDO', 'Debes adjuntar el comprobante de la transferencia para continuar');
-            else if(selectedFile !== null && !isUploading)
-                handleFile(selectedFile);
-            else
-                Toast('ACHIVO EN PROCESO', 'Ya se está subiendo un archivo. Por favor, espera');
+        if(file) previewFile(file);
     });
 
     fileInput.addEventListener('change', (e) => {
         if(e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            handleFile(file);
+            previewFile(file);
         }
 
         fileInput.value = '';
+    });
+
+    uploadButton.addEventListener('click', async (e) => {
+        e.stopPropagation();
+
+        const folio = receiptModal.dataset.folio;
+        if(!folio) {
+            Toast('ERROR', 'No se pudo identificar el folio');
+            return;
+        }
+
+        if(!isConfirming && selectedFile && !uploadComplete)
+            await uploadAndConfirm(folio);
+        else if(!selectedFile)
+            Toast('COMPROBANTE REQUERIDO', 'Debes adjuntar el comprobante de la transferencia para continuar');
+        else if(uploadComplete)
+            Toast('COMPROBANTE YA REGISTRADO', 'Este comprobante ya fue cargado previamente');
+        else
+            Toast('ACHIVO EN PROCESO', 'Ya se está subiendo un archivo. Por favor, espera');
     });
 
     // Cierre del modal
@@ -824,63 +1686,119 @@ function initReceiptUpload() {
 }
 
 // Information -> Delivered Tab
-function buttonInfoDelivered() {
-    const buttons = document.querySelectorAll('.fa-circle-info.delivered');
+async function buttonInfoDelivered() {
     const container = document.querySelector('.container');
-    if(!buttons) return;
+    const info = document.querySelector('.info-wrapper');
+    const folioSpan = info.querySelector('.info-folio');
+    const closeBtn = info.querySelector('.top-decor i');
+    const bottomCash = info.querySelector('.bottom-decor.cash');
+    const bottomTransfer = info.querySelector('.bottom-decor.transfer');
 
-    buttons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
+    if (!container || !info || !folioSpan || !closeBtn || !bottomCash || !bottomTransfer) return;
 
-            const row = button.closest('tr');
-            const card = button.closest('.card');
-            let folio;
-            let payment;
+    // Limpiar eventos anteriores
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    const newClose = newCloseBtn;
 
-            if(row) {
-                const paymentCell = row.querySelector('.payment');
-                const folioCell = row.querySelector('.folio');
+    // Modal Reset
+    function resetModal() {
+        bottomCash.style.display = 'none';
+        bottomTransfer.style.display = 'none';
+        document.querySelector('.cash-entrega span').innerHTML = '';
+        document.querySelector('.cash-confir span').innerHTML = '';
+        document.querySelector('.transfer-entrega span').innerHTML = '';
+        document.querySelector('.transfer-confir span').innerHTML = '';
+        const transferImg = bottomTransfer.querySelector('.transfer-ver img');
+        if(transferImg) transferImg.src = '';
+        const buttonsDiv = bottomTransfer.querySelector('.buttons-info');
+        if(buttonsDiv) buttonsDiv.style.display = 'none';
+    }
 
-                if(paymentCell) payment = paymentCell.textContent.trim();
-                if(folioCell) folio = folioCell.textContent.trim();
-            } else if(card) {
-                const paymentCell = card.querySelector('.payment-mobile');
-                const folioCell = card.querySelector('.folio-mobile');
+    // Close modal
+    newClose.addEventListener('click', () => {
+        info.style.display = 'none';
+        container.classList.remove('modal-open');
+        resetModal();
+    });
 
-                if(paymentCell) payment = paymentCell.textContent.trim();
-                if(folioCell) folio = folioCell.textContent.trim();
-            } else return;
+    // Icons click
+    document.body.addEventListener('click', async (e) => {
+        const target = e.target;
+        if (!target.classList.contains('fa-circle-info')) return;
+        e.stopPropagation();
 
-            const info = document.querySelector('.info-wrapper');
-            const folioInfo = info.querySelector('.info-folio');
-            const buttonClose = info.querySelector('.top-decor i');
-            const bottomCash = info.querySelector('.bottom-decor.cash');
-            const bottomTransfer = info.querySelector('.bottom-decor.transfer');
-            if(!info || !folioInfo || !buttonClose || !bottomCash) return;
+        const row = target.closest('tr');
+        const card = target.closest('.card');
+        let folio = null;
+        let payment = null;
 
-            if(payment) {
-                if(payment === 'Efectivo') {
-                    info.style.display = 'flex';
-                    container.classList.add('modal-open');
-                    folioInfo.innerHTML = `${folio}`;
-                    bottomCash.style.display = 'flex';
-                } else {
-                    info.style.display = 'flex';
-                    container.classList.add('modal-open');
-                    folioInfo.innerHTML = `${folio}`;
-                    bottomTransfer.style.display = 'flex';
+        if(row) {
+            const folioCell = row.querySelector('.folio');
+            const paymentCell = row.querySelector('.payment');
+            if(folioCell) folio = folioCell.textContent.trim();
+            if(paymentCell) payment = paymentCell.textContent.trim();
+        } else if(card) {
+            const folioCell = card.querySelector('.folio-mobile');
+            const paymentCell = card.querySelector('.payment-mobile');
+            if(folioCell) folio = folioCell.textContent.trim();
+            if(paymentCell) payment = paymentCell.textContent.trim();
+        }
+        if(!folio || !payment) return;
+
+        try {
+            const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+                credentials: 'include'
+            });
+
+            if(!response.ok) throw new Error('Error al obtener detalles');
+            const data = await response.json();
+
+            resetModal();
+            folioSpan.textContent = folio;
+
+            if(payment === 'Efectivo') {
+                bottomCash.style.display = 'flex';
+                
+                if(data.fecha_entrega)
+                    document.querySelector('.cash-entrega span').innerHTML = formatDate(data.fecha_entrega);
+                else
+                    document.querySelector('.cash-entrega span').innerHTML = '—';
+
+                if(data.fecha_confirmacion)
+                    document.querySelector('.cash-confir span').innerHTML = formatDate(data.fecha_confirmacion);
+                else
+                    document.querySelector('.cash-confir span').innerHTML = '—';
+            } else if(payment === 'Transferencia') {
+                bottomTransfer.style.display = 'flex';
+                
+                if(data.fecha_entrega)
+                    document.querySelector('.transfer-entrega span').innerHTML = formatDate(data.fecha_entrega);
+                else
+                    document.querySelector('.transfer-entrega span').innerHTML = '—';
+
+                if(data.fecha_confirmacion)
+                    document.querySelector('.transfer-confir span').innerHTML = formatDate(data.fecha_confirmacion);
+                else
+                    document.querySelector('.transfer-confir span').innerHTML = '—';
+                
+                // Image
+                const transferImg = bottomTransfer.querySelector('.transfer-ver img');
+                const buttonsDiv = bottomTransfer.querySelector('.buttons-info');
+                if(data.ruta_comprobante) {
+                    const fullImageUrl = `http://127.0.0.1:3000/${data.ruta_comprobante}`;
+                    transferImg.src = fullImageUrl;
+                    if(buttonsDiv) buttonsDiv.style.display = 'flex';
                 }
             }
 
-            buttonClose.addEventListener('click', (e) => {
-                e.stopPropagation();
-                info.style.display = 'none';
-                container.classList.remove('modal-open');
-                bottomCash.style.display = 'none';
-                bottomTransfer.style.display = 'none';
-            });
-        });
+            info.style.display = 'flex';
+            container.classList.add('modal-open');
+        } catch (error) {
+            Toast('ERROR', error.message);
+        }
     });
 }
 
@@ -910,86 +1828,53 @@ function buttonPreview() {
         e.stopPropagation();
 
         const img = document.querySelector('.transfer-ver img');
-        if(img && img.src) 
+        if(img && img.src && img.src !== '')
             previewReceipt(img.src);
-        else 
+        else
             Toast('ENTREGA DE ANTICIPO', 'Lo siento, no existe un comprobante para mostrar');
     });
 }
 
 // Download Transfer Receipt
-function downloadReceipt(imageSrc, filename) {
-    const link = document.createElement('a');
-    link.href = imageSrc;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+async function downloadReceipt(imageSrc, filename) {
+    try {
+        const response = await fetch(imageSrc, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+
+        if(!response.ok) throw new Error('No se pudo obtener la imagen');
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+        Toast('DESCARGAR COMPROBANTE', 'No se pudo descargar el comprobante. Intenta de nuevo.');
+    }
 }
 
 function buttonDownload() {
     const button = document.querySelector('.button-download');
-    if(!button) return;
+    if (!button) return;
 
     button.addEventListener('click', (e) => {
         e.stopPropagation();
 
         const img = document.querySelector('.transfer-ver img');
-        if(img && img.src) {
+        if(img && img.src && img.src !== '') {
             const folio = document.querySelector('.info-folio')?.textContent || 'Comprobante';
             downloadReceipt(img.src, `Comprobante de Solicitud ${folio}.jpg`);
-        } else 
+        } else
             Toast('DESCARGAR COMPROBANTE', 'Lo siento, no existe un comprobante para descargar');
-    });
-}
-
-// Preview and Download icons
-function cardIcons() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const folioElement = card.querySelector('.folio-mobile');
-        if(!folioElement) return;
-        const folio = folioElement.textContent.trim(); 
-
-        const viewIcons = card.querySelectorAll('.fa-image');
-        const downloadIcons = card.querySelectorAll('.fa-cloud-arrow-down');
-
-        // Preview
-        if(viewIcons) {
-            viewIcons.forEach(viewIcon => {
-                viewIcon.removeEventListener('click', handleView);
-                viewIcon.addEventListener('click', handleView);
-
-                function handleView(e) {
-                    e.stopPropagation();
-
-                    // MODIFICAR CON EL BACKEND
-                    const imgSrc = './assets/images/Transfer.jpg';
-
-                    if(imgSrc) previewReceipt(imgSrc);
-                    else Toast('DESCARGAR COMPROBANTE', 'Lo siento, no existe un comprobante para mostrar');
-                }
-            });  
-        }
-
-        if(downloadIcons) {
-            downloadIcons.forEach(downloadIcon => {
-                downloadIcon.removeEventListener('click', handleDownload);
-                downloadIcon.addEventListener('click', handleDownload);
-
-                function handleDownload(e) {
-                    e.stopPropagation();
-
-                    // MODIFICAR CON EL BACKEND
-                    const imgSrc = './assets/images/Transfer.jpg';
-                    const filename = `Comprobante de Solicitud ${folio}.jpg`;
-                    if(imgSrc && filename)
-                        downloadReceipt(imgSrc, filename);
-                    else
-                        Toast('ENTREGA DE ANTICIPO', 'Lo siento, no existe un comprobante para descargar');
-                }
-            });
-        }
     });
 }
 
@@ -1002,7 +1887,7 @@ const ToastMixin = Swal.mixin({
     showConfirmButton: false,
     timer: 4000,
     timerProgressBar: true,
-    width: '540px',
+    width: '600px',
     customClass: { popup: 'colored-toast' },
     didOpen: (toast) => {
         toast.addEventListener('mouseenter', Swal.stopTimer);
@@ -1026,12 +1911,12 @@ function Toast(title, content, imageUrl = './assets/images/Icon_agave.webp') {
 }
 
 // Toast -> Buttons
-function ToastButtons(folio, imageLeft = './assets/images/Icon_agave1.webp', imageRight = './assets/images/Icon_agave2.webp') {
+function ToastButtons(folio) {
     Swal.fire({
         title: 'CONFIRMAR ENTREGA DE ANTICIPO',
         html: `
-            <img src="${imageLeft}" alt="Agave" class="agave-half left">
-            <img src="${imageRight}" alt="Agave" class="agave-half right">
+            <img src="./assets/images/Icon_agave1.webp" alt="Agave" class="agave-half left">
+            <img src="./assets/images/Icon_agave2.webp" alt="Agave" class="agave-half right">
             <p class="received-text">¿Se ha entregado el anticipo en efectivo al colaborador para la solicitud con folio ${folio}?</p>
         `,
         position: 'top-end',
@@ -1051,9 +1936,18 @@ function ToastButtons(folio, imageLeft = './assets/images/Icon_agave1.webp', ima
             confirmButton: 'swal-confirm-btn',
             cancelButton: 'swal-cancel-btn'
         }
-    }).then((result) => {
+    }).then(async (result) => {
         if(result.isConfirmed) {
-            Toast('ENTREGA DE ANTICIPO', '¡Listo! Hemos notificado al colaborador para que confirme la recepción del anticipo');
+            try {
+                const hoy = new Date().toLocaleDateString('sv-SE');
+                await gestionarAnticipo(folio, hoy);
+                Toast('ENTREGA DE ANTICIPO', '¡Listo! Hemos notificado al colaborador para que confirme la recepción del anticipo');
+
+                const filtros = getCurrentFilters();
+                tableInformation(filtros, currentPage);
+            } catch (error) {
+                Toast('ERROR', error.message);
+            }
         }
     });
 }
