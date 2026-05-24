@@ -774,6 +774,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
     width: 100%;
     height: 100%;
     border: 2px dashed var(--line-gray);
@@ -1030,11 +1031,34 @@ body {
 
     .tab.selected { padding: 1.1em 0.5em 1.1em 2.2em; }
 
-    .tab p { font-size: 1.3em; }
+    .tab p,
+    .table-head th { font-size: 1.3em; }
 
     .tab.selected p { font-size: 1.6em; }
 
     .content-form { border-radius: 0 25px 25px 25px; }
+
+    .factura-content { height: 16em; }
+
+    .receipt-container { font-size: 1.05em; }
+
+    .button-receipt { font-size: 1.1em; }
+
+    .table-container { height: 10.5em; }
+
+    .table-body td { font-size: 1.2em; }
+
+    .table-head th:nth-child(1),
+    .table-head th:nth-child(10) { width: 120px; }
+    .table-head th:nth-child(2) { width: 140px; }
+    .table-head th:nth-child(3),
+    .table-head th:nth-child(5) { width: 280px; }
+    .table-head th:nth-child(4),
+    .table-head th:nth-child(6),
+    .table-head th:nth-child(9) { width: 130px; }
+    .table-head th:nth-child(7) { width: 110px; }
+    .table-head th:nth-child(8),
+    .table-head th:nth-child(11) { width: 170px; }
 }
 
 /* Escritorios medianos (1440px + 1800px) */
@@ -1443,7 +1467,8 @@ body {
     .table-body td {
         overflow: visible;
         text-overflow: clip;
-        padding: 0.5em 1em;
+        white-space: pre-wrap;
+        padding: 0.5em 1em; 
     }
 
     .agave-mobile {
@@ -1605,7 +1630,10 @@ body {
     .tab:first-child { z-index: 2; }
     .tab:last-child { z-index: 1; }
 
-    .tab.selected { z-index: 10; }
+    .tab.selected { 
+        z-index: 10; 
+        padding: 0.8em 0 0.8em 1.5em;
+    }
 
     .tab.selected p { font-size: 1.2em; }
 
