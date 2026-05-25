@@ -966,6 +966,7 @@ body {
 
 .table-container {
     max-width: 100%;
+    height: 9em;
     max-height: 9em;
     overflow: auto;
 }
@@ -1150,7 +1151,10 @@ body {
 
     .button-receipt { font-size: 1.1em; }
 
-    .table-container { height: 10.5em; }
+    .table-container {
+        max-height: 10.5em;
+        height: 10.5em;
+    }
 
     .table-body td { font-size: 1.2em; }
 
@@ -1204,26 +1208,28 @@ body {
 
     .tab.selected p { font-size: 1.1em; }
 
-    .request-back { font-size: 1.1em; }
-
-    .request-option { font-size: 1em; }
+    .request-back .fa-plane-departure {
+        font-size: 0.95em;
+        transform: translateY(10%);
+    }
 
     .factura-content { height: 11.5em; }
 
     .factura-upload { padding: 0 1.3em 1.2em 0; }
 
-    .table-container { max-height: 8em; }
+    .table-container { 
+        max-height: 8em;
+        height: 8em;
+    }
 }
 
 @media(min-width: 1366px) and (max-width:1469px) and (max-resolution: 1.5dppx) {
     /* TOAST */
-    body.swal2-toast-shown .swal2-container { width: 490px !important; }
+    body.swal2-toast-shown .swal2-container { width: 520px !important; }
 
-    .colored-toast span { font-size: 0.95em; }
+    .colored-toast span { font-size: 0.9em; }
 
     .colored-toast p { font-size: 1em; }
-
-    .agave-icon { height: 8em; }
 
     /* OPTION BAR */
     .logo .name { font-size: 0.97em; }
@@ -1258,15 +1264,18 @@ body {
 
     .titles .subtitle { font-size: 1.2em; }
 
+    .button { font-size: 0.85em; }
+
     .tab { padding: 0.55em 0.3em 0.55em 1.5em; }
 
     .tab.selected { padding: 0.7em 0em 0.7em 1.5em; }
 
     .tab.selected p { font-size: 1em; }
 
+    .request-back,
     .request-back i { font-size: 0.95em; }
 
-    .request-option { font-size: 0.9em; }
+    .request-option { font-size: 0.8em; }
 
     .table-head th { font-size: 0.95em }
 
@@ -1280,18 +1289,21 @@ body {
 
     .button-receipt { font-size: 0.8em; }
 
-    .table-container { max-height: 7.5em; }
+    .table-container { 
+        max-height: 7.5em;
+        height: 7.5em; 
+    }
 }
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx) {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 490px !important; }
+    body.swal2-toast-shown .swal2-container { width: 520px !important; }
 
     .colored-toast p { font-size: 1em; }
 
-    .colored-toast span { font-size: 0.95em; }
+    .colored-toast span { font-size: 0.9em; }
 
-    .agave-icon { height: 8em; }
+    .agave-half { height: 12em; }
 
     /* OPTION BAR */
     .logo .name { font-size: 1em; }
@@ -1331,9 +1343,19 @@ body {
 
     .tab.selected p { font-size: 0.95em; }
 
-    .request { height: 2.2em; }
+    .request { 
+        height: 2.3em;
+        padding: 0.4em; 
+    }
+
+    .request-back { font-size: 0.91em; }
 
     .request i { font-size: 0.9em; }
+
+    .request-option { 
+        font-size: 0.73em;
+        padding: 0.4em; 
+    }
 
     .content-form { padding: 1em; }
 
@@ -1345,13 +1367,16 @@ body {
 
     .table-body td { font-size: 0.8em; }
 
-    .table-container { max-height: 7em; }
+    .table-container { 
+        max-height: 7em;
+        height: 7em;  
+    }
 }
 
 /* Laptops pequeñas (1024px - 1250px) */
 @media(min-width: 1025px) and (max-width: 1280px) {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 480px !important; }
+    body.swal2-toast-shown .swal2-container { width: 500px !important; }
 
     .colored-toast p { font-size: 1em; }
 
@@ -1408,11 +1433,19 @@ body {
     .request {
         height: 2.3em;
         margin-bottom: 1.5em;
+        padding: 0.4em;
     }
 
     .request-back { font-size: 0.9em; }
 
     .request-back i { font-size: 0.85em; }
+
+    .request-dropdown { max-height: 150px; }
+
+    .request-option {
+        padding: 0.4em;
+        font-size: 0.7em;
+    }
 
     .content-form,
     .first-column,
@@ -1429,7 +1462,10 @@ body {
 
     .table-body td { font-size: 0.7em; }
 
-    .table-container { max-height: 6em; }
+    .table-container { 
+        max-height: 7em;
+        height: 7em; 
+    }
 }
 
 /* Tabletas */
@@ -1595,7 +1631,7 @@ body {
         padding: 0 0 1.3em 0; 
     }
 
-    .button-receipt { font-size: 0.9em; }
+    .button-receipt { font-size: 1em; }
     
     .table-container {
         height: auto;
