@@ -1876,6 +1876,8 @@ body {
 
     .tab.selected p { font-size: 1.15em; }
 
+    .search-back input { font-size: 1.1em; }
+
     .datepicker-header { font-size: 1em; }
 
     .datepicker-header button,
@@ -1980,23 +1982,20 @@ body {
 
 @media(min-width: 1366px) and (max-width:1469px) and (max-resolution: 1.5dppx) {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 470px !important; }
+    body.swal2-toast-shown .swal2-container,
+    .swal2-popup.custom-received-modal { width: 520px !important; }
 
     .swal2-popup.custom-reject-modal { width: 490px !important; }
-
-    .swal2-popup.custom-received-modal { width: 520px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
     .colored-toast span,
     .canceled-text,
-    .received-text { font-size: 0.95em; }
-
-    .reject-question { font-size: 0.93em; }
-
+    .received-text,
+    .reject-question,
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 0.91em; }
+    .swal-cancel-btn { font-size: 0.9em; }
 
     .agave-half { height: 11.8em; }
 
@@ -2133,24 +2132,22 @@ body {
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx)  {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 470px !important; }
+    body.swal2-toast-shown .swal2-container,
+    .swal2-popup.custom-received-modal { width: 520px !important; }
 
     .swal2-popup.custom-reject-modal { width: 470px !important; }
-
-    .swal2-popup.custom-received-modal { width: 510px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
     .colored-toast span,
     .canceled-text,
-    .received-text { font-size: 0.93em; }
-
+    .received-text,
     .reject-question,
     .swal-confirm-btn, 
     .swal-cancel-btn { font-size: 0.9em; }
 
-    .agave-half { height: 11.8em; }
+    .agave-half { height: 12em; }
 
     /* OPTION BAR */
     .logo .name { font-size: 1em; }
@@ -2283,7 +2280,7 @@ body {
 /* Laptops pequeñas (1024px - 1250px) */
 @media(min-width: 1025px) and (max-width: 1280px) {
     /* TOAST */ 
-    body.swal2-toast-shown .swal2-container { width: 470px !important; }
+    body.swal2-toast-shown .swal2-container { width: 500px !important; }
 
     .swal2-popup.custom-reject-modal { width: 460px !important; }
 

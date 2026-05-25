@@ -1873,6 +1873,8 @@ body {
     /* TABLE */
     .table-head { font-size: 0.9em; }
 
+    .table-head th { font-size: 1.35em; }
+
     .table-body td { font-size: 0.95em; }
 
     .table-body .folio { font-size: 1.05em; }
@@ -1963,18 +1965,14 @@ body {
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .colored-toast span { font-size: 0.95em; }
-
-    .swal2-textarea { font-size: 0.85em; }
-
-    .reject-question { font-size: 0.85em; }
-
+    .colored-toast span,
+    .swal2-textarea,
+    .reject-question,
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 0.9em; }
-
+    .swal-cancel-btn,
     .swal2-validation-message { font-size: 0.9em; }
 
-    .agave-half { height: 12.7em; }
+    .agave-half { height: 12em; }
 
     /* OPTION BAR */
     .logo .name { font-size: 0.97em; }
@@ -2104,20 +2102,17 @@ body {
 
     .swal2-popup.custom-reject-modal { width: 490px !important; }
 
-    .colored-toast span { font-size: 0.95em; }
-
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
-    .swal2-textarea { font-size: 0.85em; }
-
-    .reject-question { font-size: 0.85em; }
-
+    .swal2-textarea,
+    .reject-question,
+    .colored-toast span,
     .swal-confirm-btn, 
     .swal-cancel-btn,
     .swal2-validation-message { font-size: 0.9em; }
 
-    .agave-half { height: 12.8em; }
+    .agave-half { height: 12em; }
 
     /* OPTION BAR */
     .logo .name { font-size: 1em; }
@@ -2250,7 +2245,7 @@ body {
 /* Laptops pequeñas (1024px - 1299px) */
 @media(min-width: 1025px) and (max-width: 1280px) {
     /* TOAST */
-    body.swal2-toast-shown .swal2-container { width: 500px !important; }
+    body.swal2-toast-shown .swal2-container { width: 510px !important; }
 
     .swal2-popup.custom-reject-modal { width: 410px !important; }
 
