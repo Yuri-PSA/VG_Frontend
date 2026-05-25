@@ -5,11 +5,23 @@ document.addEventListener("DOMContentLoaded", function () {
     optionsBar();
     cancelButton();
     tabSelected();
+    requestDropdown();
     initTableResize();
+    initUpload();
 });
 
 
 /* ============================== VARIABLES ============================== */
+// Facturas
+let selectedPDF = null;
+let selectedXML = null;
+let selectedIMG = null;
+
+let isUploading = false;
+let uploadComplete = false;
+let uploadedFilePath = null;
+
+// Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
 
@@ -177,14 +189,93 @@ function cancelButton() {
 
 
 /* ============================== FACTURA TABS ============================== */
+// Reset
+function resetFacturado() {
+    const pdfContainer = document.querySelector('#facturado-container .first-column .receipt-container');
+    const xmlContainer = document.querySelector('#facturado-container .second-column .receipt-container');
+
+    selectedPDF = null;
+    selectedXML = null;
+
+    if(pdfContainer) {
+        pdfContainer.innerHTML = `
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <p>Selecciona o arrastra tu factura PDF</p>
+        `;
+
+        pdfContainer.style.backgroundImage = '';
+        pdfContainer.classList.remove('has-image');
+        pdfContainer.dataset.file = '';
+    }
+
+    if(xmlContainer) {
+        xmlContainer.innerHTML = `
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <p>Selecciona o arrastra tu factura XML</p>
+        `;
+
+        xmlContainer.style.backgroundImage = '';
+        xmlContainer.classList.remove('has-image');
+        xmlContainer.dataset.file = '';
+    }
+}
+
+function resetNoFacturado() {
+    const imgContainer = document.querySelector('#no-facturado-container .receipt-container');
+
+    selectedIMG = null;
+
+    if(imgContainer) {
+        imgContainer.innerHTML = `
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <p>Selecciona o arrastra tu comprobante (JPG o PNG)</p>
+        `;
+
+        imgContainer.style.backgroundImage = '';
+        imgContainer.classList.remove('has-image');
+        imgContainer.dataset.file = '';
+    }
+}
+
 function tabSelected() {
     const tabs = document.querySelectorAll('.tab');
+    const facturadoContainer = document.getElementById('facturado-container');
+    const noFacturadoContainer = document.getElementById('no-facturado-container');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             tabs.forEach(t => t.classList.remove('selected'));
             this.classList.add('selected');
+
+            const isFacturado = this.classList.contains('factura');
+
+            if (isFacturado) {
+                facturadoContainer.style.display = 'flex';
+                noFacturadoContainer.style.display = 'none';
+                resetFacturado();
+            } else {
+                facturadoContainer.style.display = 'none';
+                noFacturadoContainer.style.display = 'grid';
+                resetNoFacturado();
+            }
         });
+    });
+}
+
+
+/* ============================= REQUEST DROPDOWN ============================= */
+function requestDropdown() {
+    const requests = document.querySelector('.request-selector');
+    const dropdown = document.querySelector('.request-dropdown');
+
+    requests.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+        if(!requests.contains(e.target))
+            dropdown.classList.remove('show');
     });
 }
 
@@ -222,5 +313,246 @@ function initTableResize() {
             document.addEventListener('mouseup', onMouseUp);
             e.preventDefault();
         });
+    });
+}
+
+
+/* ============================= UPLOAD FACTURAS ============================= */
+function initUpload() {
+    const pdfContainer = document.querySelector('#facturado-container .first-column .receipt-container');
+    const xmlContainer = document.querySelector('#facturado-container .second-column .receipt-container');
+    const imgContainer = document.querySelector('#no-facturado-container .receipt-container');
+    const uploadButton = document.querySelector('.button-receipt');
+
+    let pdfInput = document.getElementById('pdf-input');
+    let xmlInput = document.getElementById('xml-input');
+    let imgInput = document.getElementById('img-input');
+
+    if(!pdfInput) {
+        pdfInput = document.createElement('input');
+        pdfInput.id = 'pdf-input';
+        pdfInput.type = 'file';
+        pdfInput.accept = '.pdf';
+        pdfInput.style.display = 'none';
+        document.body.appendChild(pdfInput);
+    }
+
+    if(!xmlInput) {
+        xmlInput = document.createElement('input');
+        xmlInput.id = 'xml-input';
+        xmlInput.type = 'file';
+        xmlInput.accept = '.xml';
+        xmlInput.style.display = 'none';
+        document.body.appendChild(xmlInput);
+    }
+
+    if(!imgInput) {
+        imgInput = document.createElement('input');
+        imgInput.id = 'img-input';
+        imgInput.type = 'file';
+        imgInput.accept = '.jpg, .jpeg, .png';
+        imgInput.style.display = 'none';
+        document.body.appendChild(imgInput);
+    }
+
+    // Previsualizar
+    function previewImage(container, file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            container.innerHTML = '';
+            container.style.backgroundImage = `url(${e.target.result})`;
+            container.style.backgroundSize = 'cover';
+            container.style.backgroundPosition = 'center';
+            container.classList.add('has-image');
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function previewFileInfo(container, file, iconClass) {
+        container.innerHTML = `
+            <i class="${iconClass}"></i>
+            <p>${file.name}</p>
+        `;
+
+        container.style.backgroundImage = '';
+        container.classList.add('has-image');
+    }
+
+    // Reset
+    function resetContainer(container, type) {
+        if(type === 'pdf') 
+            container.innerHTML = `
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <p>Selecciona o arrastra tu factura PDF</p>
+            `;
+        else if(type === 'xml') 
+            container.innerHTML = `
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <p>Selecciona o arrastra tu factura XML</p>
+            `;
+        else if(type === 'img') 
+            container.innerHTML = `
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <p>Selecciona o arrastra tu comprobante (JPG o PNG)</p>
+            `;
+
+        container.style.backgroundImage = '';
+        container.classList.remove('has-image');
+    }
+
+    // Loader
+    function showLoaderFact(container) {
+        container.innerHTML = `
+            <div class="loader-receipt"></div>
+            <p>Subiendo comprobante...</p>
+        `;
+    }
+
+    // Validaciones
+    function validatePDF(file) {
+        if(file.type !== 'application/pdf') {
+            Toast('FORMATO DE ARCHIVO INVÁLIDO', 'Solo se permiten archivos en formato PDF');
+            return false;
+        }
+        return true;
+    }
+
+    function validateXML(file) {
+        if(!file.name.endsWith('.xml')) {
+            Toast('FORMATO DE ARCHIVO INVÁLIDO', 'Solo se permiten archivos en formato XML');
+            return false;
+        }
+        return true;
+    }
+
+    function validateIMG(file) {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if(!validTypes.includes(file.type)) {
+            Toast('FORMATO DE ARCHIVO INVÁLIDO', 'Solo se permiten archivos en formato JPG o PNG');
+            return false;
+        }
+        return true;
+    }
+
+    // Manejadores de selección
+    function onPDFSelect(file) {
+        if(!validatePDF(file)) return false;
+        selectedPDF = file;
+        previewFileInfo(pdfContainer, file, 'fa-solid fa-file-pdf');
+        return true;
+    }
+
+    function onXMLSelect(file) {
+        if(!validateXML(file)) return false;
+        selectedXML = file;
+        previewFileInfo(xmlContainer, file, 'fa-solid fa-file-code');
+        return true;
+    }
+
+    function onIMGSelect(file) {
+        if(!validateIMG(file)) return false;
+        selectedIMG = file;
+        previewImage(imgContainer, file);
+        return true;
+    }
+
+    // Eventos de arrastre y clic
+    function setupContainer(container, inputElement, onSelect) {
+        if(!container) return;
+
+        container.addEventListener('click', (e) => {
+            e.stopPropagation();
+            inputElement.click();
+        });
+
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            container.classList.add('dragover');
+        });
+        container.addEventListener('dragleave', () => {
+            container.classList.remove('dragover');
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            container.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) onSelect(file);
+        });
+
+        inputElement.addEventListener('change', (e) => {
+            if(e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                if(onSelect(file))
+                    inputElement.value = '';
+            }
+        });
+    }
+
+    setupContainer(pdfContainer, pdfInput, onPDFSelect);
+    setupContainer(xmlContainer, xmlInput, onXMLSelect);
+    setupContainer(imgContainer, imgInput, onIMGSelect);
+
+    // Upload button
+    if(uploadButton) {
+        const newButton = uploadButton.cloneNode(true);
+        uploadButton.parentNode.replaceChild(newButton, uploadButton);
+
+        newButton.addEventListener('click', async() => {
+            const isFacturado = document.querySelector('.tab.factura.selected') !== null;
+
+            if(isFacturado) {
+                if(!selectedPDF && !selectedXML) {
+                    Toast('FALTA DE ARCHIVOS', 'Por favor, selecciona ambos archivos: PDF y XML');
+                    return;
+                }
+                if(!selectedPDF) {
+                    Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
+                    return;
+                }
+                if(!selectedXML) {
+                    Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato XML para su registro');
+                    return;
+                }
+            } else {
+                if(!selectedIMG) {
+                    Toast('COMPROBANTE FALTANTE', 'Por favor, selecciona la imagen del ticket o recibo para su registro');
+                    return;
+                }
+            }
+        });
+    }
+}
+
+
+/* ================================== TOAST ================================== */
+// Toast -> Simple
+const ToastMixin = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 4000,
+    timerProgressBar: true,
+    width: '600px',
+    customClass: { popup: 'colored-toast' },
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    },
+});
+
+function Toast(title, content, imageUrl = './assets/images/Icon_agave.webp') {
+    ToastMixin.fire({
+        icon: undefined,
+        html: `
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img src="${imageUrl}" alt="Agave" class="agave-icon">
+                <div class="text">
+                    <p>${title}</p>
+                    <span>${content}</span>
+                </div>
+            </div>
+        `
     });
 }

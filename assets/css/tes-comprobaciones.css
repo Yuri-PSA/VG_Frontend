@@ -706,6 +706,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     border-radius: 10px;
     padding: 0.4em 0.5em;
     margin-bottom: 1em;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.15);
 }
 
 .search-back {
@@ -725,7 +726,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     width: 100%;
     color: var(--gray);
     font-style: normal;
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: 600;
     background-color: transparent;
     padding: 0.5em;
