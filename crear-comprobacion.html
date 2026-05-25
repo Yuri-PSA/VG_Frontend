@@ -112,11 +112,35 @@
                                 <div class="tab factura selected"><p class="tab-selected">Facturados</p></div>
                                 <div class="tab sn-factura"><p>No Facturados</p></div>
                             </div>
+
+                            <div class="request">
+                                <div class="request-selector">
+                                    <div class="request-back">
+                                        <i class="fa-solid fa-plane-departure"></i>
+                                        <p>Seleccionar solicitud</p>
+                                        <i class="fa-solid fa-angle-down"></i>
+                                    </div>
+
+                                    <div class="request-dropdown">
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                        <div class="request-option">HOLA</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="content-form">
                             <div class="factura-receipt">
-                                <div class="factura-content">
+                                <!-- PDF y XML -->
+                                <div id="facturado-container" class="factura-content fct">
                                     <div class="first-column">
                                         <div class="receipt-container">
                                             <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -128,6 +152,16 @@
                                         <div class="receipt-container">
                                             <i class="fa-solid fa-cloud-arrow-up"></i>
                                             <p>Selecciona o arrastra tu factura XML</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Ticket -->
+                                <div id="no-facturado-container" class="factura-content" style="display: none;">
+                                    <div class="first-column" style="width: 100%;">
+                                        <div class="receipt-container" data-type="image">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                            <p>Selecciona o arrastra tu comprobante (JPG o PNG)</p>
                                         </div>
                                     </div>
                                 </div>

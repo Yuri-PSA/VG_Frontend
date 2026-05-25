@@ -791,6 +791,7 @@ body {
     border-radius: 10px;
     padding: 0.4em 0.5em;
     margin-bottom: 1em;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.15);
 }
 
 .search-back {
@@ -810,7 +811,7 @@ body {
     width: 100%;
     color: var(--gray);
     font-style: normal;
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: 600;
     background-color: transparent;
     padding: 0.5em;
@@ -1854,6 +1855,8 @@ body {
     .tab p { font-size: 1em; }
 
     .tab.selected p { font-size: 1.15em; }
+
+    .search-back input { font-size: 1.1em; }
 
     .datepicker-header { font-size: 1em; }
 

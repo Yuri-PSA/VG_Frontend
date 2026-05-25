@@ -804,6 +804,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     border-radius: 10px;
     padding: 0.4em 0.5em;
     margin-bottom: 1em;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.15);
 }
 
 .search-back {
@@ -823,7 +824,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     width: 100%;
     color: var(--gray);
     font-style: normal;
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: 600;
     background-color: transparent;
     padding: 0.5em;
@@ -1391,6 +1392,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .receipt-container.has-image:hover::after { opacity: 1; }
 
 .receipt-container.dragover {
+    border: 2px dashed var(--icons); 
+    color: var(--icons);
     background-color: var(--transparent-agave);
     transition: all 0.2s ease;
 }
@@ -1762,6 +1765,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         height: 33px; 
         font-size: 1.1em; 
     }
+
+    .search-back input { font-size: 1.1em; }
 
     .datepicker-header { font-size: 1em; }
 
@@ -2304,6 +2309,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .search { margin-left: auto; }
 
+    .search-back input { font-size: 1.1em; }
+
     .datepicker-wrapper { 
         top: 35%;
         width: 40%;
@@ -2685,7 +2692,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .search { width: 100%; }
 
-    .search-back i { font-size: 1.1em; }
+    .search-back i,
+    .search-back input { font-size: 1.1em; }
     
     .datepicker-wrapper { 
         width: 100%; 

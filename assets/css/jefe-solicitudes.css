@@ -776,6 +776,7 @@ body {
     border-radius: 10px;
     padding: 0.4em 0.5em;
     margin-bottom: 1em;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.15);
 }
 
 .search-back {
@@ -795,7 +796,7 @@ body {
     width: 100%;
     color: var(--gray);
     font-style: normal;
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: 600;
     background-color: transparent;
     padding: 0.5em;
@@ -1859,6 +1860,8 @@ body {
         font-size: 1.1em; 
     }
 
+    .search-back input { font-size: 1.1em; }
+
     .datepicker-header { font-size: 1em; }
 
     .datepicker-header button,
@@ -2477,7 +2480,36 @@ body {
         gap: 1em;
     }
 
+    .tabs {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-top: 25px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar { display: none }
+
+    .tab { 
+        padding: 0.5em 0.1em 0.5em 1.5em; 
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .tab::after { right: -21px; }
+
+    .tab:first-child { z-index: 3; }
+    .tab:nth-child(2) { z-index: 2; }
+    .tab:nth-child(3) { z-index: 1; }
+
+    .tab.selected { z-index: 10; }
+
     .search { margin-left: auto; }
+
+    .search-back input { font-size: 1.1em; }
 
     .datepicker-wrapper { 
         top: 35%;
@@ -2828,7 +2860,8 @@ body {
 
     .search { width: 100%; }
 
-    .search-back i { font-size: 1.1em; }
+    .search-back i,
+    .search-back input { font-size: 1.1em; }
     
     .datepicker-wrapper { 
         width: 100%; 
