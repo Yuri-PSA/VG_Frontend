@@ -917,6 +917,8 @@ body {
     transform: scale(1);
 }
 
+.currency-search { font-size: 0.8em; }
+
 .currency-dropdown,
 .payment-dropdown {
     position: absolute;
@@ -1106,9 +1108,15 @@ body {
     .flags i,
     .payment-selector i { font-size: 0.8em; }
 
-    .currency-dropdown { top: calc(100% + 0.7em); }
+    .currency-dropdown { top: calc(100% + 0.65em); }
 
-    .currency-option span { font-size: 1em; }
+    .currency-option span { font-size: 1.05em; }
+
+    .currency-search { font-size: 1.1em; }
+
+    .currency-list { max-height: 145px; }
+
+    .currency-option { padding: 0.6em 0.8em; }
 }
 
 /* Escritorios medianos (1440px + 1800px) */
@@ -1255,8 +1263,13 @@ body {
 
     .answer.motive { height: 5.3em; }
 
+    .currency-empty,
+    .currency-search { font-size: 0.7em; }
+
+    .currency-list { max-height: 100px; }
+
     .payment-dropdown,
-    .currency-dropdown { top: calc(100% + 0.47em); }
+    .currency-dropdown { top: calc(100% + 0.45em); }
 
     .payment-dropdown { left: -1.1em; }
 
@@ -1345,11 +1358,14 @@ body {
         height: 0.9em;
     }
 
-    .currency-option span { font-size: 0.7em; }
-
+    .currency-option span,
     .flags p { font-size: 0.65em; }
 
-    .currency-dropdown { top: calc(100% + 0.5em); }
+    .currency-dropdown { top: calc(100% + 0.44em); }
+
+    .currency-search { font-size: 0.7em; }
+
+    .currency-list { max-height: 93px; }
 
     .payment-dropdown { left: -1em; }
 }
@@ -1443,6 +1459,10 @@ body {
     }
 
     .currency-option span { font-size: 0.65em; }
+
+    .currency-list { max-height: 87px; }
+
+    .currency-search { font-size: 0.65em; }
 
     .flags p { font-size: 0.6em; }
 
@@ -1568,6 +1588,10 @@ body {
 
     .answer.motive { height: 9em; }
     
+    .currency-search { font-size: 0.9em; }
+
+    .currency-option { padding: 0.6em 0.5em; }
+
     .payment-dropdown { 
         width: 103%; 
         left: -7px;
@@ -1748,6 +1772,8 @@ body {
 
     .currency-option p,
     .flags p { font-size: 0.8em; }
+
+    .currency-option { padding: 0.7em 0.8em; }
 
     .flags i { transform: translateY(-5%); }
 
