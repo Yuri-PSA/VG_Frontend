@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     cancelButton();
     tabSelected();
     requestDropdown();
+    updateXmlVisibility();
     initTableResize();
     initUpload();
 });
@@ -17,6 +18,11 @@ let selectedPDF = null;
 let selectedXML = null;
 let selectedIMG = null;
 
+let facturasCargadas = [];
+let uploadFactura = false;
+let nextButton = null;
+let currentMoneda = null;
+
 let isUploading = false;
 let uploadComplete = false;
 let uploadedFilePath = null;
@@ -24,6 +30,19 @@ let uploadedFilePath = null;
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
+
+
+/* ================================ FUNCTIONS ================================ */
+function updateXmlVisibility() {
+    const xmlColumn = document.querySelector('#facturado-container .second-column');
+    const pdfColumn = document.querySelector('#facturado-container .first-column');
+    if(!xmlColumn) return;
+
+    if(currentMoneda && currentMoneda.toUpperCase() !== 'MXN')
+        xmlColumn.style.display = 'none';
+    else
+        xmlColumn.style.display = 'flex';
+}
 
 
 /* ================================= LOADER ================================= */
@@ -218,6 +237,8 @@ function resetFacturado() {
         xmlContainer.classList.remove('has-image');
         xmlContainer.dataset.file = '';
     }
+
+    updateXmlVisibility();
 }
 
 function resetNoFacturado() {
@@ -253,6 +274,7 @@ function tabSelected() {
                 facturadoContainer.style.display = 'flex';
                 noFacturadoContainer.style.display = 'none';
                 resetFacturado();
+                updateXmlVisibility();
             } else {
                 facturadoContainer.style.display = 'none';
                 noFacturadoContainer.style.display = 'grid';
@@ -264,23 +286,75 @@ function tabSelected() {
 
 
 /* ============================= REQUEST DROPDOWN ============================= */
-function requestDropdown() {
-    const requests = document.querySelector('.request-selector');
+async function requestDropdown() {
+    const selector = document.querySelector('.request-selector');
+    const back = selector.querySelector('.request-back');
     const dropdown = document.querySelector('.request-dropdown');
+    const textElement = back.querySelector('p');
+    const xmlColumn = document.querySelector('#facturado-container .second-column');
+    const pdfColumn = document.querySelector('#facturado-container .first-column');
 
-    requests.addEventListener('click', (e) => {
+    if(!selector || !dropdown || !textElement) return;
+
+    // Cargar solicitudes desde el backend
+    async function loadRequests() {
+        try {
+            const response = await fetch('http://127.0.0.1:3000/api/solicitudes/aprobadas-pendientes', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            });
+
+            if(!response.ok) throw new Error('Error al cargar solicitudes');
+            
+            const data = await response.json();
+            if(!data.length) 
+                dropdown.innerHTML = '<div class="request-option">No hay solicitudes aprobadas</div>';
+            else {
+                dropdown.innerHTML = '';
+                data.forEach(item => {
+                    const option = document.createElement('div');
+                    option.classList.add('request-option');
+                    option.textContent = item.folio;
+                    option.dataset.moneda = item.moneda;
+
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        textElement.textContent = item.folio;
+                        dropdown.classList.remove('show');
+                        selector.dataset.selectedFolio = item.folio;
+                        currentMoneda = item.moneda;
+                        updateXmlVisibility();
+                    });
+                    dropdown.appendChild(option);
+                });
+            }
+        } catch(error) {
+            console.error('Error al cargar solicitudes:', error);
+            Toast('ERROR', 'No se pudieron cargar las solicitudes');
+        } finally {
+            dropdown.classList.remove('show');
+        }
+    }
+
+    await loadRequests();
+
+    back.addEventListener('click', (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('show');
     });
 
     document.addEventListener('click', (e) => {
-        if(!requests.contains(e.target))
+        if(!selector.contains(e.target))
             dropdown.classList.remove('show');
     });
 }
 
 
-/* =========================== RESIZE TABLE COLUMNS =========================== */
+/* ================================== TABLE =================================== */
 function initTableResize() {
     const table = document.querySelector('.table-container table');
     const headers = table.querySelectorAll('.table-head th');
@@ -316,8 +390,179 @@ function initTableResize() {
     });
 }
 
+// Add XML
+function addFacturaXML(datos) {
+    const tbody = document.querySelector('.table-body');
+    const nuevaFila = document.createElement('tr');
+
+    nuevaFila.innerHTML = `
+        <td>${datos.folio || ''}</td>
+        <td>${datos.fecha || ''}</td>
+        <td>${datos.proveedor || ''}</td>
+        <td>${datos.concepto || ''}</td>
+        <td>${datos.descripcion || ''}</td>
+        <td>${datos.importe || '0.00'}</td>
+        <td>${datos.iva || '0.00'}</td>
+        <td>${datos.otros || '0.00'}</td>
+        <td>${datos.total || '0.00'}</td>
+        <td>${datos.moneda || 'MXN'}</td>
+        <td>${datos.tipoCambio || '1.00'}</td>
+        <td class="delete-row"><i class="fa-solid fa-trash-can"></i></td>
+    `;
+    tbody.appendChild(nuevaFila);
+    
+    const deleteBtn = nuevaFila.querySelector('.delete-row i');
+    deleteBtn.addEventListener('click', () => {
+        const index = facturasCargadas.findIndex(f => 
+            f.folio === datos.folio && 
+            f.fecha === datos.fecha && 
+            f.proveedor === datos.proveedor
+        );
+        if(index !== -1) facturasCargadas.splice(index, 1);
+        nuevaFila.remove();
+        Toast('FACTURA ELIMINADA', 'Se ha eliminado exitosamente la factura de la lista');
+    });
+}
+
+
+/* ================================== READ XML ================================== */
+async function parseXML(xmlFile) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+
+            // Verificar error de parseo
+            if(xmlDoc.getElementsByTagName("parsererror").length) {
+                reject(new Error("Error al parsear el XML"));
+                return;
+            }
+
+            // Obtener nodo raíz
+            const comprobante = xmlDoc.getElementsByTagName("cfdi:Comprobante")[0];
+            if(!comprobante) {
+                reject(new Error("Formato XML no reconocido (falta cfdi:Comprobante)"));
+                return;
+            }
+
+            // === Datos generales ===
+            let fechaRaw = comprobante.getAttribute("Fecha") || "";
+            fechaRaw = fechaRaw.split("T")[0];
+            const moneda = comprobante.getAttribute("Moneda") || "";
+            const tipoCambio = comprobante.getAttribute("TipoCambio") || "";
+            const total = parseFloat(comprobante.getAttribute("Total") || 0).toFixed(2);
+            const subtotal = parseFloat(comprobante.getAttribute("SubTotal") || 0).toFixed(2);
+
+            // === Emisor (Proveedor) ===
+            const emisor = xmlDoc.getElementsByTagName("cfdi:Emisor")[0];
+            const proveedor = emisor ? (emisor.getAttribute("Nombre") || emisor.getAttribute("Rfc") || "") : ""
+
+            // === Impuestos (IVA) ===
+            let iva = "0.00";
+            const traslados = xmlDoc.getElementsByTagName("cfdi:Traslado");
+            for(let traslado of traslados) {
+                if(traslado.getAttribute("Impuesto") === "002") {
+                    iva = parseFloat(traslado.getAttribute("Importe") || 0).toFixed(2);
+                    break;
+                }
+            }
+
+            // Si no encontró IVA en los traslados, intenta sacarlo del nodo Impuestos
+            if(iva === "0.00") {
+                const impuestosNode = xmlDoc.getElementsByTagName("cfdi:Impuestos")[0];
+                if(impuestosNode) {
+                    const totalImpuestos = impuestosNode.getAttribute("TotalImpuestosTrasladados");
+                    if (totalImpuestos) iva = parseFloat(totalImpuestos).toFixed(2);
+                }
+            }
+
+            // Otros montos
+            const otros = "0.00";
+
+            resolve({
+                fecha: fechaRaw,
+                proveedor: proveedor,
+                concepto: '-',
+                descripcion: descripcion,
+                importe: subtotal,
+                iva: iva,
+                otros: otros,
+                total: total,
+                moneda: moneda,
+                tipoCambio: tipoCambio
+            });
+        };
+        reader.onerror = () => reject(new Error("Error al leer el archivo XML"));
+        reader.readAsText(xmlFile);
+    });
+}
+
 
 /* ============================= UPLOAD FACTURAS ============================= */
+// IMG
+async function uploadIMG(imgFile) {
+    const formData = new FormData();
+    formData.append('file', imgFile);
+
+    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/factura/img', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
+        body: formData
+    });
+
+    if(!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Error al subir el comprobante');
+    }
+
+    const data = await response.json();
+    return data.ruta;
+}
+
+// PDF
+async function uploadPDF(pdfFile) {
+    const formData = new FormData();
+    formData.append('pdf', pdfFile);
+
+    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/factura/pdf', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
+        body: formData
+    });
+
+    if(!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Error al subir la factura');
+    }
+
+    const data = await response.json();
+    return data.ruta;
+}
+
+// XML
+async function uploadXML(xmlFile) {
+    const formData = new FormData();
+    formData.append('xml', xmlFile);
+
+    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/factura/xml', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
+        body: formData
+    });
+
+    if(!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Error al subir la factura');
+    }
+
+    const data = await response.json();
+    return data.ruta;
+}
+
 function initUpload() {
     const pdfContainer = document.querySelector('#facturado-container .first-column .receipt-container');
     const xmlContainer = document.querySelector('#facturado-container .second-column .receipt-container');
@@ -500,20 +745,38 @@ function initUpload() {
         uploadButton.parentNode.replaceChild(newButton, uploadButton);
 
         newButton.addEventListener('click', async() => {
+            // 1. Solicitud
+            const selector = document.querySelector('.request-selector');
+            const selectedFolio = selector ? selector.dataset.selectedFolio : null;
+            if(!selectedFolio) {
+                Toast('SOLICITUD REQUERIDA', 'Por favor, selecciona una solicitud para registrar la comprobación');
+                return;
+            }
+
             const isFacturado = document.querySelector('.tab.factura.selected') !== null;
 
             if(isFacturado) {
-                if(!selectedPDF && !selectedXML) {
-                    Toast('FALTA DE ARCHIVOS', 'Por favor, selecciona ambos archivos: PDF y XML');
-                    return;
-                }
-                if(!selectedPDF) {
-                    Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
-                    return;
-                }
-                if(!selectedXML) {
-                    Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato XML para su registro');
-                    return;
+                const xmlColumn = document.querySelector('#facturado-container .second-column');
+                const isXmlVisible = xmlColumn && window.getComputedStyle(xmlColumn).display !== 'none';
+
+                if(isXmlVisible) {
+                    if(!selectedPDF && !selectedXML) {
+                        Toast('FALTA DE ARCHIVOS', 'Por favor, selecciona ambos archivos: PDF y XML');
+                        return;
+                    }
+                    if(!selectedPDF) {
+                        Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
+                        return;
+                    }
+                    if(!selectedXML) {
+                        Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato XML para su registro');
+                        return;
+                    }
+                } else {
+                    if(!selectedPDF) {
+                        Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
+                        return;
+                    }
                 }
             } else {
                 if(!selectedIMG) {

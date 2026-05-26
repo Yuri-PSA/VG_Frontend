@@ -780,7 +780,7 @@ body {
     display: none;
     position: absolute;
     top: calc(100% + 0.5em);
-    left: -2%;
+    left: -2.5%;
     width: 105%;
     background-color: var(--transparent-blue);
     border-radius: 10px;
@@ -789,9 +789,20 @@ body {
     z-index: 20;
     max-height: 200px;
     overflow-y: auto;
+    scrollbar-width: auto;
+    scrollbar-color: var(--icons) transparent;
 }
 
 .request-dropdown.show { display: block; }
+
+.request-dropdown::-webkit-scrollbar { width: 6px; }
+
+.request-dropdown::-webkit-scrollbar-track { background: transparent; }
+
+.request-dropdown::-webkit-scrollbar-thumb {
+    background-color: var(--icons);
+    border-radius: 1em;
+}
 
 .request-option {
     padding: 0.5em;
@@ -1143,9 +1154,19 @@ body {
 
     .tab.selected p { font-size: 1.6em; }
 
+    .request {
+        height: 3em;
+        border-radius: 13px;
+        padding: 0.5em 0.6em; 
+    }
+
+    .request-back { font-size: 1.28em; }
+
+    .request-option { font-size: 1.1em; }
+
     .content-form { border-radius: 0 25px 25px 25px; }
 
-    .factura-content { height: 16em; }
+    .factura-content { height: 18em; }
 
     .receipt-container { font-size: 1.05em; }
 
