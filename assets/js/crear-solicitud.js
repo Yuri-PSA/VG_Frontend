@@ -559,7 +559,7 @@ function currencyOptions() {
     // Búsqueda dentro del dropdown
     const searchInput = document.createElement('input');
     searchInput.type        = 'text';
-    searchInput.placeholder = 'Buscar moneda...';
+    searchInput.placeholder = 'Buscar...';
     searchInput.className   = 'currency-search';
     dropdown.appendChild(searchInput);
 
