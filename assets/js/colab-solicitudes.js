@@ -44,6 +44,19 @@ function formatDate(dateStr) {
     return `${dia} / ${mes} / ${year}`;
 }
 
+// Currency
+const CURRENCY_COUNTRY = {
+    EUR: 'eu', USD: 'us', GBP: 'gb', AUD: 'au', CAD: 'ca',
+    CHF: 'ch', CNY: 'cn', JPY: 'jp', MXN: 'mx', BRL: 'br',
+    INR: 'in', KRW: 'kr', SGD: 'sg', HKD: 'hk', NOK: 'no',
+    SEK: 'se', DKK: 'dk', NZD: 'nz', ZAR: 'za', RUB: 'ru',
+    ARS: 'ar', CLP: 'cl', COP: 'co', PEN: 'pe', VES: 've',
+    AED: 'ae', SAR: 'sa', QAR: 'qa', KWD: 'kw', EGP: 'eg',
+    TRY: 'tr', PLN: 'pl', CZK: 'cz', HUF: 'hu', RON: 'ro',
+    TWD: 'tw', THB: 'th', MYR: 'my', IDR: 'id', PHP: 'ph',
+    PKR: 'pk', BDT: 'bd', VND: 'vn', ILS: 'il', NGN: 'ng',
+};
+
 
 /* ================================= LOADER ================================= */
 function showLoader() {
@@ -452,7 +465,7 @@ function renderTable(solicitudes, tab = 'all') {
             <td><p>${sol.destino}</p></td>
             <td class="monto-cell">
                 <div class="monto-content">
-                    <img src="./assets/images/${sol.moneda}.webp" alt="${sol.moneda}">
+                    <img src="${getFlagUrl(sol.moneda)}" alt="${sol.moneda}" onerror="this.style.display='none'">
                     <p><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
                 </div>
             </td>
@@ -630,9 +643,22 @@ function setupPaginationEvents() {
 }
 
 // Currency
-function obtenerSimboloMoneda(codigo) {
-    const simbolos = { MXN: '$', USD: '$', EUR: '€', JPY: '¥' };
-    return simbolos[codigo] || '$';
+function getFlagUrl(code) {
+    const country = CURRENCY_COUNTRY[code] || code.slice(0, 2).toLowerCase();
+    return `https://flagcdn.com/w40/${country}.png`;
+}
+
+function obtenerSimboloMoneda(code) {
+    try {
+        const parts = new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: code,
+            currencyDisplay: 'narrowSymbol'
+        }).formatToParts(0);
+        return parts.find(p => p.type === 'currency')?.value || code;
+    } catch {
+        return code;
+    }
 }
 
 
@@ -1158,7 +1184,7 @@ function llenarInfoCard(card, data) {
             <div class="info-mobile">
                 <p class="subt-mobile">MONTO</p>
                 <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
-                <p class="amount-mobile-currency"><img src="./assets/images/${data.monto_moneda}.webp" alt="${data.monto_moneda}">${data.monto_moneda}</p>
+                <p class="amount-mobile-currency"><img src="${getFlagUrl(data.monto_moneda)}" alt="${data.monto_moneda}" onerror="this.style.display='none'">${data.monto_moneda}</p>
             </div>
             <div class="info-mobile">
                 <p class="subt-mobile">FORMA DE PAGO</p>
@@ -1571,7 +1597,8 @@ function populateInfoPanel(data) {
 
     // Moneda (bandera y código)
     const flagImg = document.querySelector('.info-currency img');
-    flagImg.src = `./assets/images/${data.monto_moneda}.webp`;
+    flagImg.src = getFlagUrl(data.monto_moneda);
+    flagImg.onerror = () => flagImg.style.display = 'none';
     flagImg.alt = data.monto_moneda;
     document.querySelector('.info-currency p').textContent = data.monto_moneda;
 

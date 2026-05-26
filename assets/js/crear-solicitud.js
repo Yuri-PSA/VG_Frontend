@@ -302,13 +302,8 @@ function populateFormWithData(data) {
 
     // Moneda
     const moneda = data.monto_moneda || 'MXN';
-    const currencies = [
-        { code: 'MXN', name: 'MXN', flag: './assets/images/MXN.webp', symbol: '$' },
-        { code: 'USD', name: 'USD', flag: './assets/images/USD.webp', symbol: '$' },
-        { code: 'EUR', name: 'EUR', flag: './assets/images/EUR.webp', symbol: '€' },
-        { code: 'JPY', name: 'JPY', flag: './assets/images/JPY.webp', symbol: '¥' }
-    ];
-    const selectedCurrency = currencies.find(c => c.code === moneda);
+    const allCurrencies = getAllCurrencies();
+    const selectedCurrency = allCurrencies.find(c => c.code === moneda);
     if(selectedCurrency && typeof updateSelectedCurrency === 'function')
         updateSelectedCurrency(selectedCurrency);
 
@@ -501,69 +496,147 @@ function formatDate(dateInput) {
 
 
 /* ============================== CURRENCY OPTIONS ============================== */
-function currencyOptions() {
-    const currencies = [
-        { code: 'MXN', name: 'MXN', flag: './assets/images/MXN.webp', symbol: '$' },
-        { code: 'USD', name: 'USD', flag: './assets/images/USD.webp', symbol: '$' },
-        { code: 'EUR', name: 'EUR', flag: './assets/images/EUR.webp', symbol: '€' },
-        { code: 'JPY', name: 'JPY', flag: './assets/images/JPY.webp', symbol: '¥' }
-    ];
+const CURRENCY_COUNTRY = {
+    EUR: 'eu', USD: 'us', GBP: 'gb', AUD: 'au', CAD: 'ca',
+    CHF: 'ch', CNY: 'cn', JPY: 'jp', MXN: 'mx', BRL: 'br',
+    INR: 'in', KRW: 'kr', SGD: 'sg', HKD: 'hk', NOK: 'no',
+    SEK: 'se', DKK: 'dk', NZD: 'nz', ZAR: 'za', RUB: 'ru',
+    ARS: 'ar', CLP: 'cl', COP: 'co', PEN: 'pe', VES: 've',
+    AED: 'ae', SAR: 'sa', QAR: 'qa', KWD: 'kw', EGP: 'eg',
+    TRY: 'tr', PLN: 'pl', CZK: 'cz', HUF: 'hu', RON: 'ro',
+    TWD: 'tw', THB: 'th', MYR: 'my', IDR: 'id', PHP: 'ph',
+    PKR: 'pk', BDT: 'bd', VND: 'vn', ILS: 'il', NGN: 'ng',
+};
 
-    const selector = document.querySelector('.currency-selector');
-    const flagsDiv = selector.querySelector('.flags');
-    const dropdown = selector.querySelector('.currency-dropdown');
-    const symbol = document.querySelector('.answer.money .symbol');
-    
-    // Construir lista
-    function buildDropdown(currentCurrency) {
-        dropdown.innerHTML = '';
-        const otherCurrencies = currencies.filter(c => c.code !== currentCurrency);
-        otherCurrencies.forEach(currency => {
+function getFlagUrl(code) {
+    const country = CURRENCY_COUNTRY[code] || code.slice(0, 2).toLowerCase();
+    return `https://flagcdn.com/w40/${country}.png`;
+}
+
+function getCurrencyName(code, locale = 'es-MX') {
+    try {
+        const display = new Intl.DisplayNames([locale], { type: 'currency' });
+        return display.of(code) || code;
+    } catch {
+        return code;
+    }
+}
+
+// Lista desde la API 
+function getAllCurrencies() {
+    const codes = Intl.supportedValuesOf('currency');
+    return codes.map(code => ({
+        code,
+        name: `${code}`,
+        flag: getFlagUrl(code),
+        symbol: getSymbol(code)
+    }));
+}
+
+function getSymbol(code) {
+    try {
+        const parts = new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: code,
+            currencyDisplay: 'narrowSymbol'
+        }).formatToParts(0);
+
+        const symbolPart = parts.find(p => p.type === 'currency');
+        return symbolPart?.value || code;
+    } catch {
+        return code;
+    }
+}
+
+function currencyOptions() {
+    const allCurrencies = getAllCurrencies();
+
+    const selector  = document.querySelector('.currency-selector');
+    const flagsDiv  = selector.querySelector('.flags');
+    const dropdown  = selector.querySelector('.currency-dropdown');
+    const symbol    = document.querySelector('.answer.money .symbol');
+
+    // Búsqueda dentro del dropdown
+    const searchInput = document.createElement('input');
+    searchInput.type        = 'text';
+    searchInput.placeholder = 'Buscar moneda...';
+    searchInput.className   = 'currency-search';
+    dropdown.appendChild(searchInput);
+
+    const listDiv = document.createElement('div');
+    listDiv.className = 'currency-list';
+    dropdown.appendChild(listDiv);
+
+    function buildDropdown(currentCode, filter = '') {
+        listDiv.innerHTML = '';
+
+        const filtered = allCurrencies.filter(c =>
+            c.code !== currentCode &&
+            (c.code.includes(filter.toUpperCase()) ||
+             c.name.toLowerCase().includes(filter.toLowerCase()))
+        );
+
+        filtered.forEach(currency => {
             const option = document.createElement('div');
             option.className = 'currency-option';
             option.setAttribute('data-currency', currency.code);
             option.innerHTML = `
-                <img src="${currency.flag}" alt="${currency.code}">
+                <img src="${currency.flag}" alt="${currency.code}"
+                     onerror="this.style.display='none'">
                 <span>${currency.name}</span>
             `;
             option.addEventListener('click', (e) => {
                 e.stopPropagation();
                 updateSelectedCurrency(currency);
                 dropdown.classList.remove('show');
-                closeOtherDropdowns(selector);
+                searchInput.value = '';
             });
-            dropdown.appendChild(option);
+            listDiv.appendChild(option);
         });
+
+        // Mensaje si no hay resultados
+        if (!filtered.length) {
+            listDiv.innerHTML = '<p class="currency-empty">Sin resultados</p>';
+        }
     }
+
+    searchInput.addEventListener('input', (e) => {
+        e.stopPropagation();
+        buildDropdown(
+            flagsDiv.querySelector('p')?.textContent?.split(' ')[0] || 'MXN',
+            searchInput.value
+        );
+    });
+
+    searchInput.addEventListener('click', e => e.stopPropagation());
 
     function updateSelectedCurrency(currency) {
         flagsDiv.innerHTML = `
-            <img src="${currency.flag}" alt="${currency.code}">
-            <p>${currency.name}</p>
+            <img src="${currency.flag}" alt="${currency.code}"
+                 onerror="this.style.display='none'">
+            <p>${currency.code}</p>
             <i class="fa-solid fa-angle-down"></i>
         `;
-        symbol.innerHTML = `${currency.symbol}`;
-
+        symbol.textContent = currency.symbol;
         buildDropdown(currency.code);
     }
 
     flagsDiv.addEventListener('click', (e) => {
         e.stopPropagation();
         const isOpen = dropdown.classList.contains('show');
-
         closeOtherDropdowns(selector);
-        if(!isOpen)
-            dropdown.classList.add('show');
-        else
-            dropdown.classList.remove('show');
+        dropdown.classList.toggle('show', !isOpen);
+        if (!isOpen) searchInput.focus();
     });
 
     document.addEventListener('click', (e) => {
-        if(!selector.contains(e.target))
+        if (!selector.contains(e.target)) {
             dropdown.classList.remove('show');
+            searchInput.value = '';
+        }
     });
 
-    const defaultCurrency = currencies.find(c => c.code === 'MXN');
+    const defaultCurrency = allCurrencies.find(c => c.code === 'MXN');
     updateSelectedCurrency(defaultCurrency);
     window.updateSelectedCurrency = updateSelectedCurrency;
 }

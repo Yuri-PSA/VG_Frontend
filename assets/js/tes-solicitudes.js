@@ -42,6 +42,19 @@ let currentMonto = null;
 // Pending amount
 let lastKnownCount = 0;
 
+// Currency
+const CURRENCY_COUNTRY = {
+    EUR: 'eu', USD: 'us', GBP: 'gb', AUD: 'au', CAD: 'ca',
+    CHF: 'ch', CNY: 'cn', JPY: 'jp', MXN: 'mx', BRL: 'br',
+    INR: 'in', KRW: 'kr', SGD: 'sg', HKD: 'hk', NOK: 'no',
+    SEK: 'se', DKK: 'dk', NZD: 'nz', ZAR: 'za', RUB: 'ru',
+    ARS: 'ar', CLP: 'cl', COP: 'co', PEN: 'pe', VES: 've',
+    AED: 'ae', SAR: 'sa', QAR: 'qa', KWD: 'kw', EGP: 'eg',
+    TRY: 'tr', PLN: 'pl', CZK: 'cz', HUF: 'hu', RON: 'ro',
+    TWD: 'tw', THB: 'th', MYR: 'my', IDR: 'id', PHP: 'ph',
+    PKR: 'pk', BDT: 'bd', VND: 'vn', ILS: 'il', NGN: 'ng',
+};
+
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
@@ -461,7 +474,7 @@ function renderTable(solicitudes, tab = null) {
             <td><p>${formatDate(sol.inicio_viaje)}</p></td>
             <td class="monto-cell">
                 <div class="monto-content">
-                    <img src="./assets/images/${sol.moneda}.webp" alt="${sol.moneda}">
+                    <img src="${getFlagUrl(sol.moneda)}" alt="${sol.moneda}" onerror="this.style.display='none'">
                     <p><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
                 </div>
             </td>
@@ -609,9 +622,22 @@ function setupPaginationEvents() {
 }
 
 // Currency
-function obtenerSimboloMoneda(codigo) {
-    const simbolos = { MXN: '$', USD: '$', EUR: '€', JPY: '¥' };
-    return simbolos[codigo] || '$';
+function getFlagUrl(code) {
+    const country = CURRENCY_COUNTRY[code] || code.slice(0, 2).toLowerCase();
+    return `https://flagcdn.com/w40/${country}.png`;
+}
+
+function obtenerSimboloMoneda(code) {
+    try {
+        const parts = new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: code,
+            currencyDisplay: 'narrowSymbol'
+        }).formatToParts(0);
+        return parts.find(p => p.type === 'currency')?.value || code;
+    } catch {
+        return code;
+    }
 }
 
 
@@ -1230,7 +1256,7 @@ function llenarInfoCard(card, data) {
                 <div class="info-mobile">
                     <p class="subt-mobile">MONTO</p>
                     <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
-                    <p class="amount-mobile-currency"><img src="./assets/images/${moneda}.webp" alt="${moneda}">${moneda}</p>
+                    <p class="amount-mobile-currency"><img src="${getFlagUrl(moneda)}" alt="${moneda}" onerror="this.style.display='none'">${moneda}</p>
                 </div>
             </div>
         `;
@@ -1272,7 +1298,7 @@ function llenarInfoCard(card, data) {
                 <div class="info-mobile">
                     <p class="subt-mobile">MONTO</p>
                     <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
-                    <p class="amount-mobile-currency"><img src="./assets/images/${moneda}.webp" alt="${moneda}">${moneda}</p>
+                    <p class="amount-mobile-currency"><img src="${getFlagUrl(moneda)}" alt="${moneda}" onerror="this.style.display='none'">${moneda}</p>
                 </div>
                 <div class="info-mobile">
                     <p class="subt-mobile">FORMA DE PAGO</p>
@@ -1318,7 +1344,7 @@ function llenarInfoCard(card, data) {
                 <div class="info-mobile">
                     <p class="subt-mobile">MONTO</p>
                     <p class="amount-mobile"><span class="symbol-money">${simbolo}</span>${montoFormateado}</p>
-                    <p class="amount-mobile-currency"><img src="./assets/images/${moneda}.webp" alt="${moneda}">${moneda}</p>
+                    <p class="amount-mobile-currency"><img src="${getFlagUrl(moneda)}" alt="${moneda}" onerror="this.style.display='none'">${moneda}</p>
                 </div>
                 <div class="info-mobile">
                     <p class="subt-mobile">FORMA DE PAGO</p>
@@ -1481,7 +1507,7 @@ async function uploadReceiptFile(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload-comprobante', {
+    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/comprobante/anticipo', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
