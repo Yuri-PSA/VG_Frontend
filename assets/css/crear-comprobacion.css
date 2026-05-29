@@ -1056,6 +1056,29 @@ body {
 .table-head th:nth-child(8) { width: 150px; }
 .table-head th:nth-child(11) { width: 140px; }
 
+.table-head th:nth-child(12) { width: 50px; }
+
+.actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--icons);
+    font-size: 1em;
+}
+
+.actions i { cursor: pointer; }
+
+.table-body input {
+    border-width: 0em;
+    width: 100%;
+    height: 100%;
+    font-size: 1em;
+    background-color: var(--tr-medium-blue);
+    border-radius: 0.5em;
+    border: 1px solid var(--line-gray);
+    padding: 0 0.5em;
+}
+
 .table-container::-webkit-scrollbar { 
     height: 8px; 
     width: 6.5px; 
@@ -1235,13 +1258,13 @@ body {
         transform: translateY(10%);
     }
 
-    .factura-content { height: 11.5em; }
+    .factura-content { height: 11em; }
 
     .factura-upload { padding: 0 1.3em 1.2em 0; }
 
     .table-container { 
-        max-height: 8em;
-        height: 8em;
+        max-height: 7.5em;
+        height: 7.5em;
     }
 }
 
@@ -1303,7 +1326,7 @@ body {
 
     .table-body td { font-size: 0.8em }
 
-    .factura-content { height: 10em; }
+    .factura-content { height: 9.5em; }
 
     .receipt-container { font-size: 0.8em; }
 
@@ -1312,8 +1335,8 @@ body {
     .button-receipt { font-size: 0.8em; }
 
     .table-container { 
-        max-height: 7.5em;
-        height: 7.5em; 
+        max-height: 6.5em;
+        height: 6.5em; 
     }
 }
 
@@ -1381,7 +1404,7 @@ body {
 
     .content-form { padding: 1em; }
 
-    .factura-content { height: 11em; }
+    .factura-content { height: 10.5em; }
 
     .button-receipt { font-size: 0.8em; }
 
@@ -1390,8 +1413,8 @@ body {
     .table-body td { font-size: 0.8em; }
 
     .table-container { 
-        max-height: 7em;
-        height: 7em;  
+        max-height: 6.5em;
+        height: 6.5em;  
     }
 }
 
@@ -1454,7 +1477,6 @@ body {
 
     .request {
         height: 2.3em;
-        margin-bottom: 1.5em;
         padding: 0.4em;
     }
 
@@ -1485,8 +1507,8 @@ body {
     .table-body td { font-size: 0.7em; }
 
     .table-container { 
-        max-height: 7em;
-        height: 7em; 
+        max-height: 5.5em;
+        height: 5.5em; 
     }
 }
 

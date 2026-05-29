@@ -1363,7 +1363,8 @@ body {
 
     .currency-dropdown { top: calc(100% + 0.44em); }
 
-    .currency-search { font-size: 0.7em; }
+    .currency-search,
+    .currency-empty { font-size: 0.7em; }
 
     .currency-list { max-height: 93px; }
 
@@ -1458,6 +1459,7 @@ body {
         height: 0.8em;
     }
 
+    .currency-empty,
     .currency-option span { font-size: 0.65em; }
 
     .currency-list { max-height: 87px; }

@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
     updateXmlVisibility();
     initTableResize();
     initUpload();
+
+    const sendBtn = document.querySelector('.button.send');
+    if(sendBtn) sendBtn.addEventListener('click', enviarComprobacion);
 });
 
 
@@ -23,9 +26,12 @@ let uploadFactura = false;
 let nextButton = null;
 let currentMoneda = null;
 
-let isUploading = false;
-let uploadComplete = false;
-let uploadedFilePath = null;
+// Table
+let pendingEditRow = null;
+let pendingTempData = null;
+
+// API Banxico
+const exchangeRateCache = {};
 
 // Backend
 const token = Session.getToken();
@@ -36,12 +42,58 @@ const logoUser = Session.getUser();
 function updateXmlVisibility() {
     const xmlColumn = document.querySelector('#facturado-container .second-column');
     const pdfColumn = document.querySelector('#facturado-container .first-column');
-    if(!xmlColumn) return;
+    const button = document.querySelector('.button-receipt');
 
-    if(currentMoneda && currentMoneda.toUpperCase() !== 'MXN')
+    if(!xmlColumn || !button) return;
+
+    if(pendingEditRow) {
+        pendingEditRow.remove();
+        pendingEditRow = null;
+        pendingTempData = null;
+        if(pendingTempData) {
+            const index = facturasCargadas.findIndex(f => f.tempId === pendingTempData.tempId);
+            if(index !== -1) facturasCargadas.splice(index, 1);
+        }
+    }
+
+    if(currentMoneda && currentMoneda.toUpperCase() !== 'MXN') {
         xmlColumn.style.display = 'none';
-    else
+        button.innerHTML = 'LLENAR DATOS';
+    }
+    else {
         xmlColumn.style.display = 'flex';
+        button.innerHTML = 'CARGAR';
+    }
+}
+
+function clearPendingEdit() {
+    if(pendingEditRow) {
+        pendingEditRow.remove();
+        if(pendingTempData) {
+            const index = facturasCargadas.findIndex(f => f.tempId === pendingTempData.tempId);
+            if(index !== -1) facturasCargadas.splice(index, 1);
+        }
+        pendingEditRow = null;
+        pendingTempData = null;
+
+        const isFacturado = document.querySelector('.tab.factura.selected') !== null;
+        const xmlColumn = document.querySelector('#facturado-container .second-column');
+        const isXmlVisible = xmlColumn && window.getComputedStyle(xmlColumn).display !== 'none';
+        const button = document.querySelector('.button-receipt');
+        if(button) {
+            if(isFacturado && isXmlVisible)
+                button.innerHTML = 'CARGAR';
+            else
+                button.innerHTML = 'LLENAR DATOS';
+        }
+    }
+}
+
+function resetAllFacturas() {
+    const tbody = document.querySelector('.table-body');
+    if (tbody) tbody.innerHTML = '';
+    facturasCargadas = [];    
+    clearPendingEdit();
 }
 
 
@@ -265,6 +317,8 @@ function tabSelected() {
 
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
+            clearPendingEdit();
+
             tabs.forEach(t => t.classList.remove('selected'));
             this.classList.add('selected');
 
@@ -279,6 +333,9 @@ function tabSelected() {
                 facturadoContainer.style.display = 'none';
                 noFacturadoContainer.style.display = 'grid';
                 resetNoFacturado();
+
+                const button = document.querySelector('.button-receipt');
+                if(button) button.innerHTML = 'LLENAR DATOS';
             }
         });
     });
@@ -323,6 +380,9 @@ async function requestDropdown() {
 
                     option.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        clearPendingEdit();
+                        resetAllFacturas();
+                        
                         textElement.textContent = item.folio;
                         dropdown.classList.remove('show');
                         selector.dataset.selectedFolio = item.folio;
@@ -390,24 +450,24 @@ function initTableResize() {
     });
 }
 
-// Add XML
-function addFacturaXML(datos) {
+// Add XML row
+function addFactura(datos) {
     const tbody = document.querySelector('.table-body');
     const nuevaFila = document.createElement('tr');
 
     nuevaFila.innerHTML = `
         <td>${datos.folio || ''}</td>
         <td>${datos.fecha || ''}</td>
-        <td>${datos.proveedor || ''}</td>
+        <td>${(datos.proveedor).toUpperCase() || ''}</td>
         <td>${datos.concepto || ''}</td>
-        <td>${datos.descripcion || ''}</td>
+        <td>${(datos.descripcion).toUpperCase() || ''}</td>
         <td>${datos.importe || '0.00'}</td>
         <td>${datos.iva || '0.00'}</td>
         <td>${datos.otros || '0.00'}</td>
         <td>${datos.total || '0.00'}</td>
-        <td>${datos.moneda || 'MXN'}</td>
-        <td>${datos.tipoCambio || '1.00'}</td>
-        <td class="delete-row"><i class="fa-solid fa-trash-can"></i></td>
+        <td>${datos.moneda || ''}</td>
+        <td>${datos.tipoCambio || '1.0000'}</td>
+        <td class="delete-row"><div class="actions"><i class="fa-solid fa-trash-can"></i></div></td>
     `;
     tbody.appendChild(nuevaFila);
     
@@ -424,8 +484,283 @@ function addFacturaXML(datos) {
     });
 }
 
+// Add PDF or IMG row
+function addFacturaEditable(datosBase) {
+    const tbody = document.querySelector('.table-body');
+    const nuevaFila = document.createElement('tr');
+    nuevaFila.setAttribute('data-temp-id', datosBase.tempId);
+    const moneda = datosBase.moneda;
+    const esMXN = (moneda === 'MXN');
+    const tipoCambioIni = esMXN ? '1.0000' : '';
 
-/* ================================== READ XML ================================== */
+    nuevaFila.innerHTML = `
+        <td><input type="text" class="editable-folio" placeholder="Folio"></td>
+        <td><input type="text" class="editable-fecha" placeholder="Fecha"></td>
+        <td><input type="text" class="editable-proveedor" placeholder="Proveedor"></td>
+        <td><input type="text" class="editable-concepto" placeholder="Concepto"></td>
+        <td><input type="text" class="editable-descripcion" placeholder="Descripción"></td>
+        <td><input type="text" class="editable-importe" placeholder="Importe"></td>
+        <td><input type="text" class="editable-iva" placeholder="IVA"></td>
+        <td><input type="text" class="editable-others" placeholder="Otros"></td>
+        <td class="editable-total">$0.00</td>
+        <td class="editable-currency">${moneda}</td>
+        <td><input type="text" class="editable-tipoCambio" placeholder="Tipo Cambio" value="${tipoCambioIni}" ${esMXN ? 'readonly' : ''}></td>
+        <td class="delete-row"><div class="actions"><i class="fa-solid fa-trash-can"></i></div></td>
+    `;
+    tbody.appendChild(nuevaFila);
+
+    const fechaInput = nuevaFila.querySelector('.editable-fecha');
+    const tipoCambioInput = nuevaFila.querySelector('.editable-tipoCambio');
+
+    async function actTipoCambio() {
+        const fecha = fechaInput.value;
+        if(!fecha) return;
+        if(esMXN) {
+            tipoCambioInput.value = '1.0000';
+            return;
+        }
+
+        try {
+            const rate = await getTipoCambio(moneda, fecha);
+            if(rate && !isNaN(parseFloat(rate)))
+                tipoCambioInput.value = parseFloat(rate).toFixed(4);
+            else
+                tipoCambioInput.value = '';
+        } catch(error) {
+            tipoCambioInput.value = '';
+            Toast('TIPO DE CAMBIO', 'No se pudo obtener el tipo de cambio automáticamente. Por favor, ingrésalo manualmente');
+        }
+    }
+
+    fechaInput.addEventListener('change', actTipoCambio);
+
+    const importeInput = nuevaFila.querySelector('.editable-importe');
+    const ivaInput = nuevaFila.querySelector('.editable-iva');
+    const otrosInput = nuevaFila.querySelector('.editable-others');
+    const totalCell = nuevaFila.querySelector('.editable-total');
+
+    function actualizarTotal() {
+        let importe = parseFloat(importeInput.value) || 0;
+        let iva = parseFloat(ivaInput.value) || 0;
+        let otros = parseFloat(otrosInput.value) || 0;
+        let total = importe + iva + otros;
+        totalCell.textContent = `$${total.toFixed(2)}`;
+    }
+
+    importeInput.addEventListener('input', actualizarTotal);
+    ivaInput.addEventListener('input', actualizarTotal);
+    otrosInput.addEventListener('input', actualizarTotal);
+    actualizarTotal();
+    
+    // Evento eliminar
+    const deleteBtn = nuevaFila.querySelector('.delete-row i');
+    deleteBtn.addEventListener('click', () => {
+        if(pendingEditRow === nuevaFila) {
+            pendingEditRow = null;
+            pendingTempData = null;
+            const button = document.querySelector('.button-receipt');
+            button.innerHTML = 'LLENAR DATOS';
+        }
+
+        nuevaFila.remove();
+        const index = facturasCargadas.findIndex(f => f.tempId === datosBase.tempId);
+        if(index !== -1) facturasCargadas.splice(index, 1);
+        Toast('FACTURA ELIMINADA', 'Se ha eliminado exitosamente la factura de la lista');
+    });
+    
+    return nuevaFila;
+}
+
+function isValidDateFormat(fecha) {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha))
+        return false;
+
+    const [year, month, day] = fecha.split('-').map(Number);
+
+    if(month < 1 || month > 12 || day < 1 || day > 31 || year < 1900)
+        return false;
+
+    const testDate = new Date(year, month - 1, day);
+    return testDate.getFullYear() === year && 
+           testDate.getMonth() === month - 1 && 
+           testDate.getDate() === day;
+}
+
+async function addPDFRow(row, tempData) {
+    const folioFactura = row.querySelector('.editable-folio')?.value.trim();
+    const fecha = row.querySelector('.editable-fecha')?.value;
+    const proveedor = row.querySelector('.editable-proveedor')?.value.trim();
+    const concepto = row.querySelector('.editable-concepto')?.value.trim();
+    const descripcion = row.querySelector('.editable-descripcion')?.value.trim();
+    const importe = row.querySelector('.editable-importe')?.value.trim();
+    const iva = row.querySelector('.editable-iva')?.value.trim();
+    const moneda = row.querySelector('.editable-currency')?.textContent;
+    const tipoCambioInput = row.querySelector('.editable-tipoCambio');
+
+    if(!folioFactura) {
+        Toast('FOLIO REQUERIDO', 'Por favor, ingresa el folio de tu factura');
+        return false;
+    } else if(!/^\d+$/.test(folioFactura)) {
+        Toast('FOLIO INVÁLIDO', 'Ingresa únicamente el número de folio, sin letras ni caracteres especiales');
+        return false;
+    }
+
+    if(!fecha) {
+        Toast('FECHA REQUERIDA', 'Por favor, ingresa la fecha de emisión de tu factura');
+        return false;
+    } else if (!isValidDateFormat(fecha)) {
+        Toast('FECHA INVÁLIDA', 'Ingresa una fecha válida con el formato YYYY-MM-DD');
+        return false;
+    }
+
+    if(!proveedor) {
+        Toast('PROVEEDOR REQUERIDO', 'Por favor, ingresa la razón social o nombre del proveedor');
+        return false;
+    }
+
+    if(!/^(\d+|-)$/.test(concepto)) {
+        Toast('CONCEPTO REQUERIDO', 'Ingresa únicamente la clave numérica del producto o un guion (-) si no aplica');
+        return false;
+    }
+
+    if(!descripcion) {
+        Toast('DESCRIPCIÓN REQUERIDA', 'Por favor, ingresa la descripción de producto de tu factura');
+        return false;
+    }
+
+    if(!importe) {
+        Toast('IMPORTE REQUERIDO', 'Por favor, ingresa el importe o subtotal de tu factura');
+        return false;
+    } else if(!/^\d+(\.\d{1,2})?$/.test(importe)) {
+        Toast('IMPORTE INVÁLIDO', 'Por favor, ingresa un importe válido con hasta dos decimales');
+        return false;
+    } else if(parseFloat(importe) <= 0) {
+        Toast('IMPORTE INVÁLIDO', 'El importe debe ser mayor a 0');
+        return false;
+    }
+
+    if(!iva) {
+        Toast('IVA REQUERIDO', 'Por favor, ingresa el IVA de tu factura');
+        return false;
+    } else if(!/^\d+(\.\d{1,2})?$/.test(iva)) {
+        Toast('IVA INVÁLIDO', 'Por favor, ingresa un IVA válido con hasta dos decimales');
+        return false;
+    } else if(parseFloat(iva) <= 0) {
+        Toast('IVA INVÁLIDO', 'El IVA debe ser mayor a 0');
+        return false;
+    }
+
+    const otrosInput = row.querySelector('.editable-others');
+    if(!/^-?\d+(\.\d{1,2})?$/.test(otrosInput.value)) {
+        Toast('MONTO INVÁLIDO', 'Ingresa un monto válido con hasta dos decimales o un 0 si no aplica');
+        return false;
+    }
+    const otros = parseFloat(otrosInput.value).toFixed(2);
+
+    const totalCell = row.querySelector('.editable-total');
+    let totalNum = 0;
+    if(totalCell) {
+        const totalText = totalCell.textContent.replace('$', '');
+        totalNum = parseFloat(totalText) || 0;
+    }
+
+    let tipoCambio = parseFloat(tipoCambioInput.value);
+    if(isNaN(tipoCambio) && moneda !== 'MXN') {
+        Toast('TIPO DE CAMBIO REQUERIDO', 'Por favor, ingresa el tipo de cambio de la moneda de tu factura respecto al peso mexicano (MXN) según la fecha de emisión');
+        return false;
+    }
+
+    if(moneda === 'MXN')
+        tipoCambio = '1.000';
+
+    const facturaFinal = {
+        folio: folioFactura,
+        fecha: fecha,
+        proveedor: proveedor.toUpperCase(),
+        concepto: concepto,
+        descripcion: descripcion.toUpperCase(),
+        importe: parseFloat(importe).toFixed(2),
+        iva: parseFloat(iva).toFixed(2),
+        otros: parseFloat(otros).toFixed(2),
+        total: totalNum.toFixed(2),
+        moneda: moneda,
+        tipoCambio: parseFloat(tipoCambio).toFixed(4),
+        pdfFile: tempData.pdfPath || null,
+        xmlFile: tempData.xmlPath || null,
+        imgFile: tempData.imgPath || null
+    };
+
+    if(duplicateFactura(facturaFinal)) {
+        Toast('FACTURA YA REGISTRADA', 'Lo siento, esta factura ya fue agregada previamente a la solicitud');
+        
+        // Limpiar fila pendiente
+        if(pendingEditRow === row) {
+            pendingEditRow = null;
+            pendingTempData = null;
+        }
+
+        const tempIndex = facturasCargadas.findIndex(f => f.tempId === tempData.tempId);
+        if(tempIndex !== -1) facturasCargadas.splice(tempIndex, 1);
+        row.remove();
+
+        const isFacturado = document.querySelector('.tab.factura.selected') !== null;
+        if(isFacturado) resetFacturado();
+        else resetNoFacturado();
+
+        const button = document.querySelector('.button-receipt');
+        const xmlColumn = document.querySelector('#facturado-container .second-column');
+        const isXmlVisible = xmlColumn && window.getComputedStyle(xmlColumn).display !== 'none';
+        if(isFacturado && isXmlVisible) button.innerHTML = 'CARGAR';
+        else button.innerHTML = 'LLENAR DATOS';
+        return false;
+    }
+
+    row.innerHTML = `
+        <td>${facturaFinal.folio}</td>
+        <td>${facturaFinal.fecha}</td>
+        <td>${facturaFinal.proveedor}</td>
+        <td>${facturaFinal.concepto}</td>
+        <td>${facturaFinal.descripcion}</td>
+        <td>$${facturaFinal.importe}</td>
+        <td>$${facturaFinal.iva}</td>
+        <td>$${facturaFinal.otros}</td>
+        <td>$${facturaFinal.total}</td>
+        <td>${facturaFinal.moneda}</td>
+        <td>${facturaFinal.tipoCambio}</td>
+        <td class="delete-row"><div class="actions"><i class="fa-solid fa-trash-can"></i></div></td>
+    `;
+
+    // Evento eliminar
+    const deleteBtn = row.querySelector('.delete-row i');
+    deleteBtn.addEventListener('click', () => {
+        const index = facturasCargadas.findIndex(f => f.tempId === tempData.tempId);
+        if (index !== -1) facturasCargadas.splice(index, 1);
+        row.remove();
+        Toast('FACTURA ELIMINADA', 'Se ha eliminado exitosamente la factura de la lista');
+    });
+
+    const index = facturasCargadas.findIndex(f => f.tempId === tempData.tempId);
+    if(index !== -1)
+        facturasCargadas[index] = { ...facturaFinal, tempId: tempData.tempId, ...tempData };
+    else
+        facturasCargadas.push({ ...facturaFinal, tempId: tempData.tempId, ...tempData });
+
+    Toast('FACTURA REGISTRADA', 'La factura se cargó correctamente. Puedes agregar otra');
+    return true;
+}
+
+function duplicateFactura(nuevaFactura) {
+    return facturasCargadas.some(existente => 
+        existente.folio === nuevaFactura.folio &&
+        existente.proveedor === nuevaFactura.proveedor &&
+        existente.fecha === nuevaFactura.fecha &&
+        existente.descripcion === nuevaFactura.descripcion
+    );
+}
+
+
+/* =============================== READ XML & PDF =============================== */
+// XML
 async function parseXML(xmlFile) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -433,20 +768,19 @@ async function parseXML(xmlFile) {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
 
-            // Verificar error de parseo
             if(xmlDoc.getElementsByTagName("parsererror").length) {
                 reject(new Error("Error al parsear el XML"));
                 return;
             }
 
-            // Obtener nodo raíz
             const comprobante = xmlDoc.getElementsByTagName("cfdi:Comprobante")[0];
             if(!comprobante) {
                 reject(new Error("Formato XML no reconocido (falta cfdi:Comprobante)"));
                 return;
             }
 
-            // === Datos generales ===
+            const folioFactura = comprobante.getAttribute("Folio") || "";
+
             let fechaRaw = comprobante.getAttribute("Fecha") || "";
             fechaRaw = fechaRaw.split("T")[0];
             const moneda = comprobante.getAttribute("Moneda") || "";
@@ -454,11 +788,10 @@ async function parseXML(xmlFile) {
             const total = parseFloat(comprobante.getAttribute("Total") || 0).toFixed(2);
             const subtotal = parseFloat(comprobante.getAttribute("SubTotal") || 0).toFixed(2);
 
-            // === Emisor (Proveedor) ===
             const emisor = xmlDoc.getElementsByTagName("cfdi:Emisor")[0];
-            const proveedor = emisor ? (emisor.getAttribute("Nombre") || emisor.getAttribute("Rfc") || "") : ""
+            const proveedorNombre = emisor ? (emisor.getAttribute("Nombre") || "") : "";
+            const proveedorRFC = emisor ? (emisor.getAttribute("Rfc") || "") : "";
 
-            // === Impuestos (IVA) ===
             let iva = "0.00";
             const traslados = xmlDoc.getElementsByTagName("cfdi:Traslado");
             for(let traslado of traslados) {
@@ -468,27 +801,42 @@ async function parseXML(xmlFile) {
                 }
             }
 
-            // Si no encontró IVA en los traslados, intenta sacarlo del nodo Impuestos
             if(iva === "0.00") {
                 const impuestosNode = xmlDoc.getElementsByTagName("cfdi:Impuestos")[0];
                 if(impuestosNode) {
                     const totalImpuestos = impuestosNode.getAttribute("TotalImpuestosTrasladados");
-                    if (totalImpuestos) iva = parseFloat(totalImpuestos).toFixed(2);
+                    if(totalImpuestos) iva = parseFloat(totalImpuestos).toFixed(2);
                 }
             }
 
-            // Otros montos
-            const otros = "0.00";
+            // --- Concatenar todos los conceptos y descripciones ---
+            let conceptosList = [];
+            let descripcionesList = [];
+            const conceptosNodes = xmlDoc.getElementsByTagName("cfdi:Concepto");
+            for(let conceptoNode of conceptosNodes) {
+                conceptosList.push(conceptoNode.getAttribute("ClaveProdServ") || "-");
+                descripcionesList.push(conceptoNode.getAttribute("Descripcion") || "-");
+            }
+            const concepto = conceptosList.join(" | ");
+            const descripcion = descripcionesList.join(" | ");
+                
+            let otros = "";
+            if(parseFloat(iva) + parseFloat(subtotal) === parseFloat(total))
+                otros = "0.00";
+            else
+                otros = (parseFloat(total) - (parseFloat(iva) + parseFloat(subtotal))).toFixed(2);
 
             resolve({
+                folio: folioFactura,
                 fecha: fechaRaw,
-                proveedor: proveedor,
-                concepto: '-',
+                proveedor: proveedorNombre,
+                proveedorRfc: proveedorRFC,
+                concepto: concepto,
                 descripcion: descripcion,
-                importe: subtotal,
-                iva: iva,
-                otros: otros,
-                total: total,
+                importe: `$${subtotal}`,
+                iva: `$${iva}`,
+                otros: `$${otros}`,
+                total: `$${total}`,
                 moneda: moneda,
                 tipoCambio: tipoCambio
             });
@@ -499,13 +847,50 @@ async function parseXML(xmlFile) {
 }
 
 
-/* ============================= UPLOAD FACTURAS ============================= */
+/* =================================== BANXICO =================================== */
+async function getTipoCambio(moneda, fecha = null) {
+    if(!moneda || moneda === 'MXN') return '1.0000';
+
+    const BANXICO_DISPONIBLE = ['USD', 'EUR', 'JPY', 'GBP', 'CAD'];
+    if(!BANXICO_DISPONIBLE.includes(moneda)) {
+        Toast('TIPO DE CAMBIO', `La moneda ${moneda} no está disponible en Banxico. Por favor, ingresa el tipo de cambio manualmente`);
+        return null;
+    }
+
+    const cacheKey = `${moneda}_${fecha || 'hoy'}`;
+    if(exchangeRateCache[cacheKey]) return exchangeRateCache[cacheKey];
+
+    try {
+        const query = fecha ? `?fecha=${fecha}` : '';
+        const res = await fetch(`http://127.0.0.1:3000/api/solicitudes/tipocambio/${moneda}${query}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+
+        if(res.ok) {
+            const data = await res.json();
+            const rate = parseFloat(data.tipoCambio).toFixed(4);
+            exchangeRateCache[cacheKey] = rate;
+            return rate;
+        }
+
+        const err = await res.json().catch(() => ({}));
+        Toast('TIPO DE CAMBIO', err.message || `No se encontró tipo de cambio para ${moneda} en esa fecha. Por favor, ingrésalo manualmente`);
+        return null;
+    } catch {
+        Toast('TIPO DE CAMBIO', 'No se pudo conectar con el servidor para obtener el tipo de cambio. Por favor, ingrésalo manualmente');
+        return null;
+    }
+}
+
+
+/* ================================ UPLOAD FACTURAS ================================ */
 // IMG
 async function uploadIMG(imgFile) {
     const formData = new FormData();
     formData.append('file', imgFile);
 
-    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/factura/img', {
+    const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/upload/factura/img', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -524,9 +909,9 @@ async function uploadIMG(imgFile) {
 // PDF
 async function uploadPDF(pdfFile) {
     const formData = new FormData();
-    formData.append('pdf', pdfFile);
+    formData.append('file', pdfFile);
 
-    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/factura/pdf', {
+    const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/upload/factura/pdf', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -545,9 +930,9 @@ async function uploadPDF(pdfFile) {
 // XML
 async function uploadXML(xmlFile) {
     const formData = new FormData();
-    formData.append('xml', xmlFile);
+    formData.append('file', xmlFile);
 
-    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/factura/xml', {
+    const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/upload/factura/xml', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -745,7 +1130,31 @@ function initUpload() {
         uploadButton.parentNode.replaceChild(newButton, uploadButton);
 
         newButton.addEventListener('click', async() => {
-            // 1. Solicitud
+            // 1. Fila pendiente de edición
+            if(pendingEditRow && pendingTempData) {
+                const success = await addPDFRow(pendingEditRow, pendingTempData);
+                if(success) {
+                    pendingEditRow = null;
+                    pendingTempData = null;
+
+                    const isFacturado = document.querySelector('.tab.factura.selected') !== null;
+                    if(isFacturado)
+                        resetFacturado();
+                    else
+                        resetNoFacturado();
+
+                    const xmlColumn = document.querySelector('#facturado-container .second-column');
+                    const isXmlVisible = xmlColumn && window.getComputedStyle(xmlColumn).display !== 'none';
+                    const button = document.querySelector('.button-receipt');
+                    if(isFacturado && isXmlVisible)
+                        button.innerHTML = 'CARGAR';
+                    else
+                        button.innerHTML = 'LLENAR DATOS';
+                }
+                return;
+            }
+
+            // 2. Solicitud
             const selector = document.querySelector('.request-selector');
             const selectedFolio = selector ? selector.dataset.selectedFolio : null;
             if(!selectedFolio) {
@@ -755,10 +1164,12 @@ function initUpload() {
 
             const isFacturado = document.querySelector('.tab.factura.selected') !== null;
 
+            // ====== FACTURADO ====== //
             if(isFacturado) {
                 const xmlColumn = document.querySelector('#facturado-container .second-column');
                 const isXmlVisible = xmlColumn && window.getComputedStyle(xmlColumn).display !== 'none';
 
+                // XML visible
                 if(isXmlVisible) {
                     if(!selectedPDF && !selectedXML) {
                         Toast('FALTA DE ARCHIVOS', 'Por favor, selecciona ambos archivos: PDF y XML');
@@ -772,19 +1183,224 @@ function initUpload() {
                         Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato XML para su registro');
                         return;
                     }
-                } else {
+
+                    showLoaderFact(pdfContainer);
+                    showLoaderFact(xmlContainer);
+                    showLoader();
+
+                    try {    
+                        const datosXML = await parseXML(selectedXML);
+
+                        const nuevaFactura = {
+                            folio: datosXML.folio,
+                            ...datosXML,
+                            pdfFile: selectedPDF,
+                            xmlFile: selectedXML,
+                            pdfPath: null,
+                            xmlPath: null
+                        };
+
+                        if(duplicateFactura(nuevaFactura)) {
+                            Toast('FACTURA YA REGISTRADA', 'Lo siento, esta factura ya fue agregada previamente a la solicitud');
+                            resetFacturado();
+                            return;
+                        }
+
+                        addFactura(nuevaFactura);
+                        facturasCargadas.push(nuevaFactura);
+                        resetFacturado();
+                        Toast('FACTURA REGISTRADA', 'La factura se cargó correctamente. Puedes agregar otra');
+                    } catch(error) {
+                        Toast('ERROR EN EL REGISTRO', error.message);
+                        if(selectedPDF) 
+                            previewFileInfo(pdfContainer, selectedPDF, 'fa-solid fa-file-pdf');
+                        if(selectedXML && isXmlVisible) 
+                            previewFileInfo(xmlContainer, selectedXML, 'fa-solid fa-file-code');
+                    } finally {
+                        hideLoader();
+                    }
+                }
+                // PDF visible
+                else {
                     if(!selectedPDF) {
                         Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
                         return;
                     }
+                    if(pendingEditRow) {
+                        Toast('ESPERA UN MOMENTO', 'Aún tienes una factura en proceso. Complétala o elimínala para continuar');
+                        return;
+                    }
+
+                    showLoader();
+
+                    try {
+                        const tempId = Date.now() + '-' + Math.random();
+                        const tempData = {
+                            tempId: tempId,
+                            pdfPath: selectedPDF,
+                            moneda: currentMoneda || 'MXN',
+                            tipoEdicion: 'pdf'
+                        };
+
+                        const newRow = addFacturaEditable(tempData);
+                        pendingEditRow = newRow;
+                        pendingTempData = tempData;
+
+                        
+                        facturasCargadas.push(tempData);
+                        const button = document.querySelector('.button-receipt');
+                        button.innerHTML = 'CARGAR';
+                        
+                        Toast('PDF REGISTRADO', 'Por favor, completa los datos de la factura en la tabla y presiona CARGAR al terminar');
+                    } catch(error) {
+                        Toast('ERROR EN EL REGISTRO', error.message);
+                        if(selectedPDF) previewFileInfo(pdfContainer, selectedPDF, 'fa-solid fa-file-pdf');
+                    } finally {
+                        hideLoader();
+                    }
                 }
-            } else {
+            } 
+            // ====== NO FACTURADO ====== //
+            else {
                 if(!selectedIMG) {
                     Toast('COMPROBANTE FALTANTE', 'Por favor, selecciona la imagen del ticket o recibo para su registro');
                     return;
                 }
+                if(pendingEditRow) {
+                    Toast('ESPERA UN MOMENTO', 'Aún tienes una factura en proceso. Complétala o elimínala para continuar');
+                    return;
+                }
+
+                showLoader();
+
+                try {
+                    const tempId = Date.now() + '-' + Math.random();
+                    const tempData = {
+                        tempId: tempId,
+                        imgPath: selectedIMG,
+                        moneda: currentMoneda || 'MXN',
+                        tipoEdicion: 'img'
+                    };
+
+                    const newRow = addFacturaEditable(tempData);
+                    pendingEditRow = newRow;
+                    pendingTempData = tempData;
+                    facturasCargadas.push(tempData);
+                    const button = document.querySelector('.button-receipt');
+                    if(button) button.innerHTML = 'CARGAR';
+                
+                    Toast('COMPROBANTE REGISTRADO', 'Por favor, completa los datos de la factura en la tabla y presiona CARGAR al terminar');
+                } catch(error) {
+                    Toast('ERROR EN EL REGISTRO', error.message);
+                    if(selectedIMG) previewImage(imgContainer, selectedIMG);
+                } finally {
+                    hideLoader();
+                }
             }
         });
+    }
+}
+
+async function enviarComprobacion() {
+    const selector = document.querySelector('.request-selector');
+    const selectedFolio = selector?.dataset.selectedFolio;
+
+    if(!selectedFolio) {
+        Toast('SOLICITUD REQUERIDA', 'Por favor, selecciona una solicitud para enviar su comprobación');
+        return;
+    }
+    if(facturasCargadas.length === 0) {
+        Toast('SIN FACTURAS', 'Agrega al menos una factura para continuar');
+        return;
+    }
+
+    showLoader();
+    try {
+        const fechaComprobacion = new Date().toLocaleDateString('sv-SE');
+        const facturasEnviar = [];
+
+        for(const factura of facturasCargadas) {
+            let rutaPDF = null, rutaXML = null, rutaIMG = null;
+
+            if(factura.pdfFile instanceof File)
+                rutaPDF = await uploadPDF(factura.pdfFile);
+
+            if(factura.xmlFile instanceof File)
+                rutaXML = await uploadXML(factura.xmlFile);
+
+            if(factura.imgFile && factura.imgFile instanceof File)
+                rutaIMG = await uploadIMG(factura.imgFile);
+
+            const importeNum = parseFloat(String(factura.importe).replace(/[^0-9.-]/g, ''));
+            const ivaNum = parseFloat(String(factura.iva).replace(/[^0-9.-]/g, ''));
+            const otrosNum = parseFloat(String(factura.otros).replace(/[^0-9.-]/g, ''));
+            const totalNum = parseFloat(String(factura.total).replace(/[^0-9.-]/g, ''));
+            const tipoCambioNum = factura.tipoCambio ? parseFloat(factura.tipoCambio) : null;
+
+            if(isNaN(importeNum))
+                throw new Error(`Importe inválido para factura ${factura.folio}`);
+            if(isNaN(ivaNum))
+                throw new Error(`IVA inválido para factura ${factura.folio}`);
+            if(isNaN(otrosNum))
+                throw new Error(`Otros montos inválidos para factura ${factura.folio}`);
+            if(isNaN(totalNum))
+                throw new Error(`Total inválido para factura ${factura.folio}`);
+            if(tipoCambioNum && isNaN(tipoCambioNum))
+                throw new Error(`Tipo de cambio inválido para factura ${factura.folio}`);
+
+            facturasEnviar.push({
+                folio_factura: factura.folio,
+                fecha_factura: factura.fecha,
+                proveedor: factura.proveedor,
+                concepto: factura.concepto,
+                descripcion: factura.descripcion,
+                importe: importeNum,
+                iva: ivaNum,
+                otros_montos: isNaN(otrosNum) ? 0 : otrosNum,
+                total_moneda: totalNum,
+                tipo_moneda: factura.moneda,
+                ruta_xml: rutaXML,
+                ruta_pdf: rutaPDF,
+                ruta_jpg: rutaIMG,
+                tipo_cambio: tipoCambioNum
+            });
+        }
+
+        const body = {
+            folio_solicitud: selectedFolio,
+            fecha_comprobacion: fechaComprobacion,
+            facturas: facturasEnviar
+        };
+
+        console.log(body);
+
+        const response = await fetch('http://127.0.0.1:3000/api/comprobaciones', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include',
+            body: JSON.stringify(body)
+        });
+
+        if(!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || err.mensaje || 'Error al enviar comprobación');
+        }
+
+        const result = await response.json();
+        hideLoader();
+        Toast('COMPROBACIÓN ENVIADA', result.message || 'Comprobación enviada correctamente!');
+        resetAllFacturas();
+
+        setTimeout(() => {
+            window.location.href = 'colab-comprobaciones.html';
+        }, 2500);
+    } catch(error) {
+        Toast('ERROR AL ENVIAR COMPROBACIÓN', error.message);
+    } finally {
+        hideLoader();
     }
 }
 

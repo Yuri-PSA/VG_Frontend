@@ -207,7 +207,7 @@ async function sendButton() {
         const motivo = motivoRaw 
                         ? motivoRaw.charAt(0).toUpperCase() + motivoRaw.slice(1)
                         : '';
-        const monto_solicitado = parseFloat(document.querySelector('.answer.money input')?.value.trim());
+        const monto_solicitado = parseFloat(document.querySelector('.answer.money .money-amount')?.value.trim());
         const monto_moneda = document.querySelector('.currency-selector .flags p')?.textContent.trim();
         const forma_pago = document.querySelector('.payment-selector p')?.textContent.trim();
         const fecha_recepcion = new Date().toLocaleDateString('sv-SE');
@@ -241,16 +241,16 @@ async function sendButton() {
             }
 
             const result = await response.json();
-            hideLoader();
             Toast('SOLICITUD ENVIADA', result.message || '¡Solicitud enviada correctamente!');
             
             setTimeout(() => {
                 window.location.href = 'colab-solicitudes.html';
             }, 2500);
-        }catch(error) {
-            hideLoader();
+        } catch(error) {
             Toast('ERROR AL ENVIAR SOLICITUD', error.message);
-        };
+        } finally {
+            hideLoader();
+        }
     });
 }
 
@@ -275,6 +275,7 @@ async function loadSolicitudData(folio) {
         if(!response.ok) {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.message || 'Error al cargar la solicitud');
+            console.log(err);
         }
 
         const data = await response.json();
@@ -297,7 +298,7 @@ function populateFormWithData(data) {
     if(motiveTextarea) motiveTextarea.value = data.motivo || '';
 
     // Monto
-    const amountInput = document.querySelector('.answer.money input');
+    const amountInput = document.querySelector('.answer.money .money-amount');
     if(amountInput) amountInput.value = data.monto_solicitado || '';
 
     // Moneda
@@ -378,7 +379,7 @@ async function saveButton() {
         const motivo = motivoRaw 
                         ? motivoRaw.charAt(0).toUpperCase() + motivoRaw.slice(1)
                         : '';
-        const monto_solicitado = parseFloat(document.querySelector('.answer.money input')?.value.trim());
+        const monto_solicitado = parseFloat(document.querySelector('.answer.money .money-amount')?.value.trim());
         const monto_moneda = document.querySelector('.currency-selector .flags p')?.textContent.trim();
         const forma_pago = document.querySelector('.payment-selector p')?.textContent.trim();
 
@@ -430,7 +431,7 @@ async function saveButton() {
 function validateForm(isEdit = false) {
     const destination = document.getElementById('ans-destination')?.value.trim();
     const motive = document.querySelector('.answer.motive textarea')?.value.trim();
-    const amount = document.querySelector('.answer.money input')?.value.trim();
+    const amount = document.querySelector('.answer.money .money-amount')?.value.trim();
 
     const errorTitle = isEdit 
         ? 'ERROR AL GUARDAR CAMBIOS' 
