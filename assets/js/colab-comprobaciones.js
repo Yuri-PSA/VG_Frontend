@@ -7,11 +7,15 @@ document.addEventListener("DOMContentLoaded", function() {
     tableInformation({});
     tabSelected();
     search();
+    initSearchFromUrl();
     initCalendar();
     setupCalendar();
     activeCards();
     setupSorting();
     buttonComp();
+    replicateCircles();
+    window.addEventListener('resize', () => replicateCircles());
+    buttonInfo();
 });
 
 
@@ -605,6 +609,58 @@ function search() {
 }
 
 
+/* =============================== URL PARAMS =============================== */
+function initSearchFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchValue = urlParams.get('search');
+    const tipo = urlParams.get('tipo');
+
+    if(!searchValue || !tipo) return;
+
+    const input = document.querySelector('.search-back input');
+    const glass = document.querySelector('.fa-magnifying-glass');
+    const sol = document.querySelector('.fa-plane');
+    if (!input || !glass || !sol) return;
+
+    input.value = searchValue;
+
+    // Determinar modo "solicitud" (swapped = true) o "folio" (swapped = false)
+    const shouldSwapp = (tipo === 'solicitud');
+
+    if(swapped !== shouldSwapp) {
+        const parent = document.querySelector('.search-back');
+        const glassRemoved = parent.removeChild(glass);
+        const solRemoved = parent.removeChild(sol);
+
+        if(shouldSwapp) {
+            parent.insertBefore(solRemoved, input);
+            parent.insertBefore(glassRemoved, document.querySelector('.fa-calendar').nextSibling);
+            input.placeholder = 'Solicitud. . .';
+        } else {
+            parent.insertBefore(glassRemoved, input);
+            parent.insertBefore(solRemoved, document.querySelector('.fa-calendar').nextSibling);
+            input.placeholder = 'Folio. . .';
+        }
+        swapped = shouldSwapp;
+    }
+
+    // Realizar búsqueda
+    setTimeout(() => {
+        const filtros = getCurrentFilters();
+        if(tipo === 'folio') {
+            filtros.folio = searchValue;
+            delete filtros.solicitud;
+        } else {
+            filtros.solicitud = searchValue;
+            delete filtros.folio;
+        }
+        
+        currentPage = 1;
+        tableInformation(filtros, currentPage);
+    }, 200);
+}
+
+
 /* ============================== CALENDAR ============================== */
 function initCalendar() {
     const monthLabel = document.querySelector('.date-header .month');
@@ -1028,6 +1084,7 @@ function setupSorting() {
 
 
 /* ============================== ACTION BUTTONS ============================== */
+// Nueva Comprobación
 function buttonComp() {
     const button = document.querySelector('.button-create');
     if(!button) return;
@@ -1035,6 +1092,84 @@ function buttonComp() {
     button.addEventListener('click', (e) => {
         e.stopPropagation();
         window.location.href = 'crear-comprobacion.html';
+    });
+}
+
+// Information
+function replicateCircles() {
+    const bottom = document.querySelector('.info-bottom');
+    if(!bottom) return;
+
+    const existingCircles = bottom.querySelectorAll('.info-circle');
+    existingCircles.forEach(circle => circle.remove());
+
+    const circleSize = 55;
+    const spacing = 7;
+    
+    // Obtener el padding del contenedor
+    const computedStyle = getComputedStyle(bottom);
+    const paddingLeft = parseFloat(computedStyle.paddingLeft);
+    const paddingRight = parseFloat(computedStyle.paddingRight);
+    const availableWidth = bottom.clientWidth - paddingLeft - paddingRight;
+
+    if(availableWidth <= 0) return;
+
+    // Calcular cuántos círculos caben
+    let circlesCount = Math.floor((availableWidth + spacing) / (circleSize + spacing));
+    if(circlesCount < 1) circlesCount = 1;
+
+    // Calcular espacio sobrante
+    const totalCirclesWidth = circlesCount * circleSize;
+    const totalGapSpace = availableWidth - totalCirclesWidth;
+    const gapBetween = totalGapSpace / (circlesCount + 1);
+
+    let leftPos = paddingLeft + gapBetween;
+
+    for(let i = 0; i < circlesCount; i++) {
+        const circle = document.createElement('div');
+        circle.className = 'info-circle';
+        circle.style.position = 'absolute';
+        circle.style.top = '45%';
+        circle.style.transform = 'rotate(-50deg)';
+        circle.style.width = `${circleSize}px`;
+        circle.style.height = `${circleSize}px`;
+        circle.style.borderRadius = '50%';
+        circle.style.backgroundColor = 'transparent';
+        circle.style.boxShadow = 'inset -5px 3px 8px rgba(0, 0, 0, 0.25)';
+        circle.style.left = `${leftPos}px`;
+        circle.style.pointerEvents = 'none';
+        bottom.appendChild(circle);
+        leftPos += circleSize + gapBetween;
+    }
+}
+
+function buttonInfo() {
+    document.addEventListener('click', async (e) => {
+        const target = e.target;
+        if(!target.classList.contains('fa-circle-info')) return;
+
+        e.stopPropagation();
+        const row = target.closest('tr') || target.closest('.card');
+        if(!row) return;
+
+        const folioElement = row.querySelector('.folio p') || row.querySelector('.folio-mobile');
+        const folio = folioElement?.textContent.trim();
+        if(!folio) return;
+
+        const container = document.querySelector('.container');
+        const infoCard = document.querySelector('.info-wrapper');
+        const buttonClose = document.querySelector('.fa-solid.fa-xmark.close');
+        if(!infoCard || !container || !buttonClose) return;
+
+        infoCard.style.display = 'flex';
+        container.classList.add('modal-open');
+        replicateCircles();
+
+        buttonClose.onclick = (e) => {
+            e.stopPropagation();
+            infoCard.style.display = 'none';
+            container.classList.remove('modal-open');
+        };
     });
 }
 

@@ -1318,7 +1318,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     padding: 0.5em 1.3em 0.5em 0;
     border-radius: 10px 10px 0 0;
     background-color: var(--toast);
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: 550;
     letter-spacing: 0.07em;
     color: var(--white);
@@ -1338,7 +1338,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     align-items: center;
     text-align: center;
     padding: 0.9em 1.5em 1.2em 1.5em;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
 .receipt-container {
@@ -1524,6 +1524,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     bottom: 0;
     pointer-events: none;
 }
+
 
 /* ============================== MOBILE ============================== */
 .cards-mobile,

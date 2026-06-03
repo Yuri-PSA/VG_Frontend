@@ -1276,8 +1276,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 29em;
-    height: 90%;
+    width: 33em;
+    height: 93%;
     background-color: var(--transparent-blue);
     border-radius: 15px;
     padding: 0.8em;
@@ -1286,306 +1286,298 @@ body {
 
 .info-back {
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     background-color: var(--tr-passport);
     border-radius: 10px;
     overflow: hidden;
-    padding: 0;
-}
-
-.info-back::before,
-.info-back::after {
-    position: absolute;
-    content: '';
-    top: 50%;
-    transform: translateY(-50%);
-    width: 52px;
-    height: 52px;
-    background-color: transparent;
-    border-radius: 50%;
-    z-index: 10;
-}
-
-.info-back::before { 
-    left: -26px; 
-    box-shadow: inset -5px 3px 8px rgba(0, 0, 0, 0.25);
-}
-
-.info-back::after { 
-    right: -26px; 
-    box-shadow: inset 5px 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .info-decor {
-    position: relative;
+    flex-shrink: 0;
+    width: 100%;
     display: flex;
     align-items: center;
-    width: 100%;
-    height: 9%;
-    overflow: hidden;
-}
-
-.info-decor.top { border-radius: 10px 10px 0 0; }
-
-.info-decor.bottom { border-radius: 0 0 10px 10px; }
-
-.stripes {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(135deg,
-        transparent,
-        transparent 20px,
-        var(--toast) 20px,
-        var(--toast) 40px
-    );
-}
-
-.arrow-back {
-    position: absolute;
-    left: 0.5em;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2.7em;
-    height: 2.7em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--blue-white);
-    border-radius: 50%;
-    border: 6px solid var(--toast);
-    z-index: 2;
-    cursor: pointer;
-    transition: background-color 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1),
-                color 0.3s ease,
-                transform 0.2s ease;
-}
-
-.arrow-back:hover {
+    justify-content: space-between;
+    padding: 0.5em 1.3em 0.5em 0;
+    border-radius: 10px 10px 0 0;
     background-color: var(--toast);
+    font-size: 1.1em;
+    font-weight: 550;
+    letter-spacing: 0.07em;
     color: var(--white);
 }
 
-.info-container {
-    width: 100%;
-    height: 82%;
+.info-decor p,
+.info-decor span {
+    flex: 1;
+    text-align: center;
 }
 
-.info-top,
-.info-bottom {
-    position: relative;
-    width: 100%;
-    height: 50%;
+.info-decor i { cursor: pointer; }
+
+.cmp-container { 
+    flex: 1;
+    min-height: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
 }
 
 .request-generals {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0.7em 0.7em 0 0.5em;
+    padding: 0.7em;
 }
 
-.info-folio,
 .info-date,
-.info-update,
-.payment-date { 
-    font-size: 0.8em; 
+.info-update { 
+    font-size: 0.75em; 
     font-weight: 700;
+    gap: 0.4em;
 }
 
-.info-folio span,
 .info-date span,
-.info-update span,
-.payment-date span { font-weight: 500; }
-
-.both-status {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-}
-
-.request-generals .both-status .status:only-child { margin-bottom: 4em; }
-
-.request-generals .both-status .status.second { margin-bottom: 1.5em; }
+.info-update span { font-weight: 500; }
 
 .request-generals .status { padding: 0.5em 1em; }
 
-.request-destination {
-    width: 100%;
+.container-details {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.request-destination .info-subtitle {
-    font-size: 0.8em;
-    font-weight: 620;
-    color: var(--passport-gray);
-}
-
-.request-destination p {
-    font-size: 2.5em;
-    font-weight: 500;
-    line-height: 1.2em;
-}
-
-.colab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-top: 0.2em;
-    gap: 0.5em;
-}
-
-.colab::before,
-.colab::after {
-    content: '';
     flex: 1;
-    height: 40%;
-    background-color: var(--icons);
-}
-
-.request-dates-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: end;
+    min-height: 0;
     width: 100%;
-    height: 40%;
-    padding: 0 1.6em;
 }
 
-.request-dates {
+.operations {
+    flex-shrink: 0;
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-content: space-between;
-    align-items: end;
-    width: 100%;
-    height: 100%;
-    padding: 0.5em 0.7em 0.2em 0.7em;
-}
-
-.departure-date,
-.return-date { 
-    width: auto; 
-    padding-bottom: 0.4em;
-}
-
-.departure-date .info-subtitle,
-.return-date .info-subtitle {
-    font-size: 0.75em;
-    font-weight: 650;
-    color: var(--passport-gray);
-}
-
-.departure-date p,
-.return-date p { font-size: 0.9em; }
-
-.return-date { 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; 
-}
-
-.travel-days {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0px;
-}
-
-.travel-days img,
-.travel-days p {
-    margin: 0;
-    padding: 0;
-}
-
-.travel-days img:first-child {
-    width: 20%;
-    rotate: 45deg;
-    transform: translateY(10%);
-}
-
-.travel-days img:nth-child(2) {
-    width: 100%;
-    object-fit: contain;
-}
-
-.total-days {
-    font-size: 0.6em;
-    font-weight: 600;
-    color: var(--passport-gray);
-    line-height: 1.2;
-}
-
-.passport-line { 
-    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    padding: 1.5em 0;
     border-bottom: 1.5px dashed var(--line-gray);
 }
 
-.info-bottom { 
-    justify-content: center; 
-    padding-bottom: 0.7em;
+.calc-total { 
+    justify-content: center;
+    border-right: 2px solid var(--line-gray); 
+    padding: 0 1em 0 1.5em;
 }
 
-.info-row { 
-    display: flex;
-    align-items: center;
-    height: 90%;
-    align-items: stretch;
-}
-
-.info-bottom .info-subtitle {
-    font-size: 0.75em;
-    font-weight: 650;
-    color: var(--passport-gray);
-}
-
-.info-motive,
-.info-money { 
+.calc-total,
+.calc-totalSaldo {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    width: 50%; 
+    width: 100%;
     height: 100%;
 }
 
-.info-motive { padding: 0em 0.7em 0 2.2em; }
-
-.info-money {
-    text-align: end;
-    padding: 0em 2.2em 0 0.7em;
+.calc-totalSaldo { 
+    justify-content: end; 
+    padding: 0 1.5em 0 1em;
 }
 
-.info-amount { font-size: 1.7em; }
+.calc-info {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: 1.2em;
+    border-bottom: 2px solid var(--line-gray);
+    padding-bottom: 0.3em;
+}
 
-.info-currency {
+.calc-titles p,
+.calc-subtitle {
+    text-align: left;
+    font-size: 0.75em;
+    font-weight: 650;
+    color: var(--passport-gray);
+    line-height: 2;
+}
+
+.calc-values p {
+    text-align: right;
+    font-size: 0.93em;
+    line-height: 1.5;
+}
+
+.calc-saldo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 1.05em;
+    font-weight: 600;
+    margin-top: 0.3em;
+}
+
+.calc-saldo .calc-subtitle { font-size: 0.8em; }
+
+.info-currency,
+.monto-currency {
     display: flex;
     justify-content: end;
     align-items: center;
     gap: 0.3em;
-    margin-bottom: 1.5em;
-    transform: translateY(-10%);
 }
 
-.currency-flag {
-    width: 15px;
-    height: 15px;
+.info-currency img,
+.monto-currency img {
+    width: 13.5px;
+    height: 13.5px;
     border-radius: 50%;
     object-fit: cover;
 }
 
-.info-currency p { font-size: 0.8em; }
+.info-currency p,
+.monto-currency p { 
+    font-size: 0.75em; 
+    transform: translateY(-5%);
+}
 
-.general-date { padding-left: 0.7em; }
+.facturas {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
 
+.fact-title {
+    text-align: left;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--black);
+    padding: 0.7em;
+    flex-shrink: 0;
+}
+
+.content-fact {
+    flex: 1;
+    width: 100%;
+    background-color: var(--toast);
+    padding: 1em 0.7em;
+    overflow-y: auto;
+    scrollbar-width: auto;
+    scrollbar-color: var(--blue-white) transparent;
+}
+
+.content-fact::-webkit-scrollbar { width: 2px; }
+
+.content-fact::-webkit-scrollbar-track { background: transparent; }
+
+.content-fact::-webkit-scrollbar-thumb {
+    background-color: var(--icons);
+    border-radius: 1em;
+}
+
+.card-factura {
+    display: flex;
+    flex-direction: column;
+    border-radius: 7px;
+    background-color: var(--blue-white);
+}
+
+.card-factura:not(:last-child) { margin-bottom: 1em; }
+
+.factura-pres {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.7em;
+}
+
+.card-factura .factura-pres { box-shadow: 0 3px 10px -9px rgba(0, 0, 0, 0.8); }
+
+.fact-first-info { width: 50%; }
+
+.fact-first-info .fact-text { font-size: 0.95em; }
+
+.fact-text span { font-weight: 600; }
+
+.fact-subtitle {
+    font-size: 0.75em;
+    font-weight: 700;
+    color: var(--passport-gray);
+}
+
+.fact-complete-info {
+    width: 100%;
+    padding: 0.7em;
+}
+
+.general-information { border-bottom: 1.5px dashed var(--line-gray); }
+
+.general-information p:last-child { margin-bottom: 0.7em; }
+
+.fact-complete-info .fact-subtitle.prin { margin-bottom: 0.5em; }
+
+.fact-complete-info .fact-text { font-size: 0.85em; }
+
+.general-montos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0.7em 0;
+}
+
+.fact-montos { padding: 0 2.5em 0 0; }
+
+.calc-info.montos .calc-titles p { font-size: 0.7em;}
+
+.calc-info.montos .calc-values p { font-size: 0.85em; }
+
+.fact-montos .calc-saldo { font-size: 0.9em; }
+
+.fact-montos .calc-saldo .calc-subtitle { font-size: 0.75em; }
+
+.fact-tipo-cambio {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.moneda-cambio {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 0.5em;
+}
+
+.monto-currency.cambio-mx img,
+.monto-currency.cambio-intern img {
+    width: 15px;
+    height: 15px;
+}
+
+.monto-currency.cambio-mx p,
+.monto-currency.cambio-intern p { font-size: 0.85em; }
+
+.buttons-info {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: auto;
+    color: var(--icons);
+    font-size: 1.25em;
+}
+
+.buttons-info i { cursor: pointer; }
+
+.info-bottom {
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    height: 40px;
+    background: var(--tr-passport);
+    padding: 0 0.5em;
+    overflow: hidden;
+}
+
+
+/* ============================== MOBILE ============================== */
 .cards-mobile,
 .agave-mobile { display: none; }
 
@@ -1736,82 +1728,6 @@ body {
     .page { font-size: 1.5em; }
 
     /* INFORMATION */
-    .info-wrapper {
-        width: 35em;
-        height: 95%;
-        border-radius: 25px;
-        padding: 1em;
-    }
-
-    .info-back { border-radius: 15px; }
-
-    .info-back::before,
-    .info-back::after {
-        width: 60px;
-        height: 60px;
-    }
-
-    .arrow-back {
-        width: 3.5em;
-        height: 3.5em;
-        border: 8px solid var(--toast);
-    }
-
-    .arrow-back i { 
-        font-size: 1.3em; 
-        transform: translateY(5%);
-    }
-
-    .request-generals .both-status .status:only-child { margin-bottom: 4.5em; }
-
-    .request-generals .both-status .status.second { margin-bottom: 2em; }
-
-    .request-generals { padding: 0.7em 0.9em 0 0.7em; }
-
-    .info-folio,
-    .info-date,
-    .payment-date,
-    .info-update { font-size: 0.9em; }
-
-    .request-generals .status { font-size: 0.9em; }
-
-    .request-destination .info-subtitle,
-    .departure-date .info-subtitle,
-    .return-date .info-subtitle,
-    .info-bottom .info-subtitle { font-size: 1em; }
-
-    .request-destination p { font-size: 3em; }
-
-    .request-dates-wrapper { 
-        height: 100%; 
-        padding: 0 2.1em;
-    }
-
-    .departure-date p,
-    .return-date p { font-size: 1.1em; }
-
-    .travel-days img:first-child { 
-        width: 25%; 
-        transform: translateY(5%);
-    }
-
-    .total-days { font-size: 0.8em; }
-
-    .passport-line { border-bottom: 2.5px dashed var(--line-gray); } 
-
-    .info-motive p,
-    .info-payment { font-size: 1.2em; }
-
-    .info-amount { font-size: 2.2em; }
-
-    .info-currency { gap: 0.5em; }
-
-    .currency-flag {
-        width: 19px;
-        height: 19px;
-    }
-
-    .info-currency p { font-size: 1em; }
 }
 
 /* Escritorios medianos (1440px + 1800px) */
@@ -1896,76 +1812,6 @@ body {
     .page { font-size: 1em; }
 
     /* INFORMATION */
-    .info-wrapper { 
-        width: 30em;
-        height: 95%; 
-    }
-
-    .info-back::before,
-    .info-back::after {
-        width: 50px;
-        height: 50px;
-    }
-
-    .request-generals { padding: 0.7em 0.9em 0 0.7em; }
-
-    .request-generals .both-status .status:only-child { margin-bottom: 3em; }
-
-    .request-generals .both-status .status.second { margin-bottom: 0.7em; }
-
-    .arrow-back {
-        width: 2.7em;
-        height: 2.7em;
-        border: 6px solid var(--toast);
-    }
-
-    .arrow-back i { font-size: 1em; }
-
-    .info-folio,
-    .info-date,
-    .payment-date,
-    .info-update { font-size: 0.75em; }
-
-    .request-destination .info-subtitle,
-    .departure-date .info-subtitle,
-    .return-date .info-subtitle,
-    .info-bottom .info-subtitle { font-size: 0.75em; }
-
-    .request-dates-wrapper { 
-        height: 100%; 
-        padding: 0 1.8em;
-    }
-
-    .request-destination p { font-size: 2.4em; }
-
-    .colab::before,
-    .colab::after { height: 30%; }
-
-    .departure-date p,
-    .return-date p { font-size: 0.9em; }
-
-    .travel-days img:first-child { 
-        width: 20%; 
-        transform: translateY(5%);
-    }
-
-    .total-days { font-size: 0.6em; }
-
-    .passport-line { border-bottom: 2px dashed var(--line-gray); } 
-
-    .info-motive p,
-    .info-payment { font-size: 1em; }
-
-    .info-amount { font-size: 1.7em; }
-
-    .info-currency { gap: 0.3em; }
-
-    .currency-flag {
-        width: 15px;
-        height: 15px;
-    }
-
-    .info-currency p { font-size: 0.8em; }
 }
 
 @media(min-width: 1366px) and (max-width:1469px) and (max-resolution: 1.5dppx) {
@@ -2070,51 +1916,6 @@ body {
     .page { font-size: 0.9em; }
 
     /* INFORMATION */
-    .info-wrapper {
-        width: 27em; 
-        height: 95%; 
-    }
-
-    .info-back::after,
-    .info-back::before { 
-        width: 48px; 
-        height: 47px;
-    }
-
-    .arrow-back {
-        width: 35px;
-        height: 35px;
-        border: 5px solid var(--toast);
-    }
-
-    .arrow-back i { font-size: 0.9em; }
-
-    .info-folio,
-    .info-date,
-    .payment-date,
-    .info-update { font-size: 0.7em; }
-
-    .request-generals .status { 
-        font-size: 0.7em; 
-        padding: 0.4em 0.9em;
-    }
-
-    .request-generals .both-status .status:only-child { margin-bottom: 3.5em; }
-
-    .request-generals .both-status .status.second { margin-bottom: 0.6em; }
-
-    .request-destination p { font-size: 2.3em; }
-
-    .info-subtitle { font-size: 0.7em; }
-
-    .request-dates { margin-top: 0.3em; }
-
-    .departure-date p { font-size: 0.8em; }
-
-    .info-motive p,
-    .info-payment { font-size: 0.9em; }
-
-    .info-currency p { font-size: 0.75em; }
 }
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx)  {
@@ -2219,56 +2020,6 @@ body {
     .page { font-size: 0.9em; }
 
     /* INFORMATION */
-    .info-wrapper {
-        width: 27em; 
-        height: 98%; 
-    }
-
-    .info-back::after,
-    .info-back::before { 
-        width: 48px; 
-        height: 47px;
-    }
-
-    .arrow-back {
-        width: 37px;
-        height: 37px;
-        border: 5px solid var(--toast);
-    }
-
-    .arrow-back i { font-size: 0.9em; }
-
-    .info-folio,
-    .info-date,
-    .payment-date,
-    .info-update { font-size: 0.66em; }
-
-    .request-generals .status { 
-        font-size: 0.7em; 
-        padding: 0.4em 0.9em;
-    }
-
-    .request-generals .both-status .status:only-child { margin-bottom: 3em; }
-    
-    .request-generals .both-status .status.second { margin-bottom: 1em; }
-
-    .request-destination p { font-size: 2.3em; }
-
-    .colab::before,
-    .colab::after { height: 35%; }
-
-    .info-subtitle { font-size: 0.7em; }
-
-    .request-destination .info-subtitle { font-size: 0.75em; }
-
-    .request-dates { margin-top: 0.3em; }
-
-    .departure-date p { font-size: 0.8em; }
-
-    .info-motive p,
-    .info-payment { font-size: 0.9em; }
-
-    .info-currency p { font-size: 0.75em; }
 }
 
 /* Laptops pequeñas (1024px - 1250px) */
@@ -2393,33 +2144,6 @@ body {
     .page { font-size: 0.9em; }
 
     /* INFORMATION */
-    .info-wrapper { 
-        width: 26em; 
-        height: 98%;
-    }
-
-    .info-folio,
-    .info-date,
-    .info-update,
-    .payment-date { font-size: 0.7em; }
-
-    .request-destination .info-subtitle,
-    .request-generals .status { font-size: 0.75em; }
-
-    .request-destination p { font-size: 2.2em; }
-
-    .departure-date p,
-    .return-date p { font-size: 0.8em; }
-
-    .info-motive p,
-    .info-payment { font-size: 0.85em; }
-
-    .currency-flag {
-        width: 13px;
-        height: 13px;
-    }
-
-    .info-currency p { font-size: 0.75em }
 }
 
 /* Tabletas */

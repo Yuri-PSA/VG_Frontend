@@ -1251,11 +1251,12 @@ async function changeState(folio, accion, motivoRechazo = '') {
             const tempData = await tempResponse.json();
 
             if(!tempData.solicitudes || tempData.solicitudes.length === 0) {
-                lastKnownCount  = 0;
+                lastKnownCount = 0;
                 updateCounters(0, 0);
             }
         }
 
+        currentPage = 1;
         tableInformation(filtros, currentPage);
     } catch(error) {
         Toast('ERROR', error.message || 'Error al procesar la acción');
@@ -1491,7 +1492,7 @@ function Toast(title, content, imageUrl = './assets/images/Icon_agave.webp') {
 // Rejected
 function ToastRejected(folio, callback) {
     Swal.fire({
-        title: 'SOLICITUD RECHAZADA',
+        title: 'COMPROBACIÓN RECHAZADA',
         html: `
             <img src="./assets/images/Icon_agave1.webp" alt="Agave" class="agave-half left">
             <img src="./assets/images/Icon_agave2.webp" alt="Agave" class="agave-half right">

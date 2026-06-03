@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
     searchFolio();
     initCalendar();
     setupCalendar();
+    buttonsAction();
 });
 
 
@@ -264,7 +265,7 @@ function getCurrentFilters() {
     const estado = getActiveStatus();
     const input = document.querySelector('.search-back input');
     const valor = input ? input.value.trim() : '';
-    const filtros = {};
+    const filtros = { estado };
     
     if(swapped)
         filtros.solicitud = valor;
@@ -335,8 +336,8 @@ async function tableInformation(filtros = {}, page = 1) {
             return;
         }
 
-        renderTable(data.comprobaciones, getActiveTabId());
-        //renderCards(data.comprobaciones, getActiveTabId());
+        renderTable(data.comprobaciones);
+        //renderCards(data.comprobaciones);
         updateCounters(data.pendientes ?? 0);
         updatePagination(data.paginacion);
         currentPage = data.paginacion.paginaActual;
@@ -351,7 +352,7 @@ async function tableInformation(filtros = {}, page = 1) {
 }
 
 // Table Information
-function renderTable(comprobaciones, tab = null) {
+function renderTable(comprobaciones) {
     const tbody = document.querySelector('.table-body');
     if(!tbody) return;
 
@@ -1081,6 +1082,103 @@ function setupSorting() {
 }
 
 
+/* ============================== ACTION BUTTONS ============================== */
+// Reject && Aprove
+let handleActionButtons;
+
+async function changeState(folio, accion, motivoRechazo = '') {
+    if(!token) {
+        Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+        return;
+    }
+
+    showLoader();
+    try {
+        const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/estado', {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ folio, accion, motivoRechazo }),
+        });
+
+        if(!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Error al procesar' }));
+            throw new Error(errorData.message || 'Error al procesar la acción');
+        }
+
+        const data = await response.json();
+        
+        Toast(
+            `COMPROBACIÓN ${accion === 'Aprobar' ? 'APROBADA' : 'RECHAZADA'}`,
+            `La comprobación con folio ${folio} fue ${accion === 'Aprobar' ? 'aprobada' : 'rechazada'} y notificada al colaborador correctamente`
+        );
+
+        const activeTab = document.querySelector('.tab.selected');
+        const isPendingTab = activeTab && activeTab.classList.contains('pending');
+
+        const filtros = getCurrentFilters();
+
+        if(isPendingTab) {
+            const tempResponse = await fetch(`http://127.0.0.1:3000/api/comprobaciones/listar?estado=Pendiente&limit=1`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                credentials: 'include'
+            });
+            const tempData = await tempResponse.json();
+
+            if(!tempData.comprobaciones || tempData.comprobaciones.length === 0) {
+                lastKnownCount = 0;
+                updateCounters(0, 0);
+            }
+        }
+
+        currentPage = 1;
+        tableInformation(filtros, currentPage);
+    } catch(error) {
+        Toast('ERROR', error.message || 'Error al procesar la acción');
+    } finally {
+        hideLoader();
+    }
+}
+
+function buttonsAction() {
+    if(handleActionButtons)
+        document.removeEventListener('click', handleActionButtons);
+
+    handleActionButtons = function(e) {
+        const target = e.target;
+
+        // Aprobar
+        if(target.classList.contains('fa-circle-check')) {
+            e.stopImmediatePropagation();
+            const row = target.closest('tr') || target.closest('.card');
+            if(!row) return;
+
+            const folioElement = row.querySelector('.folio p') || row.querySelector('.folio-mobile');
+            const folio = folioElement?.textContent.trim();
+            
+            if(folio) changeState(folio, 'Aprobar');
+        }
+
+        // Rechazar
+        if(target.classList.contains('fa-circle-xmark')) {
+            e.stopImmediatePropagation();
+            const row = target.closest('tr') || target.closest('.card');
+            if(!row) return;
+
+            const folioElement = row.querySelector('.folio p') || row.querySelector('.folio-mobile');
+            const folio = folioElement?.textContent.trim();
+
+            if(folio) ToastRejected(folio, changeState);
+        }
+    };
+
+    document.addEventListener('click', handleActionButtons);
+}
+
+
 /* =================================== TOAST =================================== */
 // Approved - Messages
 const ToastMixin = Swal.mixin({
@@ -1117,7 +1215,7 @@ function Toast(title, content, imageUrl = './assets/images/Icon_agave.webp') {
 // Rejected
 function ToastRejected(folio, callback) {
     Swal.fire({
-        title: 'SOLICITUD RECHAZADA',
+        title: 'COMPROBACIÓN RECHAZADA',
         html: `
             <img src="./assets/images/Icon_agave1.webp" alt="Agave" class="agave-half left">
             <img src="./assets/images/Icon_agave2.webp" alt="Agave" class="agave-half right">

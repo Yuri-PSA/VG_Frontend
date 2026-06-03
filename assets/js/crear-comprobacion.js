@@ -391,9 +391,22 @@ async function requestDropdown() {
                     });
                     dropdown.appendChild(option);
                 });
+
+                // Selección automática desde URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const folioParam = urlParams.get('folio');
+                
+                if(folioParam) {
+                    const opciones = dropdown.querySelectorAll('.request-option');
+                    for(let opt of opciones) {
+                        if(opt.textContent.trim() === folioParam) {
+                            opt.click();
+                            break;
+                        }
+                    }
+                }
             }
         } catch(error) {
-            console.error('Error al cargar solicitudes:', error);
             Toast('ERROR', 'No se pudieron cargar las solicitudes');
         } finally {
             dropdown.classList.remove('show');
