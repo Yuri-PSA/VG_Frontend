@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     buttonReceived();
     buttonEdit();
     buttonInfo();
+    buttonComprobacion();
 });
 
 
@@ -1618,6 +1619,50 @@ function populateInfoPanel(data) {
         document.querySelector('.payment-date').style.display = 'none';
     
     document.querySelector('.info-update span').textContent = formatDate(data.fecha_actualizacion);
+}
+
+// Expense verification
+async function buttonComprobacion() {
+    document.addEventListener('click', async (e) => {
+        const target = e.target;
+        if(!target.classList.contains('fa-money-check-dollar')) return;
+
+        e.stopPropagation();
+        const row = target.closest('tr') || target.closest('.card');
+        if(!row) return;
+
+        const folioElement = row.querySelector('.folio p') || row.querySelector('.folio-mobile');
+        const folio = folioElement?.textContent.trim();
+        if(!folio) return;
+
+        showLoader();
+        try {
+            if(!token) {
+                Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+                return;
+            }
+
+            const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/listar?solicitud=${encodeURIComponent(folio)}&limit=1`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                credentials: 'include'
+            });
+
+            if(!response.ok) throw new Error('Error al verificar comprobación');
+            
+            const data = await response.json();
+            console.log(data);
+            const existe = data.comprobaciones && data.comprobaciones.length > 0;
+
+            if(existe)
+                window.location.href = `colab-comprobaciones.html?search=${encodeURIComponent(folio)}&tipo=solicitud`;
+            else
+                window.location.href = `crear-comprobacion.html?folio=${encodeURIComponent(folio)}`;
+        } catch(error) {
+            Toast('ERROR', 'No se pudo verificar la existencia de la comprobación');
+        } finally {
+            hideLoader();
+        }
+    });
 }
 
 

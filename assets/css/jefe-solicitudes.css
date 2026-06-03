@@ -572,7 +572,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.5em;
+    gap: 0.7em;
     font-weight: 300;
     font-size: 1.2em;
     color: var(--white);
