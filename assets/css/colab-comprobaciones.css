@@ -1269,7 +1269,7 @@ body {
 }
 
 .info-wrapper {
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
@@ -1515,7 +1515,10 @@ body {
 
 .fact-complete-info .fact-subtitle.prin { margin-bottom: 0.5em; }
 
-.fact-complete-info .fact-text { font-size: 0.85em; }
+.fact-complete-info .fact-text { 
+    font-size: 0.85em;
+    line-height: 1.7;
+}
 
 .general-montos {
     display: grid;
@@ -1728,6 +1731,64 @@ body {
     .page { font-size: 1.5em; }
 
     /* INFORMATION */
+    .info-wrapper {
+        width: 39em;
+        height: 95%;
+        border-radius: 25px;
+    }
+
+    .info-back { border-radius: 15px; }
+
+    .info-decor { font-size: 1.4em; }
+
+    .info-date,
+    .info-update,
+    .request-generals .status,
+    .calc-titles p { font-size: 0.9em; }
+
+    .calc-values p {
+        font-size: 1.15em;
+        line-height: 1.7;
+    }
+
+    .calc-saldo { font-size: 1.2em; }
+
+    .calc-saldo .calc-subtitle { font-size: 0.9em; }
+
+    .info-currency img,
+    .monto-currency img,
+    .monto-currency.cambio-mx img, 
+    .monto-currency.cambio-intern img {
+        width: 16px;
+        height: 16px;
+    }
+
+    .info-currency p,
+    .monto-currency p { font-size: 0.85em; }
+
+    .fact-title,
+    .fact-first-info .fact-text { font-size: 1.1em; }
+
+    .fact-subtitle { font-size: 0.95em; }
+
+    .fact-complete-info .fact-text { font-size: 0.97em; }
+
+    .fact-tipo-cambio { padding-right: 1em; }
+
+    .calc-info.montos .calc-titles p { font-size: 0.85em; }
+
+    .calc-info.montos .calc-values p { font-size: 1.05em; }
+
+    .fact-montos .calc-saldo { font-size: 1.1em; }
+
+    .fact-montos .calc-saldo .calc-subtitle { font-size: 0.9em; }
+
+    .monto-currency.cambio-mx p, 
+    .monto-currency.cambio-intern p { font-size: 1.06em; }
+
+    .buttons-info { font-size: 1.7em; }
+
+    .info-bottom { height: 45px; }
 }
 
 /* Escritorios medianos (1440px + 1800px) */
@@ -1916,6 +1977,61 @@ body {
     .page { font-size: 0.9em; }
 
     /* INFORMATION */
+    .info-wrapper {
+        width: 31em;
+        height: 95%;
+    }
+
+    .info-date,
+    .info-update { font-size: 0.7em; }
+
+    .request-generals .status {
+        font-size: 0.7em;
+        padding: 0.4em 0.9em;
+    }
+
+    .calc-titles p { 
+        font-size: 0.7em;
+        line-height: 1.8; 
+    }
+
+    .calc-values p { font-size: 0.85em; }
+
+    .calc-saldo,
+    .fact-first-info .fact-text { font-size: 0.9em; }
+
+    .info-currency img,
+    .monto-currency img {
+        width: 11px;
+        height: 11px;
+    }
+
+    .info-currency p,
+    .monto-currency p { 
+        font-size: 0.7em;
+        transform: translateY(0%); 
+    }
+
+    .calc-info.montos .calc-values p,
+    .fact-title,
+    .fact-montos .calc-saldo,
+    .monto-currency.cambio-mx p,
+    .monto-currency.cambio-intern p { font-size: 0.8em; }    
+
+    .fact-subtitle { font-size: 0.67em; }
+
+    .fact-montos .calc-saldo .calc-subtitle,
+    .fact-complete-info .fact-text { font-size: 0.75em; }
+
+    .calc-info.montos .calc-titles p { font-size: 0.65em; }
+
+    .monto-currency.cambio-mx img,
+    .monto-currency.cambio-intern img {
+        width: 13.5px;
+        height: 13.5px;
+    }
+
+    .info-bottom { height: 35px; }
 }
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx)  {
@@ -2020,6 +2136,65 @@ body {
     .page { font-size: 0.9em; }
 
     /* INFORMATION */
+    .info-wrapper {
+        width: 31em;
+        height: 98%;
+    }
+
+    .info-decor { font-size: 1em; }
+
+    .info-date,
+    .info-update { 
+        font-size: 0.66em;
+        font-weight: 600; 
+    }
+
+    .request-generals .status {
+        font-size: 0.7em;
+        padding: 0.4em 0.9em;
+    }
+
+    .calc-titles p { 
+        font-size: 0.7em;
+        line-height: 1.8;  
+    }
+
+    .calc-values p,
+    .fact-montos .calc-saldo { font-size: 0.85em; }
+
+    .calc-saldo,
+    .fact-first-info .fact-text { font-size: 0.9em; }
+
+    .info-currency img,
+    .monto-currency img {
+        width: 11px;
+        height: 11px;
+    }
+
+    .info-currency p,
+    .monto-currency p,
+    .fact-title { font-size: 0.7em; }
+
+    .fact-first-info .fact-text { font-size: 0.87em; }
+
+    .fact-complete-info .fact-text,
+    .monto-currency.cambio-mx p,
+    .monto-currency.cambio-intern p { font-size: 0.75em; }
+
+    .calc-info.montos .calc-titles p { font-size: 0.65em; }
+
+    .calc-info.montos .calc-values p { font-size: 0.8em; }
+
+    .monto-currency.cambio-mx img,
+    .monto-currency.cambio-intern img {
+        width: 13px;
+        height: 13px;
+    }
+
+    .monto-currency.cambio-mx p,
+    .monto-currency.cambio-intern p { transform: translateY(0%); }
+
+    .info-bottom { height: 33px; }
 }
 
 /* Laptops pequeñas (1024px - 1250px) */
@@ -2144,6 +2319,65 @@ body {
     .page { font-size: 0.9em; }
 
     /* INFORMATION */
+    .info-wrapper {
+        width: 30em;
+        height: 98%;
+    }
+
+    .info-decor { font-size: 0.95em; }
+
+    .info-date,
+    .info-update { font-size: 0.67em; }
+
+    .request-generals .status {
+        font-size: 0.7em;
+        padding: 0em 1em;
+    }
+
+    .calc-titles p { 
+        font-size: 0.65em;
+        line-height: 1.8; 
+    }
+
+    .calc-values p,
+    .fact-montos .calc-saldo,
+    .monto-currency.cambio-mx p,
+    .monto-currency.cambio-intern p { font-size: 0.8em; }
+
+    .calc-subtitle,
+    .calc-info.montos .calc-values p,
+    .fact-title { font-size: 0.75em; }
+
+    .calc-saldo { font-size: 0.85em; }
+
+    .info-currency img,
+    .monto-currency img {
+        width: 11px;
+        height: 11px;
+    }
+
+    .info-currency p,
+    .monto-currency p,
+    .fact-subtitle { font-size: 0.65em; }
+
+    .fact-first-info .fact-text { font-size: 0.85em; }
+
+    .fact-complete-info .fact-text { font-size: 0.72em; }
+
+    .calc-info.montos .calc-titles p { font-size: 0.6em; }
+
+    .fact-montos .calc-saldo .calc-subtitle { font-size: 0.7em; }
+
+    .monto-currency.cambio-mx img,
+    .monto-currency.cambio-intern img {
+        width: 13px;
+        height: 13px;
+    }
+
+    .monto-currency.cambio-mx p,
+    .monto-currency.cambio-intern p { transform: translateY(0%); }
+
+    .info-bottom { height: 30px; }
 }
 
 /* Tabletas */
@@ -2437,6 +2671,57 @@ body {
         width: 100%;
         margin-top: 3em;
     }
+
+    /* INFORMATION */
+    .info-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40em;
+        max-width: calc(100% - 2em);
+        height: auto;
+        max-height: 85vh;
+        background-color: var(--transparent-blue);
+        border-radius: 15px;
+        padding: 0.8em;
+        z-index: 2000;
+        overflow: hidden;  
+    }
+
+    .info-back {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        max-height: calc(85vh - 1.6em);
+        background-color: var(--tr-passport);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .cmp-container {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .container-details {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow-y: auto;
+    }
+
+    .buttons-info { font-size: 1.5em; }
 
     .agave-mobile img { width: 70px; }
 }
@@ -2795,6 +3080,67 @@ body {
         width: 100%;
         margin: 2em 0 0.6em;
     }
+
+    /* INFORMATION */
+    .info-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 35em;
+        max-width: calc(100% - 2em);
+        height: auto;
+        max-height: 85vh;
+        background-color: var(--transparent-blue);
+        border-radius: 15px;
+        padding: 0.8em;
+        z-index: 2000;
+        overflow: hidden;  
+    }
+
+    .info-back {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        max-height: calc(85vh - 1.6em);
+        background-color: var(--tr-passport);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .cmp-container {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .container-details {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow-y: auto;
+    }
+
+    .fact-montos { padding: 0 2em 0 0; }
+
+    .moneda-cambio {
+        flex-direction: column;
+        align-items: start;
+        gap: 0em;
+    }
+
+    .moneda-cambio .equal { transform: translateX(400%); }
+
+    .buttons-info { font-size: 1.5em; }
 
     .agave-mobile img { width: 50px; }
 }

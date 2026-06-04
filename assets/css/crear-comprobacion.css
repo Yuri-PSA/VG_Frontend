@@ -1375,7 +1375,7 @@ body {
     .content-container { padding: 1.3em 1.2em 1.3em 1.5em; }
 
     .container {
-        background-size: 70% auto; 
+        background-size: 65% auto; 
         padding: 1em 1.3em 0 1.3em; 
     }
 
@@ -1468,7 +1468,7 @@ body {
 
     .container { 
         padding: 1em 1.3em 0 1.3em;
-        background-size: 75% auto; 
+        background-size: 65% auto; 
     }
 
     .titles .title { font-size: 2.5em; }
