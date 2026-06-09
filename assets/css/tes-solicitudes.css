@@ -452,7 +452,8 @@ body {
     height: 95vh !important;
     width: 95vw !important;
     overflow: hidden !important;
-    align-items: center;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .swal2-popup.receipt-preview .swal2-content {
@@ -461,6 +462,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .receipt-preview .swal2-image {
@@ -469,7 +472,7 @@ body {
     height: 90% !important;
     max-width: 25% !important;
     max-height: 90% !important;
-    object-fit: contain;
+    object-fit: cover;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -2208,6 +2211,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .receipt-preview .swal2-image {
         max-width: 95% !important;
         max-height: 90vh !important;
+        object-fit: contain;
     }
 
     .receipt-preview .swal2-close { font-size: 3em; }

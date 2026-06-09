@@ -10,7 +10,7 @@
     <meta name="description" content="Gestión de solicitudes, anticipos y comprobación de gastos">
 
     <!-- ======================= CSS ======================= -->
-    <link rel="stylesheet" href="./assets/css/jefe-solicitudes.css">
+    <link rel="stylesheet" href="./assets/css/colab-liquidaciones.css">
 
     <!-- ======================= ICONS ======================= -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -64,6 +64,16 @@
                     <i class="fa-solid fa-plane-departure"></i>
                     <p>Solicitudes</p>
                 </div>
+
+                <div class="option expenses">
+                    <img src="./assets/images/Payment.webp" alt="Payment">
+                    <p>Comprobaciones</p>
+                </div>
+
+                <div class="option liquidation">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <p>Liquidaciones</p>
+                </div>
             </div>
 
             <div class="logout">
@@ -80,62 +90,25 @@
                 <!-- ==================== CONTENT HEADER ==================== -->
                 <div class="content-header">
                     <div class="titles">
-                        <h1 class="title">APROBACIÓN DE SOLICITUDES</h1>
-                        <p class="subtitle">Evalúa y decide sobre las solicitudes de tus colaboradores</p>
+                        <h1 class="title">LIQUIDACIONES DE VIÁTICOS</h1>
+                        <p class="subtitle">Consulta el estado de tus reembolsos, devoluciones y saldos</p>
                     </div>
                 </div>
 
                 <div class="content">
                     <div class="tab-header">
                         <div class="tabs">
-                            <div class="tab pending selected">
-                                <p class="tab-selected">Pendientes</p>
-                                <div class="amount selected"></div>
-                            </div>
-
-                            <div class="tab approved"><p>Aprobadas</p></div>
-                            <div class="tab rejected"><p>Rechazadas</p></div>
+                            <div class="tab all selected"><p class="tab-selected">Todas</p></div>
+                            <div class="tab pending"><p>Pendientes</p></div>
+                            <div class="tab paid"><p>Pagadas</p></div>
+                            <div class="tab returned"><p>Devueltas</p></div>
+                            <div class="tab settled"><p>Saldadas</p></div>
                         </div>
 
                         <div class="search">
                             <div class="search-back">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" placeholder="Folio. . .">
-                                <i class="fa-regular fa-calendar"></i>
-                                <i class="fa-regular fa-circle-user"></i>
-                            </div>
-                        </div>
-
-                        <!-- ======================== CALENDARIO ======================== -->
-                        <div class="datepicker-wrapper">
-                            <div class="datepicker">
-                                <div class="datepicker-header">
-                                    <button class="prev-month" type="button"><i class="fa-solid fa-angle-left"></i></button>
-
-                                    <div class="date-header">
-                                        <div class="month"></div>
-                                        <div class="year"></div>
-                                    </div>
-
-                                    <button class="next-month" type="button"><i class="fa-solid fa-angle-right"></i></button>
-                                </div>
-
-                                <div class="days-header">
-                                    <span>DOM</span>
-                                    <span>LUN</span>
-                                    <span>MAR</span>
-                                    <span>MIE</span>
-                                    <span>JUE</span>
-                                    <span>VIE</span>
-                                    <span>SAB</span>
-                                </div>
-
-                                <div class="dates"></div>
-
-                                <div class="datepicker-bottom">
-                                    <div class="date-button clear-date">LIMPIAR</div>
-                                    <div class="date-button search-date">BUSCAR</div>
-                                </div>
+                                <i class="fa-solid fa-plane"></i>
+                                <input type="text" placeholder="Solicitud. . .">
                             </div>
                         </div>
                     </div>
@@ -146,32 +119,47 @@
                                 <thead class="table-head">
                                     <tr>
                                         <th>
-                                            <div class="order-div" data-column="folio">
+                                            <div class="order-div" data-column="solicitud">
                                                 <div class="order">
                                                     <i class="fa-solid fa-angle-up"></i>
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </div>
-                                                Folio
+                                                Solicitud
                                             </div>
                                         </th>
-                                        <th>Colaborador</th>
-                                        <th>Fecha</th>
-                                        <th>Destino</th>
                                         <th>
-                                            <div class="order-div" data-column="monto">
+                                            <div class="order-div" data-column="anticipo">
                                                 <div class="order">
                                                     <i class="fa-solid fa-angle-up"></i>
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </div>
-                                                Monto
+                                                Anticipo
                                             </div>
                                         </th>
+                                        <th>
+                                            <div class="order-div" data-column="comprobado">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Comprobado
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="order-div" data-column="saldo">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Diferencia
+                                            </div>
+                                        </th>
+                                        <th>Ajuste</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
 
-                                <tbody class="table-body">
-                                </tbody>
+                                <tbody class="table-body"></tbody>
                             </table>
                         </div>
                     </div>
@@ -181,7 +169,7 @@
                     <!-- ==================== PAGES ==================== -->
                     <div class="tab-buttons">
                         <div class="back-buttons disabled">
-                            <div class="prev">
+                            <div class="prev disabled">
                                 <svg class="icon default-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="15 18 9 12 15 6"></polyline>
                                 </svg>
@@ -208,83 +196,76 @@
                     </div> 
                 </div>
 
-                <!-- ========================= INFORMATION ========================= -->
+                <!-- ========================= TRANSFER RECEIPT ========================= -->
+                <div class="transfer-wrapper">
+                    <div class="transfer-back">
+                        <div class="top-decor">
+                            <p>SUBIR COMPROBANTE DE TRANSFERENCIA</p>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+
+                        <div class="bottom-info">
+                            <p>Adjunta el comprobante de la transferencia realizada para validar la entrega de la devolución.</p>
+
+                            <div class="receipt-container">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p>Selecciona o arrastra tu comprobante (JPG o PNG)</p>
+                            </div>
+
+                            <div class="button-receipt">CARGAR</div>
+                        </div>
+
+                        <div class="top-decor bottom"></div>
+                    </div>
+                </div>
+
                 <div class="info-wrapper">
                     <div class="info-back">
-                        <div class="info-decor top">
-                            <div class="arrow-back"><i class="fa-solid fa-arrow-left"></i></div>
-                            <div class="stripes"></div>
+                        <div class="top-decor">
+                            <p>ENTREGA DE <span class="ajuste"></span></p>
+                            <i class="fa-solid fa-xmark"></i>
                         </div>
 
-                        <div class="info-container">
-                            <div class="info-top">
-                                <div class="request-generals">
-                                    <div class="general-info">
-                                        <p class="info-folio">FOLIO DE SOLICITUD: <span></span></p>
-                                        <p class="info-date">FECHA DE SOLICITUD: <span></span></p>
-                                    </div>
-
-                                    <div class="status"></div>
-                                </div>
-
-                                <div class="request-destination">
-                                    <p class="info-subtitle">DESTINO</p>
-                                    <p></p>
-
-                                    <div class="colab"><p class="info-subtitle"></p></div>
-                                </div>
-
-                                <div class="request-dates-wrapper">
-                                    <div class="request-dates">
-                                        <div class="departure-date">
-                                            <p class="info-subtitle">SALIDA</p>
-                                            <p></p>
-                                        </div>
-                                        
-                                        <div class="travel-days">
-                                            <img src="./assets/images/Plane.webp" alt="Plane">
-                                            <img src="./assets/images/Arrow.webp" alt="Arrow">
-                                            <p class="total-days"><span></span> DÍAS</p>
-                                        </div>
-                                        
-                                        <div class="return-date">
-                                            <p class="info-subtitle">REGRESO</p>
-                                            <p></p>
-                                        </div>
-                                    </div>
-
-                                    <div class="passport-line"></div>
-                                </div>
+                        <div class="bottom-decor cash">
+                            <div class="info-agave left">
+                                <img src="./assets/images/Agave.webp" alt="Agave">
                             </div>
 
-                            <div class="info-bottom">
-                                <div class="info-row">
-                                    <div class="info-motive">
-                                        <p class="info-subtitle">MOTIVO</p>
-                                        <p></p>
-                                    </div>
+                            <div class="info-text">
+                                <p class="cash-entrega">FECHA DE PAGO: <span></span></p>
+                                <p class="cash-confir">FECHA DE CONFIRMACIÓN: <span></span></p>
+                            </div>
 
-                                    <div class="info-money">
-                                        <p class="info-subtitle">MONTO</p>
-                                        <p class="info-amount"><span class="symbol-money"></span></p>
-                                        
-                                        <div class="info-currency">
-                                            <img class="currency-flag">
-                                            <p></p>
-                                        </div>
-                                        
-                                        <p class="info-subtitle">FORMA DE PAGO</p>
-                                        <p class="info-payment"></p>
-                                    </div>
-                                </div>
-
-                                <p class="info-update">FECHA DE ACTUALIZACIÓN: <span></span></p>
+                            <div class="info-agave right">
+                                <img src="./assets/images/Agave.webp" alt="Agave">
                             </div>
                         </div>
 
-                        <div class="info-decor bottom">
-                            <div class="stripes"></div>
+                        <div class="bottom-decor transfer">
+                            <div class="info-text transfer">
+                                <p class="transfer-entrega">FECHA DE PAGO: <span></span></p>
+                                <p class="transfer-confir">FECHA DE CONFIRMACIÓN: <span></span></p>
+
+                                <div class="transfer-ver"><img></div>
+
+                                <div class="buttons-info">
+                                    <div class="button-verification">VER COMPROBANTE</div>
+                                    <div class="button-download">DESCARGAR</div>
+                                </div>
+                                
+                                <div class="info-icons">
+                                    <div class="info-agave left">
+                                        <img src="./assets/images/Agave.webp" alt="Agave">
+                                    </div>
+
+                                    <div class="info-agave right">
+                                        <img src="./assets/images/Agave.webp" alt="Agave">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="top-decor bottom"></div>
                     </div>
                 </div>
             
@@ -296,6 +277,6 @@
     </div>
 
     <script src="./assets/js/session.js"></script>
-    <script src="./assets/js/jefe-solicitudes.js"></script>
+    <script src="./assets/js/colab-liquidaciones.js"></script>
 </body>
 </html>

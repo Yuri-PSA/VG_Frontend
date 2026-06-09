@@ -44,6 +44,8 @@ const logoUser = Session.getUser();
 const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
 function formatDate(dateStr) {
+    if(!dateStr) return '—';
+
     const fechaISO = new Date(dateStr).toISOString().slice(0, 10);
     const [year, monthNum, day] = fechaISO.split('-');
     const dia = day;
@@ -299,7 +301,7 @@ function getCurrentFilters() {
 async function tableInformation(filtros = {}, page = 1) {
     showLoader();
     renderTable([], getActiveTabId());
-    //renderCards([]);
+    renderCards([]);
 
     const offset = (page - 1) * limitPerPage;
 
@@ -328,7 +330,7 @@ async function tableInformation(filtros = {}, page = 1) {
 
         if(!response.ok) {
             renderTable([]);
-            //renderCards([]);
+            renderCards([]);
             throw new Error('Error al obtener comprobaciones');
             return;
         }
@@ -338,19 +340,19 @@ async function tableInformation(filtros = {}, page = 1) {
 
         if(data.mensaje) {
             renderTable([]);
-            //renderCards([]);
+            renderCards([]);
             const tab = toastStatus();
             Toast(`SIN COMPROBACIONES ${tab === null ? '' : tab.toUpperCase()}`, `No tienes comprobaciones ${tab === null ? '' : tab} para mostrar en este momento`);
             return;
         }
 
         renderTable(data.comprobaciones, tab);
-        //renderCards(data.comprobaciones);
+        renderCards(data.comprobaciones, tab);
         updatePagination(data.paginacion);
         currentPage = data.paginacion.paginaActual;
     } catch(error) {
         renderTable([]);
-        //renderCards([]);
+        renderCards([]);
         Toast('ERROR AL MOSTRAR', 'No se pudieron cargar las comprobaciones. Por favor, intenta de nuevo');
     } finally {
         hideLoader();
@@ -395,7 +397,7 @@ function renderTable(comprobaciones, tab = 'all') {
             maximumFractionDigits: 2
         }).format(saldoAbs);
         const signo = saldoNum < 0 ? '-' : '';
-        const saldoTexto = `${signo}${simboloSaldo}${saldoFormateado}`;
+        const saldoTexto = `${signo} ${simboloSaldo}${saldoFormateado}`;
 
         const totalFormateado = new Intl.NumberFormat('es-MX', {
             minimumFractionDigits: 2,
@@ -434,6 +436,57 @@ function renderTable(comprobaciones, tab = 'all') {
         emptyRow.innerHTML = `<td><p class="empty-row">Empty</p></td><td></td><td></td><td></td><td></td><td></td><td></td>`;
         tbody.appendChild(emptyRow);
     }
+}
+
+// Cards Information
+function renderCards(comprobaciones, tab = 'all') {
+    const statusClass = {
+        'Pendiente': 'st-pending',
+        'Aprobada': 'st-approved',
+        'Rechazada': 'st-rejected'
+    };
+
+    const container = document.querySelector('.cards-mobile');
+    if(!container) return;
+    container.innerHTML = '';
+
+    if(!comprobaciones || comprobaciones.length === 0) return;
+
+    comprobaciones.forEach(cmp => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.setAttribute('data-folio', cmp.folio);
+        card.setAttribute('data-loaded', 'false');
+
+        // Estado
+        const estado = cmp.estado || '—';
+        const estadoClass = statusClass[estado] || 'st-pending';
+
+        card.innerHTML = `
+            <div class="first-info">
+                <div class="info-mobile">
+                    <p class="subt-mobile">FOLIO</p>
+                    <p class="folio-mobile">${cmp.folio}</p>
+                </div>
+                                
+                <div class="info-mobile">
+                    <p class="subt-mobile">SOLICITUD</p>
+                    <p>${cmp.solicitud}</p>
+                </div>
+
+                <div class="info-mobile">
+                    <p class="subt-mobile">ESTADO</p>
+                    <p class="status ${estadoClass} st-mobile">${estado}</p>
+                </div>
+            </div>
+
+            <div class="complete-info"></div>
+        `;
+
+        container.appendChild(card);
+    });
+
+    activeCards();
 }
 
 // Pagination
@@ -1029,19 +1082,130 @@ function setupCalendar() {
 
 
 /* ============================= ACTIVE CARD ============================= */
-function activeCards() {
+async function loadCardDetails(card) {
+    const folio = card.getAttribute('data-folio');
+    if(!folio) return;
+
+    try {
+        if(!token) {
+            Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+            return;
+        }
+
+        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        if(!response.ok) {
+            const err = await response.json().catch(() => ({ message: 'Error al cargar los detalles' }));
+            throw new Error(err.message || 'Error al obtener detalles');
+        }
+
+        const data = await response.json();
+        llenarInfoCard(card, data);
+        card.setAttribute('data-loaded', 'true');
+    } catch(error) {
+        Toast('ERROR', error.message || 'Error al cargar los detalles');
+    }
+}
+
+async function activeCards() {
     const cards = document.querySelectorAll('.cards-mobile .card');
-    if(!cards.length) return;
+    if(cards.length === 0) return;
 
     cards.forEach(card => {
-        card.addEventListener('click', (e) => {
+        card.addEventListener('click', async (e) => {
+            if(e.target.closest('.complete-info, .fa-circle-check, .fa-circle-xmark, .buttons-mobile'))
+                return;
+            
             e.stopPropagation();
 
-            if(e.target.closest('.fa-circle-check, .fa-circle-xmark, .buttons-mobile')) return;
-            cards.forEach(c => c.classList.remove('active'));
-            card.classList.add('active')
+            const completeInfo = card.querySelector('.complete-info');
+            const wasActive = card.classList.contains('active');
+
+            if(wasActive)
+                card.classList.remove('active');
+            else {
+                cards.forEach(c => {
+                    c.classList.remove('active');
+                });
+                card.classList.add('active');
+
+                if(card.getAttribute('data-loaded') === 'false')
+                    await loadCardDetails(card);
+            }
         });
     });
+
+    const firstCard = cards[0];
+
+    firstCard.classList.add('active');
+    if(firstCard.getAttribute('data-loaded') === 'false')
+        await loadCardDetails(firstCard);
+}
+
+function llenarInfoCard(card, data) {
+    const completeInfo = card.querySelector('.complete-info');
+    const { comprobacion, facturas } = data;
+
+    // Valores
+    const totalFormat = formatCurrency(comprobacion.total);
+    const saldoNum = comprobacion.saldo || 0;
+    const saldoFormat = new Intl.NumberFormat('es-MX', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(Math.abs(saldoNum));
+    const signo = saldoNum < 0 ? '-' : '';
+    const saldo = `${signo} ${obtenerSimboloMoneda(comprobacion.saldo_moneda)}${saldoFormat}`;
+
+    completeInfo.innerHTML = `
+        <div class="first-column">
+            <div class="info-mobile">
+                <p class="subt-mobile">FECHA</p>
+                <p>${formatDate(comprobacion.fecha_comprobacion)}</p>
+            </div>
+
+            <div class="map-img">
+                <img src="./assets/images/Icon_map.webp" alt="Map">
+            </div>
+        </div>
+
+        <div class="second-column">
+            <div class="info-mobile">
+                <p class="subt-mobile">TOTAL</p>
+                <p class="amount-mobile"><span class="symbol-money">${obtenerSimboloMoneda(comprobacion.total_moneda)}</span>${totalFormat}</p>
+                <p class="amount-mobile-currency">
+                    <img src="${getFlagUrl(comprobacion.total_moneda)}" alt="${comprobacion.total_moneda}" onerror="this.style.display='none'">
+                    ${comprobacion.total_moneda}
+                </p>
+            </div>
+        </div>
+
+        <div class="third-column">
+            <div class="info-mobile">
+                <p class="subt-mobile">SALDO</p>
+                <p class="amount-mobile">${saldo}</p>
+                <p class="amount-mobile-currency">
+                    <img src="${getFlagUrl(comprobacion.saldo_moneda)}" alt="${comprobacion.saldo_moneda}" onerror="this.style.display='none'">
+                    ${comprobacion.saldo_moneda}
+                </p>
+            </div>
+
+            <div class="buttons-mobile">
+                ${comprobacion.estado === 'Aprobada' ? 
+                    `<i class="fa-solid fa-circle-info"></i>` : 
+                    `
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <i class="fa-solid fa-circle-info"></i>
+                    `}
+            </div>
+        </div>
+    `;
 }
 
 

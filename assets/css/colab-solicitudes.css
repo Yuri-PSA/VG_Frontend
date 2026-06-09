@@ -2478,7 +2478,7 @@ body {
     .options,
     .logout { 
         font-size: 1.5em;
-        gap: 0.5em; 
+        gap: 1em; 
     }
 
     .options .option,
@@ -3025,17 +3025,6 @@ body {
         font-weight: 700;
         color: var(--passport-gray);
         margin-bottom: 0.5em;
-    }
-
-    .info-mobile .amount-mobile-currency { font-size: 0.7em; }
-
-    .info-mobile .amount-mobile-currency img { 
-        width: 14px; 
-        height: 14px;
-        border-radius: 50%;
-        object-fit: cover;
-        transform: translateY(20%);
-        margin-right: 0.3em;
     }
 
     .map-img { 
