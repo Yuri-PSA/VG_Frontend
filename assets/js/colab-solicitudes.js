@@ -38,6 +38,8 @@ const logoUser = Session.getUser();
 const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
 function formatDate(dateStr) {
+    if(!dateStr) return '—';
+    
     const fechaISO = new Date(dateStr).toISOString().slice(0, 10);
     const [year, monthNum, day] = fechaISO.split('-');
     const dia = day;
@@ -311,6 +313,7 @@ async function tableInformation(filtros = {}, page = 1) {
             renderTable([]);
             renderCards([]);
             throw new Error('Error al obtener solicitudes');
+            return;
         }
 
         const data = await response.json();
@@ -388,17 +391,23 @@ function buildThead(tab) {
     setupSorting();
 }
 
-function getActionIcons(estado, financiero, tab) {
-    if(tab === 'pending')
+function getActionIcons(estado, financiero) {
+    if(estado === 'Pendiente') 
         return `
             <i class="fa-solid fa-circle-xmark"></i>
             <i class="fa-solid fa-pen-to-square"></i>
             <i class="fa-solid fa-circle-info"></i>
         `;
-    
-    else if(tab === 'approved') {
+        
+    else if(estado === 'Aprobada') {
         if(financiero === 'Pendiente')
             return `
+                <i class="fa-solid fa-money-check-dollar"></i>
+                <i class="fa-solid fa-circle-info"></i>
+            `;
+        else if(financiero === 'Liquidada')
+            return `              
+                <i class="fa-solid fa-hand-holding-dollar"></i>
                 <i class="fa-solid fa-money-check-dollar"></i>
                 <i class="fa-solid fa-circle-info"></i>
             `;
@@ -406,30 +415,8 @@ function getActionIcons(estado, financiero, tab) {
             return `<i class="fa-solid fa-circle-info"></i>`;
     }
 
-    else if(tab === 'rejected' || tab === 'canceled')
+    else
         return `<i class="fa-solid fa-circle-info"></i>`;
-    
-    else {
-        if(estado === 'Pendiente') 
-            return `
-                <i class="fa-solid fa-circle-xmark"></i>
-                <i class="fa-solid fa-pen-to-square"></i>
-                <i class="fa-solid fa-circle-info"></i>
-            `;
-        
-        else if(estado === 'Aprobada') {
-            if(financiero === 'Pendiente')
-                return `
-                    <i class="fa-solid fa-money-check-dollar"></i>
-                    <i class="fa-solid fa-circle-info"></i>
-                `;
-            else
-                return `<i class="fa-solid fa-circle-info"></i>`;
-        }
-
-        else
-            return `<i class="fa-solid fa-circle-info"></i>`;
-    }
 }
 
 function renderTable(solicitudes, tab = 'all') {
@@ -494,7 +481,7 @@ function renderTable(solicitudes, tab = 'all') {
             html += `<td></td>`;
 
         // Columna de acciones
-        const acciones = getActionIcons(sol.estado, sol.estado_financiero, tab);
+        const acciones = getActionIcons(sol.estado, sol.estado_financiero);
         html += `<td><div class="actions">${acciones}</div></td>`;
 
         tr.innerHTML = html;
@@ -516,15 +503,26 @@ function renderTable(solicitudes, tab = 'all') {
 
 // Cards Information
 function getCardActionIcons(estado, financiero) {
-    if(estado === 'Pendiente')
+    if(estado === 'Pendiente') 
         return `
             <i class="fa-solid fa-circle-xmark"></i>
             <i class="fa-solid fa-pen-to-square"></i>
         `;
-    else if(estado === 'Aprobada' && financiero === 'Pendiente' || financiero === 'Liquidada')
-        return `<i class="fa-solid fa-money-check-dollar"></i>`;
 
-    return '';
+    else if(estado === 'Aprobada') {
+        if(financiero === 'Pendiente')
+            return `<i class="fa-solid fa-money-check-dollar"></i>`;
+        else if(financiero === 'Liquidada')
+            return `
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+                <i class="fa-solid fa-money-check-dollar"></i>
+            `;
+        else
+            return '';
+    }
+
+    else
+        return '';
 }
 
 function renderCards(solicitudes) {
@@ -1110,7 +1108,7 @@ async function loadCardDetails(card) {
     }
 }
 
-function activeCards() {
+async function activeCards() {
     const cards = document.querySelectorAll('.cards-mobile .card');
     if(cards.length === 0) return;
 
@@ -1142,7 +1140,7 @@ function activeCards() {
 
     firstCard.classList.add('active');
     if(firstCard.getAttribute('data-loaded') === 'false')
-        loadCardDetails(firstCard);
+        await loadCardDetails(firstCard);
 }
 
 function llenarInfoCard(card, data) {

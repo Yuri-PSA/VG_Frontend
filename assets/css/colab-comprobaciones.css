@@ -459,7 +459,7 @@ body {
     padding: 10px 20px;
     background: transparent;
     transition: all 0.3s ease-in-out;
-    z-index: 1000;
+    z-index: 1999;
 }
 
 .mobile-nav::before {
@@ -2424,7 +2424,7 @@ body {
     .options,
     .logout { 
         font-size: 1.5em;
-        gap: 0.5em; 
+        gap: 1em; 
     }
 
     .options .option,
@@ -2466,7 +2466,7 @@ body {
     .button-create:hover::before,
     .status.btn-received::before { animation: shine 2.5s ease-out infinite; }
 
-    .content { margin-top: 3.5em; }
+    .content { margin-top: 3em; }
 
     .tab-header { 
         flex-direction: column-reverse; 
@@ -2582,10 +2582,7 @@ body {
     }
 
     .first-column,
-    .second-column { 
-        border-right: 1.5px solid var(--tabs-hover); 
-        gap: 1.2em;
-    }
+    .second-column { border-right: 1.5px solid var(--tabs-hover); }
 
     .folio-mobile { font-weight: 600; }
 
@@ -2605,7 +2602,10 @@ body {
     .second-column .info-mobile,
     .third-column .info-mobile { text-align: center; }
 
-    .info-mobile .amount-mobile-currency { font-size: 0.85em; }
+    .info-mobile .amount-mobile-currency { 
+        font-size: 0.85em;
+        margin-top: 0.3em; 
+    }
 
     .info-mobile .amount-mobile-currency img { 
         width: 16px; 
@@ -2647,6 +2647,8 @@ body {
     .tab-buttons { margin-top: 2em; }
     
     /* INFORMATION */
+    .container::before { border-radius: 20px; }
+
     .info-wrapper {
         display: none;
         justify-content: center;
@@ -3003,17 +3005,6 @@ body {
         margin-bottom: 0.5em;
     }
 
-    .info-mobile .amount-mobile-currency { font-size: 0.7em; }
-
-    .info-mobile .amount-mobile-currency img { 
-        width: 14px; 
-        height: 14px;
-        border-radius: 50%;
-        object-fit: cover;
-        transform: translateY(20%);
-        margin-right: 0.3em;
-    }
-
     .map-img { 
         display: flex;
         justify-content: center;
@@ -3056,6 +3047,8 @@ body {
     .tab-buttons { margin-top: 2.5em; }
 
     /* INFORMATION */
+    .container::before { border-radius: 20px; }
+
     .info-wrapper {
         display: none;
         justify-content: center;

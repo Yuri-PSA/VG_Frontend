@@ -62,6 +62,8 @@ const logoUser = Session.getUser();
 const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
 function formatDate(dateStr) {
+    if(!dateStr) return '—';
+    
     const fechaISO = new Date(dateStr).toISOString().slice(0, 10);
     const [year, monthNum, day] = fechaISO.split('-');
     const dia = day;
@@ -1073,7 +1075,7 @@ async function loadCardDetails(card) {
     }
 }
 
-function activeCards() {
+async function activeCards() {
     const cards = document.querySelectorAll('.cards-mobile .card');
     if(cards.length === 0) return;
 
@@ -1106,7 +1108,7 @@ function activeCards() {
     
     firstCard.classList.add('active');
     if(firstCard.getAttribute('data-loaded') === 'false')
-        loadCardDetails(firstCard);
+        await loadCardDetails(firstCard);
 }
 
 function llenarInfoCard(card, data) {

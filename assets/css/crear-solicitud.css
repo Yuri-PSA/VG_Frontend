@@ -1524,7 +1524,7 @@ body {
     .options,
     .logout { 
         font-size: 1.5em;
-        gap: 0.5em; 
+        gap: 1em; 
     }
 
     .options .option,
