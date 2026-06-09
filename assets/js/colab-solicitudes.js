@@ -334,7 +334,7 @@ async function tableInformation(filtros = {}, page = 1) {
     } catch(error) {
         renderTable([]);
         renderCards([]);
-        Toast('ERROR AL MOSTRAR SOLICITUDES', 'No se pudieron cargar las solicitudes. Por favor, intenta de nuevo');
+        Toast('ERROR AL MOSTRAR', 'No se pudieron cargar las solicitudes. Por favor, intenta de nuevo');
     } finally {
         hideLoader();
     }

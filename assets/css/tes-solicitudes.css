@@ -2628,6 +2628,12 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         min-height: calc(100vh - 90px);
     }
 
+    .content-header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
     .titles {
         align-items: center;
         text-align: center;

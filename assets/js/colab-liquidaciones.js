@@ -341,19 +341,34 @@ async function tableInformation(filtros = {}, page = 1) {
     } catch(error) {
         renderTable([]);
         renderCards([]);
-        Toast('ERROR AL MOSTRAR LIQUIDACIONES', 'No se pudieron cargar las liquidaciones. Por favor, intenta de nuevo');
+        Toast('ERROR AL MOSTRAR', 'No se pudieron cargar las liquidaciones. Por favor, intenta de nuevo');
     } finally {
         hideLoader();
     }
 }
 
 // Table Information
+function getButtons(estado, tipo_ajuste) {
+    if(estado === 'Pendiente')
+        return `<i class="fa-solid fa-circle-dollar-to-slot"></i>`;
+    else if(estado === 'Pagado') 
+        return `
+            <i class="fa-solid fa-circle-dollar-to-slot"></i>
+            <i class="fa-solid fa-circle-info"></i>
+        `;
+    else if(estado === 'Devuelto') 
+        return `<i class="fa-solid fa-circle-info"></i>`;
+    else if(estado === 'Saldado' && tipo_ajuste !== 'Sin_diferencia')
+        return `<i class="fa-solid fa-circle-info"></i>`;
+    
+    return '';
+}
+
 function renderTable(liquidaciones, tab = 'all') {
     const tbody = document.querySelector('.table-body');
     if(!tbody) return;
 
     tbody.innerHTML = '';
-
     if(liquidaciones.length === 0) return;
 
     const statusClass = {
@@ -367,7 +382,7 @@ function renderTable(liquidaciones, tab = 'all') {
         'Devolución': 'st-return',
         'Reembolso': 'st-refund',
         'Sin_diferencia': 'st-paid-off'
-    }
+    };
 
     liquidaciones.forEach(liq => {
         const tr = document.createElement('tr');
@@ -426,11 +441,7 @@ function renderTable(liquidaciones, tab = 'all') {
             <td><div class="status ${estadoClass}">${liq.estado}</div></td>
             <td>
                 <div class="actions">
-                    ${liq.estado === 'Pendiente' ? 
-                        `<i class="fa-solid fa-circle-dollar-to-slot"></i>` : 
-                        liq.estado === 'Saldado' ? '' :
-                        `<i class="fa-solid fa-circle-info"></i>`
-                    }
+                    ${getButtons(liq.estado, liq.tipo_ajuste)}
                 </div>
             </td>
         `;
@@ -465,7 +476,7 @@ function renderCards(liquidaciones, tab = 'all') {
         'Devolución': 'st-return',
         'Reembolso': 'st-refund',
         'Sin_diferencia': 'st-paid-off'
-    }
+    };
 
     liquidaciones.forEach(liq => {
         const card = document.createElement('div');
@@ -724,7 +735,17 @@ function llenarInfoCard(card, data) {
     const banderaSaldo = getFlagUrl(data.moneda_comprobacion);
 
     const fechaPago = data.fecha_pago ? formatDate(data.fecha_pago) : '—';
-    const fechaRecibido = data.fecha_recibido ? formatDate(data.fecha_recibido) : 'Pendiente de confirmación por Tesorería';
+
+    let fechaRecibido = '';
+    if(data.fecha_recibido)
+        fechaRecibido = formatDate(data.fecha_recibido);
+    else {
+        if(data.tipo_ajuste === 'Reembolso')
+            fechaRecibido = 'Pendiente de tu confirmación';
+        else if(data.tipo_ajuste === "Devolución")
+            fechaRecibido = 'Pendiente de confirmación por Tesorería';
+    }
+    
     const comprobante = !!data.ruta_comprobacion;
     const fullImageUrl = comprobante ? `http://127.0.0.1:3000/${data.ruta_comprobacion}` : '';
 
@@ -757,9 +778,9 @@ function llenarInfoCard(card, data) {
                     <p class="amount-mobile-currency"><img src="${banderaSaldo}" alt="${data.moneda_comprobacion}" onerror="this.style.display='none'">${data.moneda_comprobacion}</p>
                 </div>
 
-                <div class="buttons-mobile">
-                    ${data.estado === 'Pendiente' ? `<i class="fa-solid fa-circle-dollar-to-slot"></i>` : ''}
-                </div>
+                ${data.estado === 'Pendiente' ? 
+                    `<div class="buttons-mobile"><i class="fa-solid fa-circle-dollar-to-slot"></i></div>` :
+                ''}
             </div>
         `;
     } else {
@@ -808,11 +829,13 @@ function llenarInfoCard(card, data) {
                     <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
                     <p class="message">${fechaRecibido}</p>
                 </div>
+
+                ${data.estado === 'Devuelto' ? 
+                    `<div class="buttons-mobile"><i class="fa-solid fa-circle-dollar-to-slot"></i></div>` :
+                ''}
             </div>
         `;
-
     }
-
     completeInfo.innerHTML = html;
 
     // Image
@@ -917,7 +940,7 @@ async function gestionarComprobante(solicitud, fechaPago = null, fechaRecibido =
 
     if(!response.ok) {
         const err = await response.json();
-        throw new Error(err.message || 'Error al gestionar anticipo');
+        throw new Error(err.message || 'Error al gestionar liquidación');
     }
 
     return await response.json();
@@ -1246,8 +1269,12 @@ async function buttonInfo() {
 
                 if(data.fecha_recibido)
                     document.querySelector('.transfer-confir span').innerHTML = formatDate(data.fecha_recibido);
-                else
-                    document.querySelector('.transfer-confir span').innerHTML = 'Pendiente de confirmación por Tesorería';
+                else {
+                    if(ajuste === 'Reembolso')
+                        document.querySelector('.transfer-confir span').innerHTML = 'Pendiente de tu confirmación';
+                    else
+                        document.querySelector('.transfer-confir span').innerHTML = 'Pendiente de confirmación por Tesorería';
+                };
 
                 // Image
                 const transferImg = bottomTransfer.querySelector('.transfer-ver img');
@@ -1266,8 +1293,12 @@ async function buttonInfo() {
 
                 if(data.fecha_recibido)
                     document.querySelector('.cash-confir span').innerHTML = formatDate(data.fecha_recibido);
-                else
-                    document.querySelector('.cash-confir span').innerHTML = 'Pendiente de confirmación por Tesorería';
+                else {
+                    if(ajuste === 'Reembolso')
+                        document.querySelector('.cash-confir span').innerHTML = 'Pendiente de tu confirmación';
+                    else
+                        document.querySelector('.cash-confir span').innerHTML = 'Pendiente de confirmación por Tesorería';
+                }
             }
 
             info.style.display = 'flex';
@@ -1308,7 +1339,7 @@ function buttonPreview() {
         if(img && img.src && img.src !== '')
             previewReceipt(img.src);
         else
-            Toast('ENTREGA DE ANTICIPO', 'Lo siento, no existe un comprobante para mostrar');
+            Toast('COMPROBANTE DE LIQUIDACIÓN', 'Lo siento, no existe un comprobante para mostrar');
     });
 }
 
@@ -1334,7 +1365,7 @@ async function downloadReceipt(imageSrc, filename) {
         document.body.removeChild(link);
         URL.revokeObjectURL(blobUrl);
     } catch(error) {
-        Toast('DESCARGAR COMPROBANTE', 'No se pudo descargar el comprobante. Intenta de nuevo.');
+        Toast('DESCARGAR COMPROBANTE', 'No se pudo descargar el comprobante. Por favor, intenta de nuevo');
     }
 }
 
@@ -1506,7 +1537,7 @@ function ToastRefund(sol) {
                 Toast('RECEPCIÓN DE REEMBOLSO', 'Hemos notificado a Tesorería para dar seguimiento a la entrega de tu reembolso');
             }
 
-            const filtros = getCurrentFiltros();
+            const filtros = getCurrentFilters();
             await tableInformation(filtros, currentPage);
         } catch(error) {
             Toast('ERROR', error.message);

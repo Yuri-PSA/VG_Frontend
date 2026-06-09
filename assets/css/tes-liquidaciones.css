@@ -6,6 +6,8 @@
     --blue-white: #D9D9D9;
     --white: #FFFFFF;
     --gray: #535353;
+    --light-gray: #BDBBBB;
+    --hover-gray: #B0ACAC;
     --icons: #2A5156;
     --line-gray: #919A9B;
     --tab-selected: #ACBCC0;
@@ -26,9 +28,8 @@
     --tr-dark-blue: rgba(217, 217, 217, 0.8);
     --tr-status-pending: rgba(208, 175, 6, 0.25);
     --tr-status-approved: rgba(113, 153, 144, 0.25);
-    --tr-status-rejected: rgba(169, 56, 53, 0.25);
+    --tr-status-refund: rgba(118, 180, 233, 0.25);
     --tr-status-return: rgba(200, 162, 200, 0.4);
-    --tr-status-canceled: rgba(118, 180, 233, 0.25);
     --tr-amount-pending: rgba(153, 47,44, 0.85);
     --tr-date-range: rgba(66, 129, 136, 0.2);
     --tr-passport: rgba(217, 217, 217, 0.95);
@@ -64,11 +65,7 @@
         #719990 0%,
         #243934 100%
     );
-    --status-rejected: linear-gradient(90deg,
-        #A93835 0%,
-        #3E1413 100%
-    );
-    --status-canceled: linear-gradient(90deg,
+    --status-refund: linear-gradient(90deg,
         #58A5E7 0%,
         #1A5B94 100%
     );
@@ -239,6 +236,95 @@ h5 { font-family: 'CenturyGothic', sans-serif; }
 ::-webkit-scrollbar-track { background-color: transparent; }
 
 
+/* ============================== LOADER ============================== */
+.loader-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center
+}
+
+.dot-spinner {
+    --uib-size: 5em;
+    --uib-speed: .9s;
+    --uib-color: var(--white);
+    height: var(--uib-size);
+    width: var(--uib-size);
+    position: relative;
+}
+
+.dot-spinner__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+}
+
+.dot-spinner__dot::before {
+  content: '';
+  height: 20%;
+  width: 20%;
+  border-radius: 50%;
+  background-color: var(--uib-color);
+  transform: scale(0);
+  opacity: 0.5;
+  animation: pulse0112 calc(var(--uib-speed) * 1.111) ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(18, 31, 53, 0.3);
+}
+
+.dot-spinner__dot:nth-child(2) { transform: rotate(45deg); }
+
+.dot-spinner__dot:nth-child(2)::before { animation-delay: calc(var(--uib-speed) * -0.875); }
+
+.dot-spinner__dot:nth-child(3) { transform: rotate(90deg); }
+
+.dot-spinner__dot:nth-child(3)::before { animation-delay: calc(var(--uib-speed) * -0.75); }
+
+.dot-spinner__dot:nth-child(4) { transform: rotate(135deg); }
+
+.dot-spinner__dot:nth-child(4)::before { animation-delay: calc(var(--uib-speed) * -0.625); }
+
+.dot-spinner__dot:nth-child(5) { transform: rotate(180deg); }
+
+.dot-spinner__dot:nth-child(5)::before { animation-delay: calc(var(--uib-speed) * -0.5); }
+
+.dot-spinner__dot:nth-child(6) { transform: rotate(225deg); }
+
+.dot-spinner__dot:nth-child(6)::before { animation-delay: calc(var(--uib-speed) * -0.375); }
+
+.dot-spinner__dot:nth-child(7) { transform: rotate(270deg); }
+
+.dot-spinner__dot:nth-child(7)::before { animation-delay: calc(var(--uib-speed) * -0.25); }
+
+.dot-spinner__dot:nth-child(8) { transform: rotate(315deg); }
+
+.dot-spinner__dot:nth-child(8)::before { animation-delay: calc(var(--uib-speed) * -0.125); }
+
+@keyframes pulse0112 {
+  0%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
 /* ============================== BODY ============================== */
 body {
     display: flex;
@@ -366,7 +452,8 @@ body {
     height: 95vh !important;
     width: 95vw !important;
     overflow: hidden !important;
-    align-items: center;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .swal2-popup.receipt-preview .swal2-content {
@@ -375,15 +462,17 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .receipt-preview .swal2-image {
     border-radius: 12px;
     width: 90% !important;
     height: 90% !important;
-    max-width: 25% !important;
+    max-width: 30% !important;
     max-height: 90% !important;
-    object-fit: contain;
+    object-fit: cover;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -393,7 +482,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     color: var(--white) !important;
     filter: drop-shadow(0 0 3px rgba(0,0,0,0.5));
 }
-
 
 /* ============================== PHONE MENU ============================== */
 .mobile-nav {
@@ -489,6 +577,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     padding-left: 1.4em;
 }
 
@@ -501,7 +590,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     align-items: center;
     text-align: center;
     font-weight: 600;
-    font-size: 1.1em;
+    font-size: 1em;
     color: var(--white);
 }
 
@@ -513,7 +602,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     justify-content: center;
     gap: 0.7em;
     font-weight: 300;
-    font-size: 1.3em;
+    font-size: 1.2em;
     color: var(--white);
     padding-left: 0.9em;
 }
@@ -544,7 +633,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 }
 
 .option img {
-    width: 18px;
+    width: 17px;
     object-fit: contain;
 }
 
@@ -595,12 +684,12 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
 .titles .title{
     font-weight: 500;
-    font-size: 3.3em;
+    font-size: 3.1em;
 }
 
 .titles .subtitle {
     font-weight: 400;
-    font-size: 1.3em;
+    font-size: 1.2em;
 }
 
 .content {
@@ -638,6 +727,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .tab:first-child { z-index: 5; }
 .tab:nth-child(2) { z-index: 4; }
 .tab:nth-child(3) { z-index: 3; }
+.tab:nth-child(4) { z-index: 2; }
 
 .tab::after {
     content: '';
@@ -666,18 +756,17 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     right: -26px;
 }
 
-.tab.pending.selected { margin-right: 9px; }
-
+.tab.pending.selected,
 .tab.paid.selected,
-.tab.returns.selected { margin: 0 4px; }
+.tab.returned.selected { margin-right: 9px; }
 
 .tab p {
-    font-size: 1em;
+    font-size: 0.9em;
     font-weight: 500;
 }
 
 .tab.selected p {
-    font-size: 1.3em;
+    font-size: 1.2em;
     font-weight: 600;
 }
 
@@ -687,7 +776,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     top: -0.9em;
     width: 25px;
     height: 25px;
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -699,6 +788,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     font-weight: 600;
     z-index: 15;
 }
+
+.amount.has-number { display: flex; }
 
 .amount.selected {
     width: 35px;
@@ -744,19 +835,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     transition: color 0.2s ease, caret-color 0.2s ease;
 }
 
-.search-back i {
-    color: var(--gray);
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-}
-
-.search-back i.fade-out { opacity: 0; }
-
-.search-back i:hover,
-.search-back .icon-active {
-    color: var(--icons);
-    font-weight: 700;
-}
+.search-back i { color: var(--gray); }
 
 .table-background {
     display: flex;
@@ -785,7 +864,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .table-head { box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.2); }
 
 .table-head th {
-    font-size: 1.27em;
+    font-size: 1.23em;
     font-weight: 600;
     padding: 0.3em 0.7em;
     text-align: left;
@@ -822,29 +901,23 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     padding: 0 0.8em;
 }
 
-.table-body .folio {
-    font-size: 1.05em;
+.table-body .solicitud {
+    font-size: 1em;
     font-weight: 600;
 }
 
-.anticipo-cell,
-.comprobado-cell,
-.saldo-cell { vertical-align: middle; }
+.monto-cell { vertical-align: middle; }
 
-.anticipo-content,
-.comprobado-content,
-.saldo-content {
+.monto-content {
     display: flex;
     align-items: center;
     gap: 10px;
     white-space: nowrap;
 }
 
-.anticipo-content img,
-.comprobado-content img,
-.saldo-content img {
-    width: 18px;
-    height: 18px;
+.monto-content img {
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -876,15 +949,25 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     z-index: -1;
 }
 
-.st-pending { background-color: var(--tr-status-pending); }
+.st-pending,
+.st-paid,
+.st-returned { background-color: var(--tr-status-pending); }
 
-.st-adjustment { background-color: var(--tr-status-canceled); }
-.st-adjustment.return { background-color: var(--tr-status-return); }
+.st-pending::before,
+.st-paid::before,
+.st-returned::before { background: var(--status-pending); }
 
-.st-pending::before { background: var(--status-pending); }
+.st-settled,
+.st-paid-off { background-color: var(--tr-status-approved); }
 
-.st-adjustment::before { background: var(--status-canceled); }
-.st-adjustment.return::before { background: var(--status-return); }
+.st-settled::before,
+.st-paid-off::before { background: var(--status-approved); }
+
+.st-return { background-color: var(--tr-status-return); }
+.st-return::before { background: var(--status-return); }
+
+.st-refund { background-color: var(--tr-status-refund) }
+.st-refund::before { background: var(--status-refund) }
 
 .table-body .actions {
     display: flex;
@@ -892,10 +975,19 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     align-items: center;
     gap: 0.7em;
     color: var(--icons);
-    font-size: 1.1em;
+    font-size: 1.05em;
 }
 
 .table-body .actions i { cursor: pointer; }
+
+.fa-solid.fa-money-check-dollar { font-size: 1.2em; }
+
+.empty-row {
+    color: transparent;
+    cursor: default;
+    pointer-events: none;
+    visibility: hidden;
+}
 
 .tab-buttons {
     display: flex;
@@ -960,12 +1052,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .prev,
 .next { cursor: pointer; }
 
-.page { cursor: default; }
-
-.prev.disabled,
-.next.disabled {
+.page { 
     cursor: default;
-    color: var(--gray);
+    font-weight: 600; 
 }
 
 .prev .icon,
@@ -1038,7 +1127,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 43em;
+    width: 50em;
     transform: translate(-50%, -50%);
     background-color: var(--transparent-blue);
     border-radius: 15px;
@@ -1064,7 +1153,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     padding: 0.5em 1.3em 0.5em 0;
     border-radius: 10px 10px 0 0;
     background-color: var(--toast);
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: 550;
     letter-spacing: 0.07em;
     color: var(--white);
@@ -1084,7 +1173,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     align-items: center;
     text-align: center;
     padding: 0.9em 1.5em 1.2em 1.5em;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
 .receipt-container {
@@ -1139,6 +1228,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .receipt-container.has-image:hover::after { opacity: 1; }
 
 .receipt-container.dragover {
+    border: 2px dashed var(--icons); 
+    color: var(--icons);
     background-color: var(--transparent-agave);
     transition: all 0.2s ease;
 }
@@ -1233,7 +1324,9 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     padding: 0.9em 0;
 }
 
-.info-text span { font-weight: 600; }
+.info-text p { font-weight: 600; }
+
+.info-text span { font-weight: normal; }
 
 .info-text.transfer { width: 100%; }
 
@@ -1266,6 +1359,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     bottom: 0;
     pointer-events: none;
 }
+
 
 /* ============================== MOBILE ============================== */
 .cards-mobile,
@@ -1374,22 +1468,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .search-back i { font-size: 1.2em; }
 
-    /* CALENDAR */
-    .datepicker-wrapper {
-        top: 75%;
-        border-radius: 13px;
-        padding: 0.5em 0.6em;
-    }
-    
-    .datepicker { border-radius: 10px; }
-
-    .datepicker-header { font-size: 1.3em; }
-
-    .datepicker-header button { font-size: 0.8em; }
-
-    .days-header span,
-    .dates { font-size: 1em; }
-
     /* TABLE */
     .table-background { 
         border-radius: 0 25px 25px 25px;
@@ -1404,7 +1482,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .table-body td { font-size: 1.3em; }
 
-    .table-body .folio { font-size: 1.4em; }
+    .table-body .solicitud { font-size: 1.4em; }
 
     .monto-content img {
         width: 22px;
@@ -1427,7 +1505,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .info-wrapper {
         border-radius: 25px;
         padding: 1em;
-        width: 53em;
+        width: 60em;
     }
 
     .transfer-back,
@@ -1486,16 +1564,17 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .option img { width: 15px; }
 
+    .option.fa-plane-departure,
+    .option.fa-arrow-right-from-bracket { font-size: 0.9em; }
+
     /* CONTAINER */
     .container { background-size: 33% auto; }
 
-    .titles .title { font-size: 2.9em; }
-
-    .titles .subtitle { font-size: 1.2em; }
+    .titles .title { font-size: 3em; }
 
     .tab p { font-size: 1em; }
 
-    .tab.selected p { font-size: 1.1em; }
+    .tab.selected p { font-size: 1.15em; }
 
     .amount { 
         width: 25px;
@@ -1509,28 +1588,20 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         font-size: 1.1em; 
     }
 
-    .search { height: 2.5em; }
-
-    .search-back input { font-size: 1em; }
-
-    .search-back i { font-size: 0.9em; }
-
-    .datepicker-header { font-size: 1em; }
-
-    .datepicker-header button,
-    .days-header span,
-    .dates { font-size: 0.8em; }
+    .search-back input { font-size: 1.1em; }
 
     /* TABLE */
     .table-head { font-size: 0.9em; }
 
-    .table-body td { font-size: 1em; }
+    .table-head th { font-size: 1.35em; }
 
-    .table-body .folio { font-size: 1.1em; }
+    .table-body td { font-size: 0.95em; }
+
+    .table-body .solicitud { font-size: 1.05em; }
 
     .monto-content img {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 
     .back-buttons {
@@ -1543,18 +1614,16 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
 @media(min-width: 1366px) and (max-width: 1469px) and (max-resolution: 1.5dppx) {
     /* TOAST */
-    body.swal2-toast-shown .swal2-container { width: 520px !important; }
-
+    body.swal2-toast-shown .swal2-container,
     .swal2-popup.custom-received-modal { width: 520px !important; }
-
-    .colored-toast span,
-    .received-text { font-size: 0.95em; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
+    .colored-toast span,
+    .received-text,
     .swal-confirm-btn, 
-    .swal-cancel-btn { font-size: 0.91em; }
+    .swal-cancel-btn { font-size: 0.9em; }
 
     .agave-half { height: 11.8em; }
 
@@ -1562,14 +1631,14 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .receipt-preview .swal2-image { height: 80% !important; }
 
     /* OPTION BAR */
-    .logo .name { font-size: 1.1em; }
+    .logo .name { font-size: 0.97em; }
 
     .options,
-    .logout { font-size: 1.2em; }
+    .logout { font-size: 1.05em; }
 
     .options img { 
-        width: 17px;
-        transform: translateY(5%); 
+        width: 15px;
+        transform: translateY(10%); 
     }
 
     .option .fa-plane-departure { font-size: 0.75em; }
@@ -1587,47 +1656,39 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .content { margin-top: 0.7em; }
 
-    .titles .title { font-size: 3em; }
+    .titles .title { font-size: 2.9em; }
 
-    .titles .subtitle { font-size: 1.2em; }
+    .titles .subtitle { font-size: 1.05em; }
 
     .tab { padding: 0.55em 0.3em 0.55em 1.5em; }
 
     .tab.selected { padding: 0.7em 0em 0.7em 1.5em; }
 
-    .tab p { font-size: 1em; }
+    .tab p { font-size: 0.95em; }
 
-    .tab.selected p { font-size: 1.2em; }
+    .tab.selected p { font-size: 1.05em; }
 
     .amount.selected {
-        width: 30px;
-        height: 30px;
-        font-size: 1.1em;
+        width: 28px;
+        height: 28px;
+        font-size: 1.05em;
     }
 
-    .search { height: 2.5em; }
+    .search input { font-size: 1em; }
 
-    .search input { font-size: 1.1em; }
-
-    .search i { font-size: 1em; }
-
-    /* CALENDAR */
-    .datepicker-wrapper { width: 29%; }
-
-    .date-header { font-size: 0.9em; }
-
-    .datepicker-header button { font-size: 0.7em; }
-
-    .days-header span { font-size: 0.7em; }
-
-    .dates { font-size: 0.8em; }
+    .search i { font-size: 0.95em; }
 
     /* TABLE */
-    .table-head th { font-size: 1.2em; }
+    .table-head th { font-size: 1.15em; }
 
-    .table-body .folio { font-size: 1em; }
+    .table-body .solicitud { font-size: 0.97em; }
 
-    .table-body td { font-size: 0.9em; }
+    .table-body td { font-size: 0.85em; }
+
+    .monto-content img {
+        width: 15px;
+        height: 15px; 
+    }
 
     .status { 
         font-size: 0.9em; 
@@ -1645,7 +1706,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     /* TRANSFER RECEIPT */
     .transfer-wrapper,
-    .info-wrapper { width: 39em; } 
+    .info-wrapper { width: 46em; } 
 
     .top-decor { font-size: 1.05em; }
 
@@ -1665,29 +1726,32 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx) {
     /* TOAST */
-    body.swal2-toast-shown .swal2-container { width: 520px !important; }
-
-    .swal2-popup.custom-received-modal { width: 510px !important; }
-
-    .colored-toast span,
-    .received-text { font-size: 0.93em; }
+    body.swal2-toast-shown .swal2-container,
+    .swal2-popup.custom-received-modal { width: 520px !important; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
 
+    .colored-toast span,
+    .received-text,
     .swal-confirm-btn, 
     .swal-cancel-btn { font-size: 0.9em; }
 
-    .agave-half { height: 11.8em; }
+    .agave-half { height: 12em; }
 
     /* PREVIEW MODAL */
     .receipt-preview .swal2-image { height: 80% !important; }
 
     /* OPTION BAR */
-    .logo .name { font-size: 1em; }
+    .logo img { width: 95%; }
+    
+    .logo .name { font-size: 0.95em; }
 
     .options,
-    .logout { font-size: 1.1em; }
+    .logout { font-size: 1.05em; }
+
+    .options .option,
+    .logout .option { width: 100%; }
 
     .options img { 
         width: 15px;
@@ -1734,19 +1798,10 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .search i { font-size: 0.9em; }
 
-    /* CALENDAR */
-    .datepicker-wrapper { width: 29%; }
-
-    .date-header { font-size: 0.9em; }
-
-    .datepicker-header button,
-    .days-header span,
-    .dates { font-size: 0.7em; }
-
     /* TABLE */
     .table-head th { font-size: 1.1em; }
 
-    .table-body .folio { font-size: 1em; }
+    .table-body .solicitud { font-size: 1em; }
 
     .monto-content { gap: 8px; }
 
@@ -1756,6 +1811,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     }
 
     .table-body td { font-size: 0.9em; }
+
+    .table-body .actions { font-size: 1em; }
 
     .tab-buttons { margin-top: 0.8em; }
 
@@ -1768,7 +1825,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     /* TRANSFER RECEIPT */
     .transfer-wrapper,
-    .info-wrapper { width: 37em; }
+    .info-wrapper { width: 44em; }
 
     .top-decor { font-size: 0.95em; }
 
@@ -1789,7 +1846,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 /* Laptops pequeñas (1024px - 1299px) */
 @media(min-width: 1025px) and (max-width: 1280px) {
     /* TOAST */
-    body.swal2-toast-shown .swal2-container { width: 500px !important; }
+    body.swal2-toast-shown .swal2-container { width: 510px !important; }
 
     .swal2-popup.custom-received-modal { width: 495px !important; }
 
@@ -1814,9 +1871,11 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .logo { width: 97%; }
 
+    .logo img { width: 95%; }
+
     .logo .name { font-size: 0.9em; }
 
-    .options .option { width: 100%; }
+    .options .option { width: 97%; }
 
     .options,
     .logout { 
@@ -1837,17 +1896,17 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         background-size: 31% auto; 
     }
 
-    .titles .title { font-size: 2.3em; }
+    .titles .title { font-size: 2.5em; }
 
-    .titles .subtitle { font-size: 1.1em; }
+    .titles .subtitle { font-size: 1em; }
 
     .tab { padding: 0.6em 0.3em 0.6em 1.5em; }
 
     .tab.selected { padding: 0.8em 0 0.8em 1.5em; }
 
-    .tab p { font-size: 0.85em; }
+    .tab p { font-size: 0.8em; }
 
-    .tab.selected p { font-size: 1em; }
+    .tab.selected p { font-size: 0.97em; }
 
     .amount {
         width: 22px;
@@ -1856,40 +1915,29 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     }
 
     .amount.selected { 
-        width: 30px;
-        height: 30px;
+        width: 28px;
+        height: 28px;
         font-size: 1em; 
     }
+
+    .search { height: 2.3em; }
 
     .search-back i { font-size: 0.85em; }
 
     .search-back input { font-size: 0.9em; }
-
-    /* CALENDAR */
-    .datepicker-wrapper { width: 35%; }
-
-    .datepicker-header { font-size: 0.9em; }
-
-    .datepicker-header button { 
-        font-size: 0.8em; 
-        transform: translateY(-1%);
-    }
-
-    .days-header span,
-    .dates { font-size: 0.8em; }
 
     /* TABLE */
     .table-head th { font-size: 1em; }
 
     .table-body td { font-size: 0.8em; }
 
-    .table-body .folio { font-size: 0.9em; }
+    .table-body .solicitud { font-size: 0.85em; }
 
     .monto-content { gap: 7px; }
 
     .monto-content img {
-        width: 15px;
-        height: 15px;
+        width: 13px;
+        height: 13px;
     }
 
     .status { padding: 0.4em 0.7em; }
@@ -1903,7 +1951,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     /* TRANSFER RECEIPT */
     .transfer-wrapper,
-    .info-wrapper { width: 35em; }
+    .info-wrapper { width: 42em; }
 
     .top-decor { font-size: 0.9em; }
 
@@ -1930,6 +1978,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .receipt-preview .swal2-image {
         max-width: 95% !important;
         max-height: 90vh !important;
+        object-fit: contain;
     }
 
     .receipt-preview .swal2-close { font-size: 3em; }
@@ -2000,6 +2049,13 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         height: auto;
     }
 
+    .content-header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2em;
+    }
+
     .titles {
         width: 100%;
         text-align: center;
@@ -2043,12 +2099,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .search { margin-left: auto; }
 
-    .datepicker-wrapper { 
-        top: 35%;
-        width: 40%;
-    }
-
-    .dates { font-size: 0.9em; }
+    .search-back input,
+    .search-back i { font-size: 1.1em; }
     
     .table-background { display: none; }
 
@@ -2094,15 +2146,29 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         box-shadow: 0 3px 10px -9px rgba(0, 0, 0, 0.7);
     }
 
+    .both-status-mobile {
+        display: flex;
+        gap: 1em;
+    }
+
     .complete-info {
         display: none;
-        grid-template-columns: 32% 36% 32%;
+        grid-template-columns: 1fr 1fr 1fr;
         padding-top: 1em;
     }
 
     .card.active .complete-info { display: grid; }
 
-    .info-mobile .st-mobile { 
+    .solicitud-mobile { font-weight: 600; }
+
+    .info-mobile.second { 
+        display: flex; 
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .info-mobile .st-mobile,
+    .info-mobile .st-adjust { 
         font-size: 0.85em;
         padding: 0.5em 1em; 
     }
@@ -2115,16 +2181,13 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         justify-content: start;
         align-items: center;
         padding: 1em 0;
+        gap: 1.2em;
     }
 
     .first-column,
     .second-column { border-right: 1.5px solid var(--tabs-hover); }
 
-    .first-column,
-    .second-column,
-    .third-column { gap: 1.2em; }
-
-    .info-mobile p { font-size: 1.2em; }
+    .info-mobile p { font-size: 1em; }
 
     .info-mobile .subt-mobile {
         font-size: 0.8em;
@@ -2132,22 +2195,50 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         color: var(--passport-gray);
     }
 
-    .folio-mobile { font-weight: 600; }
+    .info-mobile .amount-mobile { font-size: 1.23em; }
+
+    .first-column .info-mobile,
+    .second-column .info-mobile,
+    .third-column .info-mobile { text-align: center; }
+
+    .info-mobile .amount-mobile-currency { 
+        font-size: 0.85em;
+        margin-top: 0.3em; 
+    }
+
+    .info-mobile .amount-mobile-currency img { 
+        width: 16px; 
+        height: 16px;
+        border-radius: 50%;
+        object-fit: cover;
+        transform: translateY(15%);
+        margin-right: 0.3em;
+    }
+
+    .message { padding: 0.4em; }
 
     .map-img {
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        height: 5em;
+        height: 4em;
         overflow: hidden;
-        padding-bottom: 0.5em;
     }
 
     .map-img img { 
         height: 100%;
         object-fit: cover;
     }
+
+    .info-mobile i {
+        color: var(--icons);
+        font-size: 1.5em;
+        cursor: pointer;
+        margin-top: 0.5em;
+    }
+
+    .info-mobile .fa-image { margin-right: 0.7em; }
 
     .buttons-mobile {
         display: flex;
@@ -2161,34 +2252,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     }
 
     .buttons-mobile i { cursor: pointer; }
-
-    .info-mobile .amount-mobile { font-size: 1.4em; }
-
-    .info-mobile.return { text-align: right; }
-
-    .first-column .info-mobile,
-    .second-column .info-mobile,
-    .third-column .info-mobile { text-align: center; }
-
-    .info-mobile .amount-mobile-currency { font-size: 0.85em; }
-
-    .info-mobile .amount-mobile-currency img { 
-        width: 16px; 
-        height: 16px;
-        border-radius: 50%;
-        object-fit: cover;
-        transform: translateY(15%);
-        margin-right: 0.3em;
-    }
-
-    .info-mobile i {
-        color: var(--icons);
-        font-size: 1.5em;
-        cursor: pointer;
-        margin-top: 0.5em;
-    }
-
-    .info-mobile .fa-image { margin-right: 0.7em; }
 
     .tab-buttons { margin-top: 2em; }
 
@@ -2227,10 +2290,10 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .swal2-toast { margin: 0 !important; }
 
     .swal2-popup.swal2-modal.custom-received-modal.swal2-show { margin: 0 !important; }
+    
+    .colored-toast .text { padding: 12px 15px 15px 0 !important; }
 
-    .colored-toast .text { padding: 12px 10px 15px 0 !important; }
-
-    .agave-icon { width: 6em; }
+    .agave-icon { width: 5em; }
 
     .colored-toast p,
     .reject-title { font-size: 1em; }
@@ -2239,8 +2302,13 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .received-text { font-size: 0.9em; }
 
     .received-text { 
-        line-height: 1.5em; 
+        line-height: 1.5; 
         margin-bottom: 1em;
+    }
+
+    .canceled-text { 
+        padding: 0 2em;
+        font-size: 0.9em; 
     }
 
     .swal-confirm-btn, 
@@ -2282,7 +2350,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         width: 70%;
         height: 100vh;
         background: var(--option-bar);
-        padding: 150px 30px;
+        padding: 110px 30px 110px 20px;
         transform: translateX(-100%);
         transition: transform 0.4s ease;
         overflow-y: auto;
@@ -2338,6 +2406,13 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         min-height: calc(100vh - 90px);
     }
 
+    .content-header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2.5em;
+    }
+
     .titles {
         align-items: center;
         text-align: center;
@@ -2358,7 +2433,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .tab-header {
         flex-direction: column-reverse;
-        gap: 1em;
+        gap: 0em;
     }
 
     .tabs {
@@ -2380,18 +2455,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         transition: all 0.3s ease;
     }
 
-    .tab::after {
-        content: '';
-        position: absolute;
-        background-color: var(--tabs-gray);
-        top: 0;
-        right: -20px;
-        width: 50px;
-        height: 100%;
-        transform: skewX(36deg);
-        z-index: -1;
-        transition: background-color 0.3s ease;
-    }
+    .tab::after { right: -21px; }
 
     .tab:first-child { z-index: 5; }
     .tab:nth-child(2) { z-index: 4; }
@@ -2405,30 +2469,14 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .tab.selected p { font-size: 1.2em; }
 
-    .amount.selected { 
-        width: 30px;
-        height: 30px;
-        font-size: 1em; 
-    }
-
-    .amount {
-        width: 20px;
-        height: 20px;
-        font-size: 0.7em;
-    }
-
     .search { width: 100%; }
 
-    .search-back i { font-size: 1.1em; }
-    
-    .datepicker-wrapper { 
-        width: 100%; 
-        top: 35%;
-    }
-
-    .table-background { display: none; }
+    .search-back i,
+    .search-back input { font-size: 1.1em; }
 
     /* TABLE -> CARDS */
+    .table-background { display: none; }
+
     .cards-mobile {
         display: flex;
         flex-direction: column;
@@ -2470,12 +2518,21 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         box-shadow: 0 3px 10px -9px rgba(0, 0, 0, 0.7);
     }
 
-    .folio-mobile { 
+    .solicitud-mobile { 
         font-size: 1.3em; 
         font-weight: 600;
     }
 
-    .status.st-mobile {
+    .both-status-mobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 1.5em;
+    }
+
+    .status.st-mobile,
+    .status.st-adjust {
         font-size: 0.9em;
         padding: 0.6em 1em;
     }
@@ -2497,26 +2554,20 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         gap: 1em;
     }
 
-    .map-img { 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 5em;
-        overflow: hidden;
-    }
-
-    .map-img img { 
-        height: 100%;
-        object-fit: cover;
-    }
-
     .first-column,
     .second-column { margin-bottom: 1em; }
 
     .info-mobile .amount-mobile { 
         font-size: 1.3em; 
         font-weight: 600;
+    }
+
+    .info-mobile.second { 
+        display: flex; 
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+        width: 100%;
     }
 
     .info-mobile p { font-size: 1.1em; }
@@ -2528,9 +2579,24 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         margin-bottom: 0.5em;
     }
 
+    .map-img { 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 5em;
+        overflow: hidden;
+        margin-bottom: 0.8em;
+    }
+
+    .map-img img { 
+        height: 100%;
+        object-fit: cover;
+    }
+
     .info-mobile .amount-mobile-currency { font-size: 0.75em; }
 
-    .info-mobile .amount-mobile-currency img { 
+    .info-mobile .amount-mobile-currency img {
         width: 16px; 
         height: 16px;
         border-radius: 50%;
@@ -2539,7 +2605,16 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         margin-right: 0.3em;
     }
 
-    .info-mobile.tranfer-rec { display: none; }
+    .info-mobile i {
+        color: var(--icons);
+        font-size: 1.5em;
+        cursor: pointer;
+        margin-top: 0.5em;
+    }
+
+    .info-mobile .fa-image { margin-right: 0.7em; }
+
+    .message { padding: 0.4em; }
 
     .buttons-mobile {
         display: flex;
@@ -2549,7 +2624,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         width: 100%;
         gap: 1.5em;
         color: var(--icons);
-        font-size: 1.4em;
+        font-size: 1.5em;
         margin-top: 1em;
     }
 
