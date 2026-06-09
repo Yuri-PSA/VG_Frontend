@@ -20,6 +20,21 @@
 </head>
 
 <body>
+    <!-- ======================= LOADER ======================= -->
+    <div class="loader-overlay">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <!-- ======================= CONTENT ======================= -->
     <div class="background">
         <!-- ======================= PHONE MENU ======================= -->
         <div class="mobile-nav">
@@ -36,9 +51,7 @@
         <div class="option-bar" id="optionBar">
             <div class="logo">
                 <img src="./assets/images/White_logo.webp" alt="Grupo | PSA">
-                <div class="name">
-                    <p>Yuriana Ibarra</p>
-                </div>
+                <div class="name"><p></p></div>
             </div>
 
             <div class="options">
@@ -77,7 +90,7 @@
                 <!-- ==================== CONTENT HEADER ==================== -->
                 <div class="content-header">
                     <div class="titles">
-                        <h1 class="title">LIQUIDACIONES</h1>
+                        <h1 class="title">LIQUIDACIONES DE VIÁTICOS</h1>
                         <p class="subtitle">Gestiona reembolsos y devoluciones derivados de las comprobaciones de viáticos</p>
                     </div>
                 </div>
@@ -87,18 +100,18 @@
                         <div class="tabs">
                             <div class="tab pending selected">
                                 <p class="tab-selected">Pendientes</p>
-                                <div class="amount selected">6</div>
+                                <div class="amount selected"></div>
                             </div>
 
                             <div class="tab paid"><p>Pagadas</p></div>
-                            <div class="tab returns"><p>Devueltas</p></div>
-                            <div class="tab money-exact"><p>Saldadas</p></div>
+                            <div class="tab returned"><p>Devueltas</p></div>
+                            <div class="tab settled"><p>Saldadas</p></div>
                         </div>
 
                         <div class="search">
                             <div class="search-back">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" placeholder="Folio. . .">
+                                <i class="fa-solid fa-plane"></i>
+                                <input type="text" placeholder="Solicitud. . .">
                             </div>
                         </div>
                     </div>
@@ -110,7 +123,7 @@
                                 <thead class="table-head">
                                     <tr>
                                         <th>
-                                            <div class="order-div">
+                                            <div class="order-div" data-column="solicitud">
                                                 <div class="order">
                                                     <i class="fa-solid fa-angle-up"></i>
                                                     <i class="fa-solid fa-angle-down"></i>
@@ -118,607 +131,44 @@
                                                 Solicitud
                                             </div>
                                         </th>
-                                        <th>Anticipo</th>
-                                        <th>Comprobado</th>
-                                        <th>Diferencia</th>
+                                        <th>
+                                            <div class="order-div" data-column="anticipo">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Anticipo
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="order-div" data-column="comprobado">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Comprobado
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="order-div" data-column="saldo">
+                                                <div class="order">
+                                                    <i class="fa-solid fa-angle-up"></i>
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </div>
+                                                Diferencia
+                                            </div>
+                                        </th>
                                         <th>Ajuste</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
 
-                                <tbody class="table-body">
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-001</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment return">
-                                            Devolución
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-002</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment refund">
-                                            Reembolso
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-001</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment return">
-                                            Devolución
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-002</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment refund">
-                                            Reembolso
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-001</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment return">
-                                            Devolución
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-002</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment refund">
-                                            Reembolso
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="folio"><p>SOL-26-002</p></td>
-                                        <td class="anticipo-cell">
-                                            <div class="anticipo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money anticipo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="comprobado-cell">
-                                            <div class="comprobado-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money comprobado"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td class="saldo-cell">
-                                            <div class="saldo-content">
-                                                <img src="./assets/images/MXN.webp" alt="MXN">
-                                                <p><span class="symbol-money saldo"></span>10,000.00</p>
-                                            </div>
-                                        </td>
-                                        <td><div class="status st-adjustment refund">
-                                            Reembolso
-                                        </div></td>
-                                        <td><div class="status st-pending">
-                                            Pendiente
-                                        </div></td>
-                                        <td>
-                                            <div class="actions">
-                                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                <tbody class="table-body"></tbody>
                             </table>
                         </div>
                     </div>
 
-                    <div class="cards-mobile">
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card active">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FINANCIERO</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="info-mobile tranfer-rec">
-                                        <p class="subt-mobile">COMPROBANTE</p>
-                                        <i class="fa-solid fa-image"></i>
-                                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/MXN.webp" alt="MXN">MXN</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE ENTREGA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
-                                        <p>20 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-image"></i>
-                                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FINANCIERO</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="map-img">
-                                        <img src="./assets/images/Icon_map.webp" alt="Map">
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Efectivo</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE ENTREGA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA DE CONFIRMACIÓN</p>
-                                        <p>20 / ABR / 2026</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/JPY.webp" alt="JPY">JPY</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/EUR.webp" alt="EUR">EUR</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Efectivo</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="first-info">
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">FOLIO</p>
-                                    <p class="folio-mobile">SOL-26-001</p>
-                                </div>
-                                
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">COLABORADOR</p>
-                                    <p>Yuriana Montserrat Ibarra Granados</p>
-                                </div>
-
-                                <div class="info-mobile">
-                                    <p class="subt-mobile">ENTREGA</p>
-                                    <p class="status st-pending st-mobile">Pendiente</p>
-                                </div>
-                            </div>
-
-                            <div class="complete-info">
-                                <div class="first-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FECHA</p>
-                                        <p>16 / ABR / 2026</p>
-                                    </div>
-                                </div>
-
-                                <div class="second-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">MONTO</p>
-                                        <p class="amount-mobile"><span class="symbol-money"></span>10,000.00</p>
-                                        <p class="amount-mobile-currency"><img src="./assets/images/MXN.webp" alt="MXN">MXN</p>
-                                    </div>
-                                </div>
-
-                                <div class="third-column">
-                                    <div class="info-mobile">
-                                        <p class="subt-mobile">FORMA DE PAGO</p>
-                                        <p class="payment-mobile">Transferencia</p>
-                                    </div>
-
-                                    <div class="buttons-mobile">
-                                        <i class="fa-solid fa-circle-dollar-to-slot"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="cards-mobile"></div>
 
                     <!-- ==================== PAGES ==================== -->
                     <div class="tab-buttons">
@@ -734,7 +184,7 @@
                         </div>
 
                         <div class="back-buttons">
-                            <div class="page"> 1 </div>
+                            <div class="page"></div>
                         </div>
 
                         <div class="back-buttons">
@@ -759,7 +209,7 @@
                         </div>
 
                         <div class="bottom-info">
-                            <p>Adjunta el comprobante de la transferencia realizada para validar la entrega del anticipo.</p>
+                            <p>Adjunta el comprobante de la transferencia realizada para validar la entrega del reembolso.</p>
                         
                             <div class="receipt-container">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -776,7 +226,7 @@
                 <div class="info-wrapper">
                     <div class="info-back">
                         <div class="top-decor">
-                            <p>ENTREGA DE ANTICIPO <span class="info-folio"></span></p>
+                            <p>ENTREGA DE <span class="ajuste"></span></p>
                             <i class="fa-solid fa-xmark"></i>
                         </div>
 
@@ -786,8 +236,8 @@
                             </div>
 
                             <div class="info-text">
-                                <p><span>FECHA DE ENTREGA: </span>16 / ABR / 2026</p>
-                                <p><span>FECHA DE CONFIRMACIÓN: </span>20 / ABR / 2026</p>
+                                <p class="cash-entrega">FECHA DE PAGO: <span></span></p>
+                                <p class="cash-confir">FECHA DE CONFIRMACIÓN: <span></span></p>
                             </div>
 
                             <div class="info-agave right">
@@ -797,12 +247,10 @@
 
                         <div class="bottom-decor transfer">
                             <div class="info-text transfer">
-                                <p><span>FECHA DE ENTREGA: </span>16 / ABR / 2026</p>
-                                <p><span>FECHA DE CONFIRMACIÓN: </span>20 / ABR / 2026</p>
+                                <p class="transfer-entrega">FECHA DE PAGO: <span></span></p>
+                                <p class="transfer-confir">FECHA DE CONFIRMACIÓN: <span></span></p>
 
-                                <div class="transfer-ver">
-                                    <img src="./assets/images/Transfer.jpg" alt="Transfer">
-                                </div>
+                                <div class="transfer-ver"><img></div>
 
                                 <div class="buttons-info">
                                     <div class="button-verification">VER COMPROBANTE</div>
@@ -832,6 +280,7 @@
         </div>
     </div>
 
+    <script src="./assets/js/session.js"></script>
     <script src="./assets/js/tes-liquidaciones.js"></script>
 </body>
 </html>

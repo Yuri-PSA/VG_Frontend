@@ -331,6 +331,8 @@ h5 { font-family: 'CenturyGothic', sans-serif; }
     transition: all 0.3s ease-out !important;
 }
 
+.swal2-container { z-index: 3000; }
+
 .swal2-toast.swal2-hide {
     opacity: 0 !important;
     transform: translateY(-20px) !important;

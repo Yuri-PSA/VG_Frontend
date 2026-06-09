@@ -963,14 +963,6 @@ body {
 .st-refund { background-color: var(--tr-status-refund) }
 .st-refund::before { background: var(--status-refund) }
 
-.status.btn-received { 
-    background-color: var(--icons);
-    color: var(--white);
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    overflow: hidden;
-}
-
 .table-body .actions {
     display: flex;
     justify-content: flex-end;
@@ -1576,14 +1568,6 @@ body {
     .tab.selected p { font-size: 1.15em; }
 
     .search-back input { font-size: 1.1em; }
-
-    .datepicker-header { font-size: 1em; }
-
-    .datepicker-header button,
-    .days-header span,
-    .dates { font-size: 0.8em; }
-
-    .date-button { font-size: 0.75em; }
 
     /* TABLE */
     .table-head { font-size: 0.9em; }
@@ -2598,7 +2582,7 @@ body {
         width: 100%;
         gap: 1.5em;
         color: var(--icons);
-        font-size: 1.4em;
+        font-size: 1.5em;
         margin-top: 1em;
     }
 

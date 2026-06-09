@@ -2833,6 +2833,12 @@ body {
         min-height: calc(100vh - 90px);
     }
 
+    .content-header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
     .titles {
         align-items: center;
         text-align: center;
