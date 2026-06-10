@@ -10,7 +10,7 @@
     <meta name="description" content="Gestión de solicitudes, anticipos y comprobación de gastos">
 
     <!-- ======================= CSS ======================= -->
-    <link rel="stylesheet" href="./assets/css/jefe-dashboard.css">
+    <link rel="stylesheet" href="./assets/css/dashboard.css">
     
     <!-- ======================= ICONS ======================= -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,6 +20,21 @@
 </head>
 
 <body>
+    <!-- ======================= LOADER ======================= -->
+    <div class="loader-overlay">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <!-- ======================= CONTENT ======================= -->
     <div class="background">
         <!-- ======================= PHONE MENU ======================= -->
         <div class="mobile-nav">
@@ -36,9 +51,7 @@
         <div class="option-bar" id="optionBar">
             <div class="logo">
                 <img src="./assets/images/White_logo.webp" alt="Grupo | PSA">
-                <div class="name">
-                    <p>Yuriana Ibarra</p>
-                </div>
+                <div class="name"><p></p></div>
             </div>
 
             <div class="options treasury">
@@ -221,6 +234,7 @@
         </div>
     </div>
 
+    <script src="./assets/js/session.js"></script>
     <script src="./assets/js/tes-dashboard.js"></script>
 </body>
 </html>

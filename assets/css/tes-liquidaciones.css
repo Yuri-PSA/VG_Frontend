@@ -792,8 +792,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .amount.has-number { display: flex; }
 
 .amount.selected {
-    width: 35px;
-    height: 35px;
+    width: 33px;
+    height: 33px;
     right: -1.3em;
     font-size: 1.2em;
 }
@@ -2468,6 +2468,18 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .tab.selected { z-index: 10; }
 
     .tab.selected p { font-size: 1.2em; }
+
+    .amount.selected { 
+        width: 30px;
+        height: 30px;
+        font-size: 1em; 
+    }
+
+    .amount {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7em;
+    }
 
     .search { width: 100%; }
 
