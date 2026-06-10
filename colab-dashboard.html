@@ -10,7 +10,7 @@
     <meta name="description" content="Gestión de solicitudes, anticipos y comprobación de gastos">
 
     <!-- ======================= CSS ======================= -->
-    <link rel="stylesheet" href="./assets/css/jefe-dashboard.css">
+    <link rel="stylesheet" href="./assets/css/dashboard.css">
     
     <!-- ======================= ICONS ======================= -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,6 +20,21 @@
 </head>
 
 <body>
+    <!-- ======================= LOADER ======================= -->
+    <div class="loader-overlay">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <!-- ======================= CONTENT ======================= -->
     <div class="background">
         <!-- ======================= PHONE MENU ======================= -->
         <div class="mobile-nav">
@@ -81,7 +96,7 @@
                 </div>
 
                 <div class="content colab">
-                    <div class="cards">
+                    <div class="cards twice">
                         <div class="card-wrapper">
                             <div class="card-background"></div>
                             <div class="card pending-card"></div>

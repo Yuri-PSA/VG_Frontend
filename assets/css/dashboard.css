@@ -415,7 +415,7 @@ body {
     align-items: center;
     text-align: center;
     font-weight: 600;
-    font-size: 1.1em;
+    font-size: 1em;
     color: var(--white);
 }
 
@@ -425,15 +425,12 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.5em;
+    gap: 0.7em;
     font-weight: 300;
-    font-size: 1.3em;
+    font-size: 1.2em;
     color: var(--white);
     padding-left: 0.9em;
 }
-
-.options.treasury,
-.logout.treasury { gap: 0.7em; }
 
 .options .option,
 .logout .option {
@@ -461,7 +458,7 @@ body {
 }
 
 .option img {
-    width: 18px;
+    width: 17px;
     object-fit: contain;
 }
 
@@ -512,12 +509,12 @@ body {
 
 .titles .title{
     font-weight: 500;
-    font-size: 3.3em;
+    font-size: 3.1em;
 }
 
 .titles .subtitle {
     font-weight: 400;
-    font-size: 1.3em;
+    font-size: 1.2em;
 }
 
 .content {
@@ -884,8 +881,6 @@ body {
 
 .graph-back.total .graph-wrapper .total-money.treasury { margin-top: -0.2em; }
 
-.agave-mobile { display: none; }
-
 .agave {
     position: absolute;
     bottom: -0.5em;
@@ -899,6 +894,8 @@ body {
     right: -7.5em;
     bottom: -1em;
 }
+
+.agave-mobile { display: none; }
 
 
 /* ======================== RESPONSIVE DESKTOP FIRST ======================== */
@@ -1071,12 +1068,13 @@ body {
 
     .option img { width: 15px; }
 
+    .option.fa-plane-departure,
+    .option.fa-arrow-right-from-bracket { font-size: 0.9em; }
+
     /* CONTAINER */
     .container { background-size: 33% auto; }
 
-    .titles .title { font-size: 2.9em; }
-
-    .titles .subtitle { font-size: 1.2em; }
+    .titles .title { font-size: 3em; }
 
     /* GRAPHS */
     .card-text { padding: 0.3em 1.2em; }
@@ -1124,14 +1122,14 @@ body {
 
 @media(min-width: 1366px) and (max-width:1469px) and (max-resolution: 1.5dppx) {
     /* OPTION BAR */
-    .logo .name { font-size: 1.1em; }
+    .logo .name { font-size: 0.97em; }
 
     .options,
-    .logout { font-size: 1.2em; }
+    .logout { font-size: 1.05em; }
 
     .options img { 
-        width: 17px;
-        transform: translateY(5%); 
+        width: 15px;
+        transform: translateY(10%); 
     }
 
     .option .fa-plane-departure { font-size: 0.75em; }
@@ -1154,9 +1152,9 @@ body {
         gap: 1.1em; 
     }
 
-    .titles .title { font-size: 3em; }
+    .titles .title { font-size: 2.9em; }
 
-    .titles .subtitle { font-size: 1.2em; }
+    .titles .subtitle { font-size: 1.05em; }
 
     .card-text { padding: 0.3em 1.2em; }
 
@@ -1245,10 +1243,15 @@ body {
 
 @media(min-width: 1281px) and (max-width: 1365px) and (max-resolution: 1.5dppx) {
     /* OPTION BAR */
-    .logo .name { font-size: 1em; }
+    .logo img { width: 95%; }
+
+    .logo .name { font-size: 0.95em; }
 
     .options,
-    .logout { font-size: 1.1em; }
+    .logout { font-size: 1.05em; }
+
+    .options .option,
+    .logout .option { width: 100%; }
 
     .options img { 
         width: 15px;
@@ -1374,9 +1377,11 @@ body {
 
     .logo { width: 97%; }
 
+    .logo img { width: 95%; }
+
     .logo .name { font-size: 0.9em; }
 
-    .options .option { width: 100%; }
+    .options .option { width: 97%; }
 
     .options,
     .logout { 
@@ -1397,9 +1402,9 @@ body {
         background-size: 31% auto; 
     }
 
-    .titles .title { font-size: 2.3em; }
+    .titles .title { font-size: 2.5em; }
 
-    .titles .subtitle { font-size: 1.1em; }
+    .titles .subtitle { font-size: 1em; }
 
     .content { 
         gap: 1.3em; 
@@ -1609,6 +1614,8 @@ body {
         align-self: flex-end;
         margin-left: auto;
     }
+
+    .cards.twice .card-wrapper:first-child { margin: auto; }
 
     .card-background { 
         height: 80%;
