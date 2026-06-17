@@ -5,12 +5,15 @@
     --white: #FFFFFF;
     --blue: #D9D9D9;
     --gray: #535353;
+    --light-gray: #BDBBBB;
+    --hover-gray: #B0ACAC;
     --selected: #428188;
     --line-gray: #919A9B;
     --tab-selected: #ACBCC0;
     --tabs-gray: #A1AAAC;
     --tabs-hover: #969C9C;
     --icons: #2A5156;
+    --date: #B0BDC1;
     --toast: #00333E;
     --html-back: #002027;
     --table-top: #CED3D4;
@@ -899,6 +902,7 @@ body {
     color: var(--icons);
     background-color: var(--transparent-agave);
     border: 2px solid var(--icons); 
+    overflow: hidden;
 }
 
 .receipt-container.has-image::after {
@@ -1040,22 +1044,22 @@ body {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    padding: 0.3em 0.7em;
+    padding: 0.5em 0.7em;
     font-size: 0.9em; 
 }
 
 /* Anchos específicos */
 .table-head th:nth-child(1),
-.table-head th:nth-child(4) { width: 110px; }
-.table-head th:nth-child(2),
+.table-head th:nth-child(4),
 .table-head th:nth-child(6) { width: 120px; }
 .table-head th:nth-child(3),
 .table-head th:nth-child(5) { width: 250px; }
 .table-head th:nth-child(7),
 .table-head th:nth-child(9),
 .table-head th:nth-child(10) { width: 100px; }
+.table-head th:nth-child(2),
 .table-head th:nth-child(8) { width: 150px; }
-.table-head th:nth-child(11) { width: 140px; }
+.table-head th:nth-child(11) { width: 160px; }
 
 .table-head th:nth-child(12) { width: 50px; }
 
@@ -1079,6 +1083,195 @@ body {
     border: 1px solid var(--line-gray);
     padding: 0.3em 0.5em;
 }
+
+.fecha-container,
+.tc-container {
+    position: relative;
+    display: inline-block;
+}
+
+.fecha-container input,
+.tc-container input {
+  padding-right: 30px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fecha-container i,
+.tc-container i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.fecha-container i:hover,
+.tc-container i:hover {
+    color: var(--icons);
+    font-weight: 600;
+}
+
+.datepicker-wrapper { 
+    display: none;
+    position: fixed;
+    width: 27%;
+    z-index: 999;
+    background-color: var(--transparent-blue);
+    border-radius: 10px;
+    padding: 0.4em 0.5em;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.datepicker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--tr-dark-blue);
+    border-radius: 7px;
+    padding: 0.3em 0.6em 0.5em 0.6em;
+}
+
+.datepicker-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-bottom: 1px solid var(--line-gray);
+    font-weight: 500;
+    font-size: 1em;
+    padding-bottom: 0.3em;
+    gap: 2em;
+}
+
+.datepicker-header button { transform: translateY(2px); }
+
+.date-header { display: flex; }
+
+.date-header .month,
+.date-header .year {
+    cursor: pointer;
+    padding: 0.3em 0.4em;
+    border-radius: 5px;
+}
+
+.date-header .month:hover,
+.date-header .year:hover { background-color: var(--date); }
+
+.days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    padding: 0.5em 0 0.3em 0;
+    gap: 0.5em;
+}
+
+.days-header span { 
+    font-size: 0.75em;
+    font-weight: 600; 
+    display: block;
+}
+
+.dates {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    align-items: center;
+    text-align: center;
+    color: var(--black);
+    font-weight: 500;
+    font-size: 0.78em;
+    gap: 0.3em;
+}
+
+.date-cell.other-month { 
+    color: var(--gray);
+    cursor: default;
+    pointer-events: none;
+}
+
+.date-cell { 
+    position: relative;
+    cursor: pointer;
+    padding: 0.2em 0;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, color 0.2s;
+}
+
+.date-cell:not(.other-month):hover { 
+    background-color: var(--selected); 
+    color: var(--white);
+}
+
+.date-cell.start {
+    background-color: var(--selected);
+    color: var(--white);
+    font-weight: 600;
+}
+
+.months-grid,
+.years-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8em;
+    padding: 1em 0;
+    font-size: 0.9em;
+}
+
+.month-item,
+.year-item {
+    text-align: center;
+    padding: 0.5em 0;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.year-item:first-child,
+.year-item:last-child { 
+    color: var(--gray);
+    cursor: default; 
+    pointer-events: none;
+}
+
+.month-item:hover,
+.year-item:not(:first-child):not(:last-child):hover {
+    background-color: var(--selected);
+    color: var(--white);
+}
+
+.datepicker-bottom {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 1em;
+    width: 100%;
+    margin-top: 0.5em;
+    border-top: 1px solid var(--line-gray);
+    padding: 0.5em 0.5em 0.3em 0;
+}
+
+.date-button {
+    padding: 0.2em 0.7em;
+    font-size: 0.75em;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.date-button.select-date {
+    background-color: var(--selected);
+    color: var(--white);
+}
+
+.date-button.select-date:hover { background-color: var(--icons); }
 
 .table-container::-webkit-scrollbar { 
     height: 8px; 
@@ -1217,6 +1410,22 @@ body {
     .table-head th:nth-child(7) { width: 110px; }
     .table-head th:nth-child(8),
     .table-head th:nth-child(11) { width: 170px; }
+
+    .datepicker-wrapper {
+        border-radius: 13px;
+        padding: 0.5em 0.6em;
+    }
+
+    .datepicker { border-radius: 10px; }
+
+    .datepicker-header { font-size: 1.3em; }
+
+    .datepicker-header button { font-size: 0.8em; }
+
+    .days-header span,
+    .dates { font-size: 1em; }
+
+    .date-button { font-size: 0.95em; }
 }
 
 /* Escritorios medianos (1440px + 1800px) */
@@ -1269,6 +1478,14 @@ body {
         max-height: 7.5em;
         height: 7.5em;
     }
+
+    .datepicker-header { font-size: 1em; }
+
+    .datepicker-header button,
+    .days-header span,
+    .dates { font-size: 0.8em; }
+
+    .date-button { font-size: 0.75em; }
 }
 
 @media(min-width: 1366px) and (max-width:1469px) and (max-resolution: 1.5dppx) {
@@ -1330,6 +1547,17 @@ body {
     .table-body td { font-size: 0.8em }
 
     .table-body input { font-size: 0.9em }
+
+    .datepicker-wrapper { width: 26%; }
+
+    .date-header { font-size: 0.9em; }
+
+    .datepicker-header button,
+    .days-header span { font-size: 0.7em; }
+
+    .dates { font-size: 0.8em; }
+
+    .date-button { font-size: 0.75em; }
 
     .factura-content { height: 9.5em; }
 
@@ -1423,6 +1651,16 @@ body {
     .table-body td { font-size: 0.8em; }
 
     .table-body input { font-size: 0.9em; }
+
+    .datepicker-wrapper { width: 26%; }
+
+    .date-header { font-size: 0.9em; }
+
+    .datepicker-header button,
+    .days-header span,
+    .dates { font-size: 0.7em; }
+
+    .date-button { font-size: 0.65em; }
 
     .table-container { 
         max-height: 6.5em;
@@ -1524,6 +1762,20 @@ body {
         max-height: 5.5em;
         height: 5.5em; 
     }
+
+    .datepicker-header { font-size: 0.9em; }
+
+    .datepicker-header button { 
+        font-size: 0.8em; 
+        transform: translateY(-1%);
+    }
+
+    .days-header span,
+    .dates { font-size: 0.7em; }
+
+    .date-cell { padding: 0.1em 0; }
+
+    .date-button { font-size: 0.7em; }
 }
 
 /* Tabletas */
@@ -1696,12 +1948,31 @@ body {
         max-height: none;
     }
 
+    .table-head th:nth-child(1) { width: 130px; }
+    .table-head th:nth-child(2) { width: 160px; }
+    .table-head th:nth-child(3), 
+    .table-head th:nth-child(5) { width: 280px; }
+    .table-head th:nth-child(4) { width: 140px; }
+    .table-head th:nth-child(11) { width: 170px; }
+
     .table-body td {
         overflow: visible;
         text-overflow: clip;
-        white-space: pre-wrap;
-        padding: 0.5em 1em; 
+        padding: 1em; 
+        white-space: normal;
     }
+
+    .table-body td input {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .datepicker-wrapper { width: 34%; }
+
+    .dates { font-size: 0.9em; }
+
+    .date-button { font-size: 0.85em; }
 
     .agave-mobile {
         display: flex;
@@ -1924,11 +2195,18 @@ body {
     .table-body td {
         overflow: visible;
         text-overflow: clip;
-        white-space: pre-wrap; 
-        padding: 0.5em 1em; 
+        white-space: normal; 
+        padding: 1em; 
     }
 
-    .table-body input { padding: 0.5em; }
+    .table-body td input {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0.5em;
+    }
+
+    .datepicker-wrapper { width: 75%; }
 
     .agave-mobile {
         display: flex;

@@ -23,10 +23,16 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener('resize', () => replicateCircles());
     
     buttonInfo();
+    buttonLiquidacion();
 });
 
 
 /* ============================== VARIABLES ============================== */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
+
 let globalStartDate = null;
 let globalEndDate = null;
 let swapped = false;
@@ -40,9 +46,6 @@ let currentFolio = 'ASC';
 let currentSol = null;
 let currentTotal = null;
 let currentSaldo = null;
-
-const token = Session.getToken();
-const logoUser = Session.getUser();
 
 
 /* ================================= FUNCIONES ================================= */
@@ -165,7 +168,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -324,7 +327,7 @@ async function tableInformation(filtros = {}, page = 1) {
     if(currentSaldo) params.append('ordenSaldo', currentSaldo);
 
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/listar?${params.toString()}`, {
+        const response = await fetch(`${API}/api/comprobaciones/listar?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -371,6 +374,11 @@ function getActionIcons(estado) {
             <i class="fa-solid fa-pen-to-square"></i>
             <i class="fa-solid fa-circle-info"></i>
         `;
+    else if(estado === 'Aprobada')
+        return `
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+            <i class="fa-solid fa-circle-info"></i>
+        `;
     else
         return `<i class="fa-solid fa-circle-info"></i>`;
 }
@@ -413,7 +421,7 @@ function renderTable(comprobaciones, tab = 'all') {
 
         let html = `
             <td class="folio"><p>${cmp.folio}</p></td>
-            <td><p>${cmp.solicitud}</p></td>
+            <td class="sol"><p>${cmp.solicitud}</p></td>
             <td><p>${formatDate(cmp.fecha_comprobacion)}</p></td>
             <td class="monto-cell">
                 <div class="monto-content">
@@ -476,7 +484,7 @@ function renderCards(comprobaciones, tab = 'all') {
                                 
                 <div class="info-mobile">
                     <p class="subt-mobile">SOLICITUD</p>
-                    <p>${cmp.solicitud}</p>
+                    <p class="sol-mobile">${cmp.solicitud}</p>
                 </div>
 
                 <div class="info-mobile">
@@ -1097,7 +1105,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1203,11 +1211,9 @@ function llenarInfoCard(card, data) {
 
             <div class="buttons-mobile">
                 ${comprobacion.estado === 'Aprobada' ? 
-                    `<i class="fa-solid fa-circle-info"></i>` : 
-                    `
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <i class="fa-solid fa-circle-info"></i>
-                    `}
+                    `<i class="fa-solid fa-hand-holding-dollar"></i>` : 
+                    `<i class="fa-solid fa-pen-to-square"></i>`}
+                <i class="fa-solid fa-circle-info"></i>
             </div>
         </div>
     `;
@@ -1330,7 +1336,7 @@ async function loadDetails(folio) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -1625,7 +1631,7 @@ async function downloadFile(url, filename) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/${url}`, {
+        const response = await fetch(`${API}/${url}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -1647,6 +1653,27 @@ async function downloadFile(url, filename) {
     } catch(error) {
         Toast('ERROR', 'Lo siento, no fue posible descargar el archivo');
     }
+}
+
+// Settlement
+function buttonLiquidacion() {
+    document.body.addEventListener('click', async(e) => {
+        const target = e.target;
+        if(!target.classList.contains('fa-hand-holding-dollar')) return;
+        e.stopPropagation();
+
+        const row = target.closest('tr');
+        const card = target.closest('.card');
+        let solicitud = null;
+
+        if(row)
+            solicitud = row.querySelector('.sol')?.textContent.trim();
+        else if(card) 
+            solicitud = card.querySelector('.sol-mobile')?.textContent.trim();
+
+        if(solicitud) 
+            window.location.href = `colab-liquidaciones.html?search=${encodeURIComponent(solicitud)}`;
+    });
 }
 
 

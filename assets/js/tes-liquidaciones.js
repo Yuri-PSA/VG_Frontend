@@ -28,6 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 /* ============================== VARIABLES ============================== */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
+
 // Transfer receipt
 let selectedFile = null;
 let isUploading = false;
@@ -53,10 +58,6 @@ let lastKnownCount = 0;
 // Adjustment
 let availableAdj = [];
 let currentAdjIndex = -1;
-
-// Backend
-const token = Session.getToken();
-const logoUser = Session.getUser();
 
 
 /* ================================= FUNCIONES ================================= */
@@ -179,7 +180,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -328,7 +329,7 @@ async function tableInformation(filtros = {}, page = 1) {
     params.append('ordenAjuste', currentAjuste);
 
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/liquidaciones/listar?${params.toString()}`, {
+        const response = await fetch(`${API}/api/liquidaciones/listar?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -756,7 +757,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/liquidaciones/detalle?solicitud=${encodeURIComponent(solicitud)}`, {
+        const response = await fetch(`${API}/api/liquidaciones/detalle?solicitud=${encodeURIComponent(solicitud)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -857,7 +858,7 @@ function llenarInfoCard(card, data) {
     }
     
     const comprobante = !!data.ruta_comprobacion;
-    const fullImageUrl = comprobante ? `http://127.0.0.1:3000/${data.ruta_comprobacion}` : '';
+    const fullImageUrl = comprobante ? `${API}/${data.ruta_comprobacion}` : '';
 
     card.setAttribute('data-comprobante-url', fullImageUrl);
 
@@ -984,7 +985,7 @@ async function fetchAjustes() {
             return false;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/liquidaciones/ajustes`, {
+        const response = await fetch(`${API}/api/liquidaciones/ajustes`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -1083,7 +1084,7 @@ async function gestionarComprobante(solicitud, fechaPago = null, fechaRecibido =
         return false;
     }
 
-    const response = await fetch('http://127.0.0.1:3000/api/liquidaciones/comprobante', {
+    const response = await fetch(`${API}/api/liquidaciones/comprobante`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -1138,7 +1139,7 @@ async function uploadReceiptFile(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch('http://127.0.0.1:3000/api/liquidaciones/upload/comprobante/liquidacion', {
+    const response = await fetch(`${API}/api/liquidaciones/upload/comprobante/liquidacion`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -1402,7 +1403,7 @@ async function buttonInfo() {
         if(!solicitud || !ajuste) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:3000/api/liquidaciones/detalle?solicitud=${encodeURIComponent(solicitud)}`, {
+            const response = await fetch(`${API}/api/liquidaciones/detalle?solicitud=${encodeURIComponent(solicitud)}`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
                 credentials: 'include'
@@ -1435,7 +1436,7 @@ async function buttonInfo() {
                 const transferImg = bottomTransfer.querySelector('.transfer-ver img');
                 const buttonsDiv = bottomTransfer.querySelector('.buttons-info');
                 
-                const fullImageUrl = `http://127.0.0.1:3000/${data.ruta_comprobacion}`;
+                const fullImageUrl = `${API}/${data.ruta_comprobacion}`;
                 transferImg.src = fullImageUrl;
                 if(buttonsDiv) buttonsDiv.style.display = 'flex';
             } else {

@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 /* ============================== VARIABLES ============================== */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
+
 // Transfer receipt
 let selectedFile = null;
 let isUploading = false;
@@ -56,10 +61,6 @@ const CURRENCY_COUNTRY = {
     TWD: 'tw', THB: 'th', MYR: 'my', IDR: 'id', PHP: 'ph',
     PKR: 'pk', BDT: 'bd', VND: 'vn', ILS: 'il', NGN: 'ng',
 };
-
-// Backend
-const token = Session.getToken();
-const logoUser = Session.getUser();
 
 
 /* ================================= FUNCIONES ================================= */
@@ -161,7 +162,7 @@ function initMobileScroll() {
 // Logout
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -314,7 +315,7 @@ async function tableInformation(filtros = {}, page = 1) {
     if(currentMonto) params.append('ordenMonto', currentMonto);
 
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/listar?${params.toString()}`, {
+        const response = await fetch(`${API}/api/solicitudes/listar?${params.toString()}`, {
             method: 'GET',
             headers: { 
                 'Content-Type': 'application/json',
@@ -1184,7 +1185,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1259,7 +1260,7 @@ function llenarInfoCard(card, data) {
     const fechaEntrega = data.fecha_entrega ? formatDate(data.fecha_entrega) : '—';
     const fechaConfirmacion = data.fecha_confirmacion ? formatDate(data.fecha_confirmacion) : '—';
     const comprobante = !!data.ruta_comprobante;
-    const fullImageUrl = comprobante ? `http://127.0.0.1:3000/${data.ruta_comprobante}` : '';
+    const fullImageUrl = comprobante ? `${API}/${data.ruta_comprobante}` : '';
 
     card.setAttribute('data-comprobante-url', fullImageUrl);
 
@@ -1474,7 +1475,7 @@ async function gestionarAnticipo(folio, fechaEntrega = null, fechaConfirmacion =
     if(rutaComprobante) body.rutaComprobante = rutaComprobante;
     if(noRecibido) body.noRecibido = noRecibido;
 
-    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/anticipo', {
+    const response = await fetch(`${API}/api/solicitudes/anticipo`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -1538,7 +1539,7 @@ async function uploadReceiptFile(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch('http://127.0.0.1:3000/api/solicitudes/upload/comprobante/anticipo', {
+    const response = await fetch(`${API}/api/solicitudes/upload/comprobante/anticipo`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -1804,7 +1805,7 @@ async function buttonInfoDelivered() {
         if(!folio || !payment) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+            const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
                 credentials: 'include'
@@ -1845,7 +1846,7 @@ async function buttonInfoDelivered() {
                 const transferImg = bottomTransfer.querySelector('.transfer-ver img');
                 const buttonsDiv = bottomTransfer.querySelector('.buttons-info');
                 if(data.ruta_comprobante) {
-                    const fullImageUrl = `http://127.0.0.1:3000/${data.ruta_comprobante}`;
+                    const fullImageUrl = `${API}/${data.ruta_comprobante}`;
                     transferImg.src = fullImageUrl;
                     if(buttonsDiv) buttonsDiv.style.display = 'flex';
                 }
@@ -1964,7 +1965,7 @@ async function syncCompButtons() {
     // Consultar existencia de comprobación para cada folio
     await Promise.all(elements.map(async ({ folio, btn }) => {
         try {
-            const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/listar?solicitud=${encodeURIComponent(folio)}&limit=1`, {
+            const response = await fetch(`${API}/api/comprobaciones/listar?solicitud=${encodeURIComponent(folio)}&limit=1`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 credentials: 'include'
             });

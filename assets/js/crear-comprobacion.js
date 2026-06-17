@@ -3,12 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
     phoneMenu();
     initMobileScroll();
     optionsBar();
-    cancelButton();
     tabSelected();
     requestDropdown();
     updateXmlVisibility();
     initTableResize();
     initUpload();
+    buttonTC();
+    cancelButton();
 
     const sendBtn = document.querySelector('.button.send');
     if(sendBtn) sendBtn.addEventListener('click', enviarComprobacion);
@@ -16,6 +17,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 /* ============================== VARIABLES ============================== */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
+
+// API Banxico
+const exchangeRateCache = {};
+
 // Facturas
 let selectedPDF = null;
 let selectedXML = null;
@@ -30,12 +39,8 @@ let currentMoneda = null;
 let pendingEditRow = null;
 let pendingTempData = null;
 
-// API Banxico
-const exchangeRateCache = {};
-
-// Backend
-const token = Session.getToken();
-const logoUser = Session.getUser();
+// Date
+let globalStartDate = null;
 
 
 /* ================================ FUNCTIONS ================================ */
@@ -181,7 +186,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -243,18 +248,6 @@ function optionsBar() {
     logout.addEventListener('click', async (e) => {
         e.stopPropagation();
         logoutReset();
-    });
-}
-
-
-/* =============================== FORM BUTTONS =============================== */
-// Cancel
-function cancelButton() {
-    const cancelButton = document.querySelector('.button.cancel');
-
-    cancelButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        window.location.href = 'colab-comprobaciones.html';
     });
 }
 
@@ -356,7 +349,7 @@ async function requestDropdown() {
     // Cargar solicitudes desde el backend
     async function loadRequests() {
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/solicitudes/aprobadas-pendientes', {
+            const response = await fetch(`${API}/api/solicitudes/aprobadas-pendientes`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -508,7 +501,14 @@ function addFacturaEditable(datosBase) {
 
     nuevaFila.innerHTML = `
         <td><input type="text" class="editable-folio" placeholder="Folio"></td>
-        <td><input type="text" class="editable-fecha" placeholder="Fecha"></td>
+        
+        <td>
+            <div class="fecha-container">
+                <input type="text" class="editable-fecha" placeholder="Fecha">
+                <i class="fa-regular fa-calendar"></i>
+            </div>
+        </td>
+
         <td><input type="text" class="editable-proveedor" placeholder="Proveedor"></td>
         <td><input type="text" class="editable-concepto" placeholder="Concepto"></td>
         <td><input type="text" class="editable-descripcion" placeholder="Descripción"></td>
@@ -517,10 +517,20 @@ function addFacturaEditable(datosBase) {
         <td><input type="text" class="editable-others" placeholder="Otros"></td>
         <td class="editable-total">$0.00</td>
         <td class="editable-currency">${moneda}</td>
-        <td><input type="text" class="editable-tipoCambio" placeholder="Tipo Cambio" value="${tipoCambioIni}" ${esMXN ? 'readonly' : ''}></td>
+
+        <td>
+            <div class="tc-container">
+                <input type="text" class="editable-tipoCambio" placeholder="Tipo Cambio" value="${tipoCambioIni}" ${esMXN ? 'readonly' : ''}>
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+        </td>
+        
         <td class="delete-row"><div class="actions"><i class="fa-solid fa-trash-can"></i></div></td>
     `;
     tbody.appendChild(nuevaFila);
+
+    initCalendar();
+    setupCalendar();
 
     const fechaInput = nuevaFila.querySelector('.editable-fecha');
     const tipoCambioInput = nuevaFila.querySelector('.editable-tipoCambio');
@@ -772,7 +782,348 @@ function duplicateFactura(nuevaFactura) {
 }
 
 
-/* =============================== READ XML & PDF =============================== */
+/* ================================ INPUT BUTTONS ================================ */
+// Calendar
+function initCalendar() {
+    const monthLabel = document.querySelector('.date-header .month');
+    const yearLabel = document.querySelector('.date-header .year');
+    const datesContainer = document.querySelector('.dates');
+    const daysHeader = document.querySelector('.days-header');
+    const prevBtn = document.querySelector('.prev-month');
+    const nextBtn = document.querySelector('.next-month');
+    const monthSelector = document.querySelector('.month-selector');
+    const yearSelector = document.querySelector('.year-selector');
+
+    let currentDate = new Date();
+    let startDate = null;
+    let viewMode = 'days';
+
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto',
+                        'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    // Funciones auxiliares
+    function getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayIndex(year, month) {
+        return new Date(year, month, 1).getDay();
+    }
+
+    function isSameDate(date1, date2) {
+        return date1 && date2 && date1.year === date2.year && date1.month === date2.month && date1.day === date2.day;
+    }
+
+    function toTimestamp(date) {
+        if (!date) return null;
+        return new Date(date.year, date.month, date.day).getTime();
+    }
+
+    // Renderiza el calendario de días
+    function renderDays() {
+        monthLabel.style.display = 'flex';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        monthLabel.textContent = monthNames[month];
+        yearLabel.textContent = year;
+
+        const firstDay = getFirstDayIndex(year, month);
+        const daysInMonth = getDaysInMonth(year, month);
+
+        // Días del mes anterior
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevMonthYear = month === 0 ? year - 1 : year;
+        const daysInPrevMonth = getDaysInMonth(prevMonthYear, prevMonth);
+        const prevMonthDays = firstDay;
+
+        const totalCells = 42;  // 6 filas x 7 días
+        const nextMonthDays = totalCells - (prevMonthDays + daysInMonth);
+        
+        datesContainer.innerHTML = '';
+        daysHeader.style.display = 'grid';
+        datesContainer.classList.remove('months-grid', 'years-grid');
+
+        // 1. Mes anterior
+        for(let i = prevMonthDays - 1; i >= 0; i--) {
+            const day = daysInPrevMonth - i;
+            const cell = createDateCell(day, prevMonthYear, prevMonth, true);
+            datesContainer.appendChild(cell);
+        }
+
+        // 2. Mes actual
+        for(let day = 1; day <= daysInMonth; day++) {
+            const cell = createDateCell(day, year, month, false);
+            datesContainer.appendChild(cell);
+        }
+
+        // 3. Mes siguiente
+        let nextMonth = month === 11 ? 0 : month + 1;
+        let nextMonthYear = month === 11 ? year + 1 : year;
+        for(let day = 1; day <= nextMonthDays; day++) {
+            const cell = createDateCell(day, nextMonthYear, nextMonth, true);
+            datesContainer.appendChild(cell);
+        }
+    }
+
+    // Vista de días
+    function createDateCell(day, year, month, isOtherMonth) {
+        const cell = document.createElement('div');
+        cell.classList.add('date-cell');
+        cell.textContent = day;
+        if(isOtherMonth) cell.classList.add('other-month');
+
+        const dateObj = { year, month, day };
+
+        // Asignar clases de rango
+        if(startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
+
+        cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startDate = { year, month, day };
+            globalStartDate = `${year}-${month+1}-${day}`;
+            renderCalendar();
+        });
+        return cell;
+    }
+
+    // Vista de meses
+    function renderMonths() {
+        const year = currentDate.getFullYear();
+        monthLabel.textContent = monthNames[currentDate.getMonth];
+        yearLabel.textContent = year;
+
+        daysHeader.style.display = 'none';
+        datesContainer.innerHTML = '';
+        datesContainer.classList.remove('years-grid');
+        datesContainer.classList.add('months-grid');
+        monthLabel.style.display = 'none';
+
+        for (let i = 0; i < 12; i++) {
+            const monthDiv = document.createElement('div');
+            monthDiv.classList.add('month-item');
+            monthDiv.textContent = monthNames[i];
+            monthDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Cambiar al mes seleccionado
+                currentDate.setMonth(i);
+                viewMode = 'days';
+                renderCalendar();
+            });
+
+            datesContainer.appendChild(monthDiv);
+        }
+    }
+
+    // Vista de años
+    function renderYears() {
+        const year = currentDate.getFullYear();
+        const decadeStart = Math.floor(year / 10) * 10;
+        yearLabel.textContent = `${decadeStart} - ${decadeStart + 9}`;
+        monthLabel.style.display = 'none';
+
+        daysHeader.style.display = 'none';
+        datesContainer.innerHTML = '';
+        datesContainer.classList.remove('months-grid');
+        datesContainer.classList.add('years-grid');
+
+        // Generar años
+        const startYear = decadeStart - 1;
+        for (let i = 0; i < 12; i++) {
+            const y = startYear + i;
+            const yearDiv = document.createElement('div');
+            yearDiv.classList.add('year-item');
+            yearDiv.textContent = y;
+            yearDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentDate.setFullYear(y);
+                viewMode = 'days';
+                renderCalendar();
+            });
+            datesContainer.appendChild(yearDiv);
+        }
+    }
+
+    // Render principal
+    function renderCalendar() {
+        if(viewMode === 'months')
+            renderMonths();
+        else if (viewMode === 'years')
+            renderYears();
+        else
+            renderDays();
+    }
+
+    // Navegación con flechas
+    function navigate(delta) {
+        if (viewMode === 'months') {
+            currentDate.setFullYear(currentDate.getFullYear() + delta);
+            renderMonths();
+        } else if (viewMode === 'years') {
+            currentDate.setFullYear(currentDate.getFullYear() + delta * 10);
+            renderYears();
+        } else {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderDays();
+        }
+        hideSelectors();
+    }
+
+    function hideSelectors() {
+        if (monthSelector) monthSelector.style.display = 'none';
+        if (yearSelector) yearSelector.style.display = 'none';
+    }
+
+    // Eventos
+    if (prevBtn) prevBtn.addEventListener('click', () => navigate(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => navigate(1));
+
+    monthLabel.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if (viewMode === 'days') {
+            viewMode = 'months';
+            renderCalendar();
+        } else if (viewMode === 'months') {
+            viewMode = 'days';
+            renderCalendar();
+        } else if (viewMode === 'years') {
+            viewMode = 'months';
+            renderCalendar();
+        }
+        hideSelectors();
+    });
+
+    yearLabel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        viewMode = 'years';
+        renderCalendar();
+        hideSelectors();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (monthSelector && yearSelector)
+            if (!monthSelector.contains(e.target) && !yearSelector.contains(e.target) &&
+                e.target !== monthLabel && e.target !== yearLabel)
+                    hideSelectors();
+    });
+
+    window.addEventListener('calendar-closed', () => {
+        startDate = null;
+        endDate = null;
+        renderCalendar();
+    });
+
+    window.calendarRender = renderCalendar;
+}
+
+function setupCalendar() {
+    const calendarIcon = document.querySelector('.fa-calendar');
+    const datepicker = document.querySelector('.datepicker-wrapper');    
+    const selectDate = document.querySelector('.date-button.select-date');
+
+    if(!calendarIcon || !datepicker || !selectDate) return;
+
+    function closeDatepicker() {
+        calendarIcon.classList.remove('icon-active');
+        datepicker.style.display = 'none';
+        globalStartDate = null;
+        window.dispatchEvent(new CustomEvent('calendar-closed'));
+    }
+
+    calendarIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        const isVisible = datepicker.style.display === 'block';
+        if(isVisible)
+            closeDatepicker();
+        else {
+            calendarIcon.classList.add('icon-active');
+
+            const datesContainer = document.querySelector('.dates');
+            if(datesContainer && datesContainer.children.length === 0 && window.calendarRender)
+                window.calendarRender();
+
+            datepicker.style.visibility = 'hidden';
+            datepicker.style.display = 'block';
+            
+            requestAnimationFrame(() => {
+                positionDatepicker(calendarIcon, datepicker);
+                datepicker.style.visibility = 'visible';
+            });
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if(!datepicker.contains(e.target) && e.target !== calendarIcon)
+            closeDatepicker();
+    });
+
+    selectDate.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if(!globalStartDate) {
+            Toast('SELECCIÓN DE FECHA', 'Por favor, selecciona la fecha en la que tu factura fue emitida');
+            return;
+        }
+
+        const [year, month, day] = globalStartDate.split('-');
+        const formatted = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        if(pendingEditRow) {
+            const fechaInput = pendingEditRow.querySelector('.editable-fecha');
+            if(fechaInput) {
+                fechaInput.value = formatted;
+                fechaInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        closeDatepicker();
+    });
+}
+
+function positionDatepicker(icon, datepicker) {
+    const rect = icon.getBoundingClientRect();
+    const dpRect = datepicker.getBoundingClientRect();
+
+    // Móvil, centrar respecto a la pantalla
+    if(window.innerWidth <= 765) {
+        const left = (window.innerWidth - dpRect.width) / 2;
+        let top = rect.top - dpRect.height - 8;
+        if(top < 10) top = rect.bottom + 8;
+
+        datepicker.style.left = `${left}px`;
+        datepicker.style.top = `${top}px`;
+        return;
+    }
+
+    // Computadoras
+    let left = rect.left + rect.width / 2 - dpRect.width / 2;
+    let top = rect.top - dpRect.height - 8;
+
+    if(left < 10) left = 10;
+    if(left + dpRect.width > window.innerWidth - 10)
+        left = window.innerWidth - dpRect.width - 10;
+    if(top < 10) top = rect.bottom + 8;
+
+    datepicker.style.left = `${left}px`;
+    datepicker.style.top = `${top}px`;
+}
+
+// T.C. Information
+function buttonTC() {
+    document.addEventListener('click', (e) => {
+        const target = e.target;
+        if(!target.classList.contains('fa-circle-info')) return;
+
+        e.stopPropagation();
+        Toast('TIPO DE CAMBIO REQUERIDO', 'Ingresa el tipo de cambio de la fecha de emisión. Por ejemplo, si 1 EUR equivale a 21.43 MXN, captura 21.43');
+    });
+}
+
+
+/* =================================== READ XML =================================== */
 // XML
 async function parseXML(xmlFile) {
     return new Promise((resolve, reject) => {
@@ -875,7 +1226,7 @@ async function getTipoCambio(moneda, fecha = null) {
 
     try {
         const query = fecha ? `?fecha=${fecha}` : '';
-        const res = await fetch(`http://127.0.0.1:3000/api/solicitudes/tipocambio/${moneda}${query}`, {
+        const res = await fetch(`${API}/api/solicitudes/tipocambio/${moneda}${query}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -903,7 +1254,7 @@ async function uploadIMG(imgFile) {
     const formData = new FormData();
     formData.append('file', imgFile);
 
-    const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/upload/factura/img', {
+    const response = await fetch(`${API}/api/comprobaciones/upload/factura/img`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -924,7 +1275,7 @@ async function uploadPDF(pdfFile) {
     const formData = new FormData();
     formData.append('file', pdfFile);
 
-    const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/upload/factura/pdf', {
+    const response = await fetch(`${API}/api/comprobaciones/upload/factura/pdf`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -945,7 +1296,7 @@ async function uploadXML(xmlFile) {
     const formData = new FormData();
     formData.append('file', xmlFile);
 
-    const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/upload/factura/xml', {
+    const response = await fetch(`${API}/api/comprobaciones/upload/factura/xml`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
@@ -1314,6 +1665,19 @@ function initUpload() {
     }
 }
 
+
+/* ================================== BUTTONS ================================== */
+// Cancel
+function cancelButton() {
+    const cancelButton = document.querySelector('.button.cancel');
+
+    cancelButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = 'colab-comprobaciones.html';
+    });
+}
+
+// Send
 async function enviarComprobacion() {
     const selector = document.querySelector('.request-selector');
     const selectedFolio = selector?.dataset.selectedFolio;
@@ -1391,7 +1755,7 @@ async function enviarComprobacion() {
 
         console.log(body);
 
-        const response = await fetch('http://127.0.0.1:3000/api/comprobaciones', {
+        const response = await fetch(`${API}/api/comprobaciones`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -24,6 +24,7 @@ let globalEndDate = null;
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
 
 
 /* ================================= LOADER ================================= */
@@ -110,7 +111,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -225,7 +226,7 @@ async function sendButton() {
 
         showLoader();        
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/solicitudes', {
+            const response = await fetch(`${API}/api/solicitudes`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -263,7 +264,7 @@ function getFolioFromUrl() {
 async function loadSolicitudData(folio) {
     showLoader();
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -396,7 +397,7 @@ async function saveButton() {
         
         showLoader();
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/solicitudes/editar', {
+            const response = await fetch(`${API}/api/solicitudes/editar`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
