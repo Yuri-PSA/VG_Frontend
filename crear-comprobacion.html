@@ -8,6 +8,7 @@
         <title>Viáticos</title>
         <meta name="title" content="Viáticos">
         <meta name="description" content="Gestión de solicitudes, anticipos y comprobación de gastos">
+        <link rel="icon" href="./assets/images/Page_icon.ico" type="image/x-icon">
 
         <!-- ======================= CSS ======================= -->
         <link rel="stylesheet" href="./assets/css/crear-comprobacion.css">
@@ -179,9 +180,40 @@
                                         </tr>
                                     </thead>
 
-                                    <tbody class="table-body">
-                                    </tbody>
+                                    <tbody class="table-body"></tbody>
                                 </table>
+
+                                <!-- ======================== CALENDARIO ======================== -->
+                                <div class="datepicker-wrapper">
+                                    <div class="datepicker">
+                                        <div class="datepicker-header">
+                                            <button class="prev-month" type="button"><i class="fa-solid fa-angle-left"></i></button>
+
+                                            <div class="date-header">
+                                                <div class="month"></div>
+                                                <div class="year"></div>
+                                            </div>
+
+                                            <button class="next-month" type="button"><i class="fa-solid fa-angle-right"></i></button>
+                                        </div>
+
+                                        <div class="days-header">
+                                            <span>DOM</span>
+                                            <span>LUN</span>
+                                            <span>MAR</span>
+                                            <span>MIE</span>
+                                            <span>JUE</span>
+                                            <span>VIE</span>
+                                            <span>SAB</span>
+                                        </div>
+
+                                        <div class="dates"></div>
+
+                                        <div class="datepicker-bottom">
+                                            <div class="date-button select-date">SELECCIONAR</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

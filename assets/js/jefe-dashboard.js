@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-const API_BASE = 'https://abc123.ngrok-free.app';
+const API = 'http://127.0.0.1:3000';
 
 // Estados mensuales
 let currentYear = null;
@@ -205,7 +205,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch(`${API_BASE}/auth/logout`, {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -271,7 +271,7 @@ function cardLinks() {
 /* ============================== CARDS COUNTS ============================== */
 async function fetchCardCounts() {
     try {
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/cantidad-solicitudes`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/cantidad-solicitudes`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -404,7 +404,7 @@ function createFlagPlugin(flagMap, currencyColors) {
 // ======= Status graph =======
 async function fetchStatusChart(year, month) {
     try {
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/estados`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -524,7 +524,7 @@ async function updateStatusChart(year, month) {
 
 async function loadAllMonths() {
     try {
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/estados`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -601,7 +601,7 @@ async function fetchGraphsYears(forTendencia = true) {
             return;
         }
 
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/years-jefes`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/years-jefes`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -709,7 +709,7 @@ async function fetchTendData(year) {
             return;
         }
 
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/tendencia?year=${year}`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/tendencia?year=${year}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -884,7 +884,7 @@ async function fetchExpenseData(year) {
             return;
         }
 
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/gasto?year=${year}`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/gasto?year=${year}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -1043,7 +1043,7 @@ async function fetchTotalCardData(year) {
             return;
         }
 
-        const response = await fetch(`${API_BASE}/api/solicitudes/dashboard/gasto?year=${year}`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/gasto?year=${year}`, {
             headers: { 'Authorization': `Bearer ${token}` }, 
             credentials: 'include' 
         });

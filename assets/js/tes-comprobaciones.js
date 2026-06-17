@@ -32,6 +32,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 /* ============================== VARIABLES ============================== */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
+
 let globalStartDate = null;
 let globalEndDate = null;
 let swapped = false;
@@ -48,10 +53,6 @@ let currentSaldo = null;
 
 // Pending amount
 let lastKnownCount = 0;
-
-// Backend
-const token = Session.getToken();
-const logoUser = Session.getUser();
 
 
 /* ================================= FUNCIONES ================================= */
@@ -174,7 +175,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -330,7 +331,7 @@ async function tableInformation(filtros = {}, page = 1) {
     if(currentSaldo) params.append('ordenSaldo', currentSaldo);
 
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/listar?${params.toString()}`, {
+        const response = await fetch(`${API}/api/comprobaciones/listar?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -1160,7 +1161,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1340,7 +1341,7 @@ async function changeState(folio, accion, motivoRechazo = '') {
 
     showLoader();
     try {
-        const response = await fetch('http://127.0.0.1:3000/api/comprobaciones/estado', {
+        const response = await fetch(`${API}/api/comprobaciones/estado`, {
             method: 'PATCH',
             credentials: 'include',
             headers: {
@@ -1368,7 +1369,7 @@ async function changeState(folio, accion, motivoRechazo = '') {
         const filtros = getCurrentFilters();
 
         if(isPendingTab) {
-            const tempResponse = await fetch(`http://127.0.0.1:3000/api/comprobaciones/listar?estado=Pendiente&limit=1`, {
+            const tempResponse = await fetch(`${API}/api/comprobaciones/listar?estado=Pendiente&limit=1`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 credentials: 'include'
             });
@@ -1479,7 +1480,7 @@ async function loadDetails(folio) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -1774,7 +1775,7 @@ async function downloadFile(url, filename) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/${url}`, {
+        const response = await fetch(`${API}/${url}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -1806,7 +1807,7 @@ async function settlementTab(solicitud) {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/liquidaciones/detalle?solicitud=${encodeURIComponent(solicitud)}`, {
+        const response = await fetch(`${API}/api/liquidaciones/detalle?solicitud=${encodeURIComponent(solicitud)}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,

@@ -4,9 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 /* ================================ VARIABLES ================================ */
-// NGROK -> Forwarding (al abrir cada vez la terminal)
-const API = 'https://celibacy-deskbound-buccaneer.ngrok-free.dev';
-//const API = 'http://127.0.0.1:3000';
+const API = 'http://127.0.0.1:3000';
 
 
 /* =================================== LOADER =================================== */
@@ -34,10 +32,7 @@ async function login() {
 
             const response = await fetch(`${API}/auth/login`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'ngrok-skip-browser-warning': 'true'  // NGROK
-                },
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ correo, password }),
             });

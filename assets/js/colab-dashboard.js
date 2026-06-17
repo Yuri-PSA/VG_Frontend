@@ -28,6 +28,11 @@ document.addEventListener("DOMContentLoaded", async function() {
 
 
 /* ================================ VARIABLES ================================ */
+// Backend
+const token = Session.getToken();
+const logoUser = Session.getUser();
+const API = 'http://127.0.0.1:3000';
+
 // Estados mensuales (solicitudes)
 let currentStatusYear = null;
 let currentStatusMonth = null;
@@ -51,10 +56,6 @@ let expenseChart = null;
 let currentExpenseYear = new Date().getFullYear();
 let minExpenseYear = null;
 let maxExpenseYear = null;
-
-// Backend
-const token = Session.getToken();
-const logoUser = Session.getUser();
 
 const CURRENCY_COLORS = [
     '#2A5156', '#C9C867', '#97BD13', '#D65B5B',
@@ -201,7 +202,7 @@ function initMobileScroll() {
 /* ============================== OPTIONS BAR ============================== */
 async function logoutReset() {
     try {
-        await fetch('http://127.0.0.1:3000/auth/logout', {
+        await fetch(`${API}/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -270,7 +271,7 @@ function optionsBar() {
 /* ============================== CARDS COUNTS ============================== */
 async function fetchCardCounts() {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/liquidaciones/dashboard/reem-dev`, {
+        const response = await fetch(`${API}/api/liquidaciones/dashboard/reem-dev`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -393,7 +394,7 @@ function createFlagPlugin(flagMap, currencyColors) {
 // Backend
 async function fetchStatusChart(year, month) {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/dashboard/estados`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -518,7 +519,7 @@ async function updateStatusChart(year, month) {
 
 async function loadAllMonths() {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/dashboard/estados`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -590,7 +591,7 @@ function setupStatusChartNav() {
 // Backend
 async function fetchCompChart(year, month) {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/dashboard/estados`, {
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/estados`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -708,7 +709,7 @@ async function updateCompChart(year, month) {
 
 async function loadAllComprobacionesMonths() {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/dashboard/estados`, {
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/estados`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -784,7 +785,7 @@ async function fetchAntYears() {
             return;
         }
 
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/dashboard/years`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/years`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -871,7 +872,7 @@ async function fetchPaymentData(year) {
             return;
         }
         
-        const response = await fetch(`http://127.0.0.1:3000/api/solicitudes/dashboard/aprobado?year=${year}`, {
+        const response = await fetch(`${API}/api/solicitudes/dashboard/aprobado?year=${year}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -1025,7 +1026,7 @@ async function updatePaymentChart(year) {
 // Years
 async function fetchCmpYears() {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/dashboard/years`, {
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/years`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
@@ -1107,7 +1108,7 @@ function setupExpenseChartNav() {
 // Backend
 async function fetchExpenseData(year) {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/comprobaciones/dashboard/comprobado?year=${year}`, {
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/comprobado?year=${year}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
