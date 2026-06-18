@@ -811,7 +811,7 @@ body {
 }
 
 .legend-item {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: left;
     font-size: 1em;

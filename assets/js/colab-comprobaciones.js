@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     buttonInfo();
     buttonLiquidacion();
+    buttonEdit();
 });
 
 
@@ -1673,6 +1674,32 @@ function buttonLiquidacion() {
 
         if(solicitud) 
             window.location.href = `colab-liquidaciones.html?search=${encodeURIComponent(solicitud)}`;
+    });
+}
+
+// Edit
+function buttonEdit() {
+    document.body.addEventListener('click', (e) => {
+        const button = e.target.closest('.fa-pen-to-square');
+        if(!button) return;
+        e.stopPropagation();
+
+        const row = button.closest('tr');
+        const card = button.closest('.card');
+        let folio = null;
+
+        if(row) {
+            const folioCell = row.querySelector('.folio p');
+            if(folioCell) folio = folioCell.textContent.trim();
+        } else if(card) {
+            const folioElem = card.querySelector('.folio-mobile');
+            if (folioElem) folio = folioElem.textContent.trim();
+        }
+
+        if(folio)
+            window.location.href = `editar-comprobacion.html?search=${encodeURIComponent(folio)}`;
+        else
+            Toast('ERROR', 'No se pudo identificar el folio de la solicitud');
     });
 }
 
