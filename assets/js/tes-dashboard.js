@@ -10,7 +10,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         await Promise.all([
             updateCardCounts(),
             loadAllComprobacionesMonths(),
-            initAntChart()
+            initAntChart(),
+            initCmpChart(),
+            initLiquidMXN(),
         ]);
 
         setupCompChartNav();
@@ -47,6 +49,14 @@ let expenseChart = null;
 let currentExpenseYear = new Date().getFullYear();
 let minExpenseYear = null;
 let maxExpenseYear = null;
+
+// Card liquidaciones
+let currentYearLiq = null;
+let currentMonthLiq = null;
+let availableYearsLiq = [];
+let liqCardCache = {};
+let minLiqYear = null;
+let maxLiqYear = null;
 
 const CURRENCY_COLORS = [
     '#2A5156', '#C9C867', '#97BD13', '#D65B5B',
@@ -890,7 +900,7 @@ async function initCmpChart() {
     setupCmpChartNav();
 }
 
-function setupExpenseChartNav() {
+function setupCmpChartNav() {
     const prevBtn = document.querySelector('.graph-back.expenses .prev.expense-button');
     const nextBtn = document.querySelector('.graph-back.expenses .next.expense-button');
     if(!prevBtn || !nextBtn) return;
@@ -931,7 +941,306 @@ function setupExpenseChartNav() {
 
 // Backend
 async function fetchCmpData(year) {
-    
+    try {
+        if(!token) {
+            Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+            return;
+        }
+
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/comprobado-tes?year=${year}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+
+        if(!response.ok) throw new Error('Error al obtener datos comprobados');
+
+        const data = await response.json();
+        const monthlyData = Array(12).fill(0);
+        data.forEach(item => {
+            if(item.mes >= 1 && item.mes <= 12)
+                monthlyData[item.mes - 1] = item.total_mxn;
+        });
+        return monthlyData;
+    } catch(error) {
+        Toast('ERROR', 'No se pudieron cargar los datos de la gráfica de comprobaciones');
+        return Array(12).fill(0);
+    }
+}
+
+// Graph 
+async function updateCmpChart(year) {
+    const monthlyData = await fetchCmpData(year);
+
+    // Actualizar año
+    const yearSpan = document.querySelector('.graph-back.expenses .expense-year');
+    if(yearSpan) yearSpan.textContent = year;
+    currentExpenseYear = year;
+
+    if(expenseChart) expenseChart.destroy();
+
+    // Calcular máximo de los datos
+    const maxData = Math.max(...monthlyData, 0);
+
+    let step = 10000;
+    if(maxData <= 100) step = 10;
+    else if(maxData <= 1000) step = 100;
+    else if(maxData <= 5000) step = 1000;
+    else if(maxData <= 10000) step = 2000;
+    else if(maxData <= 50000) step = 10000;
+    else step = 25000;
+
+    let yMax = Math.ceil(maxData / step) * step;
+    if(yMax === 0) yMax = step;
+
+    // Gráfica
+    const ctx = document.getElementById('expense-chart').getContext('2d');
+    const isDesktop = window.innerWidth >= 1801;
+
+    expenseChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'],
+            datasets: [{
+                label: 'Comprobado',
+                data: monthlyData,
+                borderColor: '#2A5156',
+                borderWidth: isDesktop ? 2 : 1.5,
+                tension: 0,
+                pointBackgroundColor: '#2A5156',
+                pointBorderWidth: isDesktop ? 2 : 1,
+                pointRadius: isDesktop ? 4 : 3,
+                pointHoverRadius: isDesktop ? 7 : 5,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgb(217, 217, 217, 0.8)',
+                    titleColor: '#505455',
+                    bodyColor: '#000000',
+                    titleFont: { size: isDesktop ? 15 : 10 },
+                    bodyFont: { size: isDesktop ? 21 : 15, weight: 'normal', color: '#000000' },
+                    displayColors: false,
+                    padding: isDesktop ? 7 : 6,
+                    callbacks: {
+                        title: (context) => "COMPROBADO",
+                        label: (context) => "$" + context.raw.toLocaleString('es-MX')
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: yMax,                    
+                    grid: {
+                        color: '#919A9B',
+                        lineWidth: 1.5,
+                        drawBorder: false,
+                        drawTicks: true
+                    },
+                    ticks: {
+                        stepSize: step,
+                        font: { size: isDesktop ? 18 : 11 },
+                        color: '#000000',
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-MX');
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: { size: isDesktop ? 15 : 10, weight: 400 },
+                        color: '#000000'
+                    }
+                }
+            },
+            elements: { line: { borderJoinStyle: 'round' } }
+        }
+    });
+}
+
+
+/* =========================== TARJETA LIQUIDACIONES =========================== */
+async function fetchLiqData(year) {
+    if(liqCardCache[year]) return liqCardCache[year];
+
+    try {
+        if(!token) {
+            Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+            return;
+        }
+
+        const response = await fetch(`${API}/api/liquidaciones/dashboard/liquidaciones?year=${year}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if(!response.ok) throw new Error('Error al obtener datos de liquidaciones');
+        const data = await response.json();
+
+        liqCardCache[year] = data.map(r => ({
+            mes: Number(r.mes),
+            devoluciones: r.devoluciones ? Number(r.devoluciones) : 0,
+            reembolsos: r.reembolsos ? Number(r.reembolsos) : 0,
+        }));
+
+        return liqCardCache[year];
+    } catch(error) {
+        Toast('ERROR', 'No se pudieron cargar los datos de liquidaciones');
+        return [];
+    }
+}
+
+async function fetchLiqYears() {
+    try {
+        if(!token) {
+            Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
+            return;
+        }
+
+        const response = await fetch(`${API}/api/liquidaciones/dashboard/years-liq`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if(!response.ok) throw new Error('Error al obtener años de liquidaciones');
+        const data = await response.json();
+
+        if(data.length) {
+            minLiqYear = data[0].min_anio;
+            maxLiqYear = data[0].max_anio;
+        } else {
+            const today = new Date().getFullYear();
+            minLiqYear = today;
+            maxLiqYear = today;
+        }
+    } catch(error) {
+        Toast('ERROR', 'No se pudo determinar el rango de años de liquidaciones');
+        const today = new Date().getFullYear();
+        minLiqYear = today;
+        maxLiqYear = today;
+    }
+}
+
+function getAvailableMonthsLiq(rawData) {
+    return [...new Set(rawData.map(r => r.mes))].sort((a, b) => a - b);
+}
+
+// Card
+function updateLiqCard(rawData, month) {
+    const monthNames = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO',
+                        'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+
+    document.querySelector('.total-year').textContent  = currentYearLiq;
+    document.querySelector('.total-month').textContent = monthNames[month - 1];
+
+    const monthData = rawData.find(item => item.mes === month);
+    const devoluciones = monthData ? monthData.devoluciones : 0;
+    const reembolsos = monthData ? monthData.reembolsos   : 0;
+
+    const totalAmounts = document.querySelectorAll('.total-money.treasury .total-amount');
+    if(totalAmounts.length >= 2) {
+        totalAmounts[0].textContent = formatCurrency(devoluciones);
+        totalAmounts[1].textContent = formatCurrency(reembolsos);
+    }
+}
+
+async function initLiquidMXN() {
+    await fetchLiqYears();
+
+    currentYearLiq = maxLiqYear || new Date().getFullYear();
+
+    const rawData = await fetchLiqData(currentYearLiq);
+    const months = getAvailableMonthsLiq(rawData);
+    currentMonthLiq = months.length ? months[months.length - 1] : new Date().getMonth() + 1;
+
+    updateLiqCard(rawData, currentMonthLiq);
+    setupLiqCardNav();
+}
+
+// Navegación
+function setupLiqCardNav() {
+    const prevBtn = document.querySelector('.prev.total-button');
+    const nextBtn = document.querySelector('.next.total-button');
+    if(!prevBtn || !nextBtn) return;
+
+    const newPrev = prevBtn.cloneNode(true);
+    const newNext = nextBtn.cloneNode(true);
+    prevBtn.parentNode.replaceChild(newPrev, prevBtn);
+    nextBtn.parentNode.replaceChild(newNext, nextBtn);
+
+    async function updateButtonsState() {
+        // Mes anterior
+        const prevYearData = await fetchLiqData(currentMonthLiq === 1 ? currentYearLiq - 1 : currentYearLiq);
+        const prevMonths = getAvailableMonthsLiq(prevYearData);
+        const atStart = currentYearLiq <= minLiqYear && currentMonthLiq <= (prevMonths[0] || 1);
+        newPrev.classList.toggle('disabled', atStart);
+
+        // Mes siguiente
+        const nextYearData = await fetchLiqData(currentMonthLiq === 12 ? currentYearLiq + 1 : currentYearLiq);
+        const nextMonths = getAvailableMonthsLiq(nextYearData);
+        const atEnd = currentYearLiq >= maxLiqYear && currentMonthLiq >= (nextMonths[nextMonths.length - 1] || 12);
+        newNext.classList.toggle('disabled', atEnd);
+    }
+
+    newPrev.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if(newPrev.classList.contains('disabled')) return;
+
+        let year = currentYearLiq;
+        let month = currentMonthLiq - 1;
+
+        if(month < 1) {
+            year--;
+            const prevData = await fetchLiqData(year);
+            const prevMonths = getAvailableMonthsLiq(prevData);
+            month = prevMonths.length ? prevMonths[prevMonths.length - 1] : 12;
+        }
+
+        const rawData = await fetchLiqData(year);
+        currentYearLiq = year;
+        currentMonthLiq = month;
+        updateLiqCard(rawData, month);
+        await updateButtonsState();
+    });
+
+    newNext.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if(newNext.classList.contains('disabled')) return;
+
+        let year = currentYearLiq;
+        let month = currentMonthLiq + 1;
+
+        if(month > 12) {
+            year++;
+            const nextData = await fetchLiqData(year);
+            const nextMonths = getAvailableMonthsLiq(nextData);
+            month = nextMonths.length ? nextMonths[0] : 1;
+        }
+
+        const rawData = await fetchLiqData(year);
+        currentYearLiq = year;
+        currentMonthLiq = month;
+        updateLiqCard(rawData, month);
+        await updateButtonsState();
+    });
+
+    updateButtonsState();
 }
 
 
