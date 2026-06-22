@@ -2,7 +2,6 @@
 // const API = 'http://127.0.0.1:3000';
 const API = 'http://10.10.164.200:3000';
 
-// Login
 const msalConfig = {
     auth: {
         clientId: '9ab12a2e-e456-4273-85bd-6d9b648e6916',
@@ -14,9 +13,8 @@ const msalConfig = {
     }
 };
 
-const msalInstance = new msal.PublicClientApplication(msalConfig);
-
 const LOGIN_SCOPES = ['openid', 'profile', 'email', 'User.Read'];
+let msalInstance;
 
 
 /* =================================== LOADER =================================== */
@@ -31,6 +29,7 @@ function hideLoader() {
 
 /* =================================== INIT =================================== */
 document.addEventListener("DOMContentLoaded", async function() {
+    msalInstance = new msal.PublicClientApplication(msalConfig);
     await msalInstance.initialize();
 
     try {
