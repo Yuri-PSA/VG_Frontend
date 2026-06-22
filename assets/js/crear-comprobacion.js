@@ -736,8 +736,8 @@ async function addPDFRow(row, tempData) {
     } else if(!/^\d+(\.\d{1,2})?$/.test(iva)) {
         Toast('IVA INVÁLIDO', 'Por favor, ingresa un IVA válido con hasta dos decimales');
         return false;
-    } else if(parseFloat(iva) <= 0) {
-        Toast('IVA INVÁLIDO', 'El IVA debe ser mayor a 0');
+    } else if(parseFloat(iva) < 0) {
+        Toast('IVA INVÁLIDO', 'El IVA no puede ser menor a 0');
         return false;
     }
 

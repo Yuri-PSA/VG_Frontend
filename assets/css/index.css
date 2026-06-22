@@ -462,7 +462,8 @@ body {
     color: var(--white);
     background-image: var(--button);
     border-radius: 70px;
-    margin-top: 2.5em;
+    margin-top: 4em;
+    gap: 0.7em;
     cursor: pointer;
     overflow: hidden;
     transition: all 0.3s ease-in-out;

@@ -1,11 +1,42 @@
-document.addEventListener("DOMContentLoaded", function() {
-    passwordVisibility();
-    login();
+document.addEventListener("DOMContentLoaded", async function() {
+    await msalInstance.initialize();
+
+    try {
+        const response = await msalInstance.handleRedirectPromise();
+        if(response) {
+            await loginBackend(response.accessToken);
+            return;
+        }
+    } catch(error) {
+        hideLoader();
+        Toast(error.message || 'Error al procesar respuesta de Microsoft');
+        return;
+    }
+
+    document.querySelector('.button-login.microsoft').addEventListener('click', () => {
+        msalInstance.loginRedirect({ scopes: LOGIN_SCOPES });
+    });
 });
 
 /* ================================ VARIABLES ================================ */
 // const API = 'http://127.0.0.1:3000';
 const API = 'http://10.10.164.200:3000';
+
+// Login
+const msalConfig = {
+    auth: {
+        clientId: '9ab12a2e-e456-4273-85bd-6d9b648e6916',
+        authority: 'https://login.microsoftonline.com/8f861cfa-33df-4e2c-ac7e-3b8224ae9d66',
+        redirectUri: window.location.origin + window.location.pathname,
+    },
+    cache: {
+        cacheLocation: 'sessionStorage',
+    }
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+const LOGIN_SCOPES = ['openid', 'profile', 'email', 'User.Read'];
 
 
 /* =================================== LOADER =================================== */
@@ -18,6 +49,51 @@ function hideLoader() {
 }
 
 
+/* =============================== LOGIN MICROSOFT =============================== */
+async function loginBackend(microsoftToken) {
+    showLoader();
+
+    try {
+        const response = await fetch(`${API}/auth/login-microsoft`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', },
+            credentials: 'include',
+            body: JSON.stringify({ token: microsoftToken }),
+        });
+
+        if(!response.ok) {
+            const err = await response.json().catch(() => null);
+            throw new Error(err?.message || 'Error al iniciar sesión');
+        }
+
+        const data = await response.json();
+        Session.setToken(data.access_token);
+        Session.setUser(data.usuario.nombre);
+
+        // Redirigir según rol
+        const rol = data.usuario.rol;
+        switch(rol) {
+            case 'Jefe': 
+                window.location.href = 'jefe-dashboard.html';  
+                break;
+            case 'Tesorería': 
+                window.location.href = 'tes-dashboard.html';   
+                break;
+            case 'Colaborador': 
+                window.location.href = 'colab-dashboard.html'; 
+                break;
+            default: window.location.href = 'index.html';
+        }
+    } catch(error) {
+        hideLoader();
+        Toast(error.message);
+    }
+}
+
+
+
+
+/* BORRAR DESPUÉS */
 /* =================================== LOGIN =================================== */
 async function login() {
     document.querySelector('.button-login').addEventListener('click', async(e) => {
@@ -104,6 +180,8 @@ function loginValidation() {
     }
     return true;
 }
+
+/* HASTA AQUÍ */
 
 
 /* =================================== TOAST =================================== */
