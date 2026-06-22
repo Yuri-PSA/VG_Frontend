@@ -1,23 +1,3 @@
-document.addEventListener("DOMContentLoaded", async function() {
-    await msalInstance.initialize();
-
-    try {
-        const response = await msalInstance.handleRedirectPromise();
-        if(response) {
-            await loginBackend(response.accessToken);
-            return;
-        }
-    } catch(error) {
-        hideLoader();
-        Toast(error.message || 'Error al procesar respuesta de Microsoft');
-        return;
-    }
-
-    document.querySelector('.button-login.microsoft').addEventListener('click', () => {
-        msalInstance.loginRedirect({ scopes: LOGIN_SCOPES });
-    });
-});
-
 /* ================================ VARIABLES ================================ */
 // const API = 'http://127.0.0.1:3000';
 const API = 'http://10.10.164.200:3000';
@@ -47,6 +27,28 @@ function showLoader() {
 function hideLoader() {
     document.querySelector('.loader-overlay').style.display = 'none';
 }
+
+
+/* =================================== INIT =================================== */
+document.addEventListener("DOMContentLoaded", async function() {
+    await msalInstance.initialize();
+
+    try {
+        const response = await msalInstance.handleRedirectPromise();
+        if(response) {
+            await loginBackend(response.accessToken);
+            return;
+        }
+    } catch(error) {
+        hideLoader();
+        Toast(error.message || 'Error al procesar respuesta de Microsoft');
+        return;
+    }
+
+    document.querySelector('.button-login.microsoft').addEventListener('click', () => {
+        msalInstance.loginRedirect({ scopes: LOGIN_SCOPES });
+    });
+});
 
 
 /* =============================== LOGIN MICROSOFT =============================== */
@@ -180,7 +182,6 @@ function loginValidation() {
     }
     return true;
 }
-
 /* HASTA AQUÍ */
 
 
