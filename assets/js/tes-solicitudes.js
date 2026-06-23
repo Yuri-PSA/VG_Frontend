@@ -25,8 +25,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-const API = 'http://127.0.0.1:3000';
-// const API = 'http://10.10.164.200:3000';
+// const API = 'http://127.0.0.1:3000';
+const API = 'http://10.10.164.200:3000';
 
 // Transfer receipt
 let selectedFile = null;
@@ -91,8 +91,23 @@ function hideLoader() {
 /* ============================== MENU NAME ============================== */
 function menuUser() {
     const user = document.querySelector('.option-bar .name p');
-    user.innerHTML = '';
-    user.innerHTML = logoUser;
+    if(!user) return;
+
+    function capitalizarNombre(nombreCompleto) {
+        if(!nombreCompleto) return '';
+        return nombreCompleto
+            .trim()
+            .toLowerCase()
+            .split(' ')
+            .map(palabra => {
+                if(palabra.length === 0) return '';
+                return palabra[0].toUpperCase() + palabra.slice(1);
+            })
+            .join(' ');
+    }
+
+    const name = capitalizarNombre(logoUser);
+    user.innerHTML = name;
 }
 
 
