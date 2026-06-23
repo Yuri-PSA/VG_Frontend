@@ -1051,6 +1051,11 @@ body {
 
     .logo .name { font-size: 1.5em; }
 
+    .rol {
+        width: 100%;
+        font-size: 0.85em;
+    }
+
     .options,
     .logout { 
         font-size: 1.6em; 
@@ -1262,8 +1267,6 @@ body {
     .graph-back.requests .graph-wrapper p,
     .graph-back.expenses .graph-wrapper p { font-size: 0.9em; }
 
-    .graph-back.total { width: 55%; }
-
     .graph-back.total .graph-wrapper .graph-desc .total-month { font-size: 0.75em; }
 }
 
@@ -1279,6 +1282,8 @@ body {
 
     /* OPTION BAR */
     .logo .name { font-size: 0.97em; }
+
+    .rol { font-size: 0.8em; }
 
     .options,
     .logout { font-size: 1.05em; }
@@ -1409,6 +1414,11 @@ body {
     .logo img { width: 95%; }
 
     .logo .name { font-size: 0.95em; }
+
+    .rol { 
+        width: 100%;
+        font-size: 0.7em;
+    }
 
     .options,
     .logout { font-size: 1.05em; }
@@ -1541,6 +1551,11 @@ body {
     .logo img { width: 95%; }
 
     .logo .name { font-size: 0.9em; }
+
+    .rol {
+        width: 97%;
+        font-size: 0.7em;
+    }
 
     .options .option { width: 97%; }
 
@@ -1710,6 +1725,8 @@ body {
     }
 
     .logo .name { font-size: 1.1em; }
+
+    .rol { width: 90%; }
 
     .options,
     .logout { 
@@ -1916,6 +1933,14 @@ body {
     .logo { padding-left: 0; }
 
     .logo .name { font-size: 1em; }
+
+    .rol {
+        width: 100%;
+        font-size: 0.65em;
+    }
+
+    .rol .normal,
+    .rol .special { padding: 0.4em 0.9em; }
 
     .options,
     .logout {
