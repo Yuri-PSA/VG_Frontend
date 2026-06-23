@@ -1,6 +1,6 @@
 /* ================================ VARIABLES ================================ */
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 const msalConfig = {
     auth: {
@@ -47,6 +47,10 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.querySelector('.button-login.microsoft').addEventListener('click', () => {
         msalInstance.loginRedirect({ scopes: LOGIN_SCOPES });
     });
+
+    // Borrar
+    login();
+    passwordVisibility();
 });
 
 
