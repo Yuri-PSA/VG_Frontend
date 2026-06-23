@@ -1,6 +1,7 @@
 :root {
     /* ============= PRINCIPAL COLORS ============= */
     --agave: #00758D;
+    --dark-agave: #002A32;
     --toast: #00333E;
     --black: #000000;
     --white: #FFFFFF;
@@ -12,6 +13,7 @@
     --gray: #919A9B;
     --dark-gray: #5C5F60;
     --html-back: #002027;
+    --blue-white: #D9D9D9;
 
     /* ============= TRANSLUCENT COLORS ============= */
     --transparent-white: rgba(255, 255, 255, 0.5);
@@ -26,6 +28,12 @@
         #002027 100%
     );
     --option-hover: linear-gradient(90deg,
+        #002027 0%,
+        #002A32 18%,
+        #004C5B 53%,
+        var(--agave) 100%
+    );
+    --optionsec-hover: linear-gradient(280deg,
         #002027 0%,
         #002A32 18%,
         #004C5B 53%,
@@ -468,6 +476,83 @@ body {
     font-weight: 600;
     font-size: 1em;
     color: var(--white);
+}
+
+.rol {
+    position: relative;
+    display: grid;
+    grid-template-columns: 60% 40%;
+    border-radius: 25px;
+    background-color: var(--dark-agave);
+    box-shadow: rgba(0, 42, 50, 0.3) 0px 30px 60px -12px inset, 
+                rgba(0, 0, 0, 0.5) 0px 18px 10px -18px inset;
+    width: 105%;
+    font-size: 0.75em;
+    margin-bottom: 1em;
+    overflow: hidden;
+}
+
+.rol:before,
+.rol:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: inherit;
+    z-index: 1;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rol::before {
+    left: 0;
+    width: 60%;
+    background-image: var(--option-hover);
+    opacity: 1;
+}
+
+.rol::after {
+    left: 0;
+    width: 60%;
+    background-image: var(--optionsec-hover);
+    opacity: 0;
+}
+
+.rol.special-active::before {
+    left: 60%;
+    width: 40%;
+    opacity: 0;
+}
+
+.rol.special-active::after {
+    left: 60%;
+    width: 40%;
+    opacity: 1;
+}
+
+.rol .normal,
+.rol .special { 
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; 
+    padding: 0.4em 0.7em;
+    border-radius: inherit;
+    cursor: pointer;
+    z-index: 2;
+    transition: font-weight 0.3s ease, color 0.3s ease;
+    user-select: none;
+}
+
+.rol .normal:not(.current):hover,
+.rol .special:not(.current):hover { font-weight: 500; }
+
+.rol .normal.current,
+.rol .special.current {
+    font-weight: 600;
+    cursor: default;
 }
 
 .options,
@@ -1245,8 +1330,6 @@ body {
 
     /* GRAPHS */
     .graph-back.comp .graph-wrapper.treasury { padding: 1em 0; }
-
-    .graphs.colab { padding-bottom: 10em; }
 
     .graph-back.status .graph-wrapper p,
     .graph-back.comp .graph-wrapper p { font-size: 1em; }
