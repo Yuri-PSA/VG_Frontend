@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
     
     const urlParams = new URLSearchParams(window.location.search);
@@ -32,8 +33,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 let globalStartDate = null;
 let globalEndDate = null;
@@ -183,6 +184,48 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    const rol = Session.getRol();
+    const esJefe = Session.getJefe();
+
+    if(rol !== 'Jefe' && rol !== 'Tesorería' && !esJefe) {
+        rolDiv.style.display = 'none';
+        return;
+    }
+
+    const vistaJefe = rol === 'Jefe' || esJefe;
+
+    specialBtn.textContent = rol === 'Tesorería' ? 'TESORERÍA' : 'JEFE'; 
+    rolDiv.classList.add(rol === 'Tesorería' ? 'tes' : 'jefe');
+
+    const colab = window.location.pathname.includes('colab-');
+    if(colab) {
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+    } else {
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+    }
+
+    rolDiv.style.display = 'grid';
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        window.location.href = vistaJefe ? 'jefe-dashboard.html' : 'tes-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 async function logoutReset() {
     try {
         await fetch(`${API}/auth/logout`, {
@@ -331,6 +374,7 @@ async function tableInformation(filtros = {}, page = 1) {
     const offset = (page - 1) * limitPerPage;
 
     const params = new URLSearchParams();
+    params.append('vista', 'Colaborador');
     if(filtros.estado) params.append('estado', filtros.estado);
     if(filtros.folio) params.append('folio', filtros.folio);
     if(filtros.solicitud) params.append('solicitud', filtros.solicitud); 
@@ -1122,7 +1166,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}&vista=Colaborador`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1353,7 +1397,7 @@ async function loadDetails(folio) {
             return;
         }
 
-        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/comprobaciones/detalle?folio=${encodeURIComponent(folio)}&vista=Colaborador`, {
             method: 'GET',
             credentials: 'include',
             headers: {

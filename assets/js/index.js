@@ -1,6 +1,6 @@
 /* ================================ VARIABLES ================================ */
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 const msalConfig = {
     auth: {
@@ -74,6 +74,8 @@ async function loginBackend(microsoftToken) {
         const data = await response.json();
         Session.setToken(data.access_token);
         Session.setUser(data.usuario.nombre);
+        Session.setRol(data.usuario.rol);
+        Session.setJefe(data.usuario.es_jefe);
 
         // Redirigir según rol
         const rol = data.usuario.rol;
@@ -127,6 +129,8 @@ async function login() {
             const data = await response.json();
             Session.setToken(data.access_token);
             Session.setUser(data.usuario.nombre);
+            Session.setRol(data.usuario.rol);
+            Session.setJefe(data.usuario.es_jefe);
 
             hideLoader();
 

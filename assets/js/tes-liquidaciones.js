@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -31,8 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 // Transfer receipt
 let selectedFile = null;
@@ -194,6 +195,38 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    rolDiv.style.display = 'grid';
+
+    if(specialBtn.classList.contains('current'))
+        rolDiv.classList.add('special-active');
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+
+        window.location.href = 'tes-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+        rolDiv.classList.remove('special-active');
+
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 async function logoutReset() {
     try {
         await fetch(`${API}/auth/logout`, {
@@ -334,6 +367,7 @@ async function tableInformation(filtros = {}, page = 1) {
     const offset = (page - 1) * limitPerPage;
 
     const params = new URLSearchParams();
+    params.append('vista', 'Tesorería');
     if(filtros.estado) params.append('estado', filtros.estado);
     if(filtros.solicitud) params.append('solicitud', filtros.solicitud);
     params.append('limit', limitPerPage);
@@ -1001,7 +1035,7 @@ async function fetchAjustes() {
             return false;
         }
 
-        const response = await fetch(`${API}/api/liquidaciones/ajustes`, {
+        const response = await fetch(`${API}/api/liquidaciones/ajustes?vista=Tesorería`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
