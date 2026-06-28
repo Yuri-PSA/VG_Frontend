@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
 
     showLoader();
@@ -31,8 +32,8 @@ document.addEventListener("DOMContentLoaded", async function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 // Estados mensuales (solicitudes)
 let currentStatusYear = null;
@@ -216,6 +217,48 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    const rol = Session.getRol();
+    const esJefe = Session.getJefe();
+
+    if(rol !== 'Jefe' && rol !== 'Tesorería' && !esJefe) {
+        rolDiv.style.display = 'none';
+        return;
+    }
+
+    const vistaJefe = rol === 'Jefe' || esJefe;
+
+    specialBtn.textContent = rol === 'Tesorería' ? 'TESORERÍA' : 'JEFE'; 
+    rolDiv.classList.add(rol === 'Tesorería' ? 'tes' : 'jefe');
+
+    const colab = window.location.pathname.includes('colab-');
+    if(colab) {
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+    } else {
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+    }
+
+    rolDiv.style.display = 'grid';
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        window.location.href = vistaJefe ? 'jefe-dashboard.html' : 'tes-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 async function logoutReset() {
     try {
         await fetch(`${API}/auth/logout`, {
@@ -410,7 +453,10 @@ function createFlagPlugin(flagMap, currencyColors) {
 // Backend
 async function fetchStatusChart(year, month) {
     try {
-        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
+        const params = new URLSearchParams();
+        params.append('vista', 'Colaborador');
+
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -535,7 +581,10 @@ async function updateStatusChart(year, month) {
 
 async function loadAllMonths() {
     try {
-        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
+        const params = new URLSearchParams();
+        params.append('vista', 'Colaborador');
+
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -607,7 +656,10 @@ function setupStatusChartNav() {
 // Backend
 async function fetchCompChart(year, month) {
     try {
-        const response = await fetch(`${API}/api/comprobaciones/dashboard/estados`, {
+        const params = new URLSearchParams();
+        params.append('vista', 'Colaborador');
+
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/estados?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -725,7 +777,10 @@ async function updateCompChart(year, month) {
 
 async function loadAllComprobacionesMonths() {
     try {
-        const response = await fetch(`${API}/api/comprobaciones/dashboard/estados`, {
+        const params = new URLSearchParams();
+        params.append('vista', 'Colaborador');
+
+        const response = await fetch(`${API}/api/comprobaciones/dashboard/estados?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });

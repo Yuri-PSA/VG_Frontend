@@ -480,8 +480,7 @@ body {
 
 .rol {
     position: relative;
-    display: grid;
-    grid-template-columns: 60% 40%;
+    display: none;
     border-radius: 25px;
     background-color: var(--dark-agave);
     box-shadow: rgba(0, 42, 50, 0.3) 0px 30px 60px -12px inset, 
@@ -491,6 +490,10 @@ body {
     margin-bottom: 1em;
     overflow: hidden;
 }
+
+.rol.jefe { grid-template-columns: 60% 40%; }
+
+.rol.tes { grid-template-columns: 55% 45%; }
 
 .rol:before,
 .rol:after {
@@ -512,23 +515,42 @@ body {
     opacity: 1;
 }
 
+.rol.jefe::before { width: 60%; }
+
+.rol.tes::before { width: 57%; }
+
 .rol::after {
     left: 0;
-    width: 60%;
     background-image: var(--optionsec-hover);
     opacity: 0;
 }
 
-.rol.special-active::before {
+.rol.jefe::after { width: 60%; }
+
+.rol.tes::after { width: 57%; }
+
+.rol.special-active::before { opacity: 0; }
+
+.rol.jefe.special-active::before {
     left: 60%;
     width: 40%;
-    opacity: 0;
 }
 
-.rol.special-active::after {
+.rol.tes.special-active::before {
+    left: 55%;
+    width: 45%;
+}
+
+.rol.special-active::after { opacity: 1; }
+
+.rol.jefe.special-active::after {
     left: 60%;
     width: 40%;
-    opacity: 1;
+}
+
+.rol.tes.special-active::after {
+    left: 55%;
+    width: 45%;
 }
 
 .rol .normal,

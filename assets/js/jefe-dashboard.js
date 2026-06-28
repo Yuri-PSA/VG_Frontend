@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 // Estados mensuales
 let currentYear = null;
@@ -226,18 +226,10 @@ function rolSwitch() {
     const specialBtn = document.querySelector('.rol .special');
     if(!rolDiv || !normalBtn || !specialBtn) return;
 
+    rolDiv.style.display = 'grid';
+
     if(specialBtn.classList.contains('current'))
         rolDiv.classList.add('special-active');
-
-    normalBtn.addEventListener('click', () => {
-        if(normalBtn.classList.contains('current')) return;
-
-        normalBtn.classList.add('current');
-        specialBtn.classList.remove('current');
-        rolDiv.classList.remove('special-active');
-
-        //window.location.href = 'colab-dashboard.html';
-    });
 
     specialBtn.addEventListener('click', () => {
         if(specialBtn.classList.contains('current')) return;
@@ -246,7 +238,17 @@ function rolSwitch() {
         normalBtn.classList.remove('current');
         rolDiv.classList.add('special-active');
 
-        //window.location.href = 'jefe-dashboard.html';
+        window.location.href = 'jefe-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+        rolDiv.classList.remove('special-active');
+
+        window.location.href = 'colab-dashboard.html';
     });
 }
 
@@ -451,7 +453,10 @@ function createFlagPlugin(flagMap, currencyColors) {
 // ======= Status graph =======
 async function fetchStatusChart(year, month) {
     try {
-        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
+        const params = new URLSearchParams();
+        params.append('vista', 'Jefe');
+
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });
@@ -571,7 +576,10 @@ async function updateStatusChart(year, month) {
 
 async function loadAllMonths() {
     try {
-        const response = await fetch(`${API}/api/solicitudes/dashboard/estados`, {
+        const params = new URLSearchParams();
+        params.append('vista', 'Jefe');
+
+        const response = await fetch(`${API}/api/solicitudes/dashboard/estados?${params.toString()}`, {
             headers: { 'Authorization': `Bearer ${token}` },
             credentials: 'include'
         });

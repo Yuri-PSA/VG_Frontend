@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
     tableInformation(getCurrentFilters());
     tabSelected();
@@ -25,8 +26,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 // Transfer receipt
 let selectedFile = null;
@@ -62,6 +63,12 @@ const CURRENCY_COUNTRY = {
     TWD: 'tw', THB: 'th', MYR: 'my', IDR: 'id', PHP: 'ph',
     PKR: 'pk', BDT: 'bd', VND: 'vn', ILS: 'il', NGN: 'ng',
 };
+
+// Functionality
+let buttonTransferIni = false;
+let buttonInfoIni = false;
+let buttonCompIni = false;
+let buttonLiqIni = false;
 
 
 /* ================================= FUNCIONES ================================= */
@@ -175,6 +182,38 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    rolDiv.style.display = 'grid';
+
+    if(specialBtn.classList.contains('current'))
+        rolDiv.classList.add('special-active');
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+
+        window.location.href = 'tes-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+        rolDiv.classList.remove('special-active');
+
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 // Logout
 async function logoutReset() {
     try {
@@ -320,6 +359,7 @@ async function tableInformation(filtros = {}, page = 1) {
 
     // Construir query string
     const params = new URLSearchParams();
+    params.append('vista', 'Tesorería');
     if(filtros.estado) params.append('estado', filtros.estado);
     if(filtros.folio) params.append('folio', filtros.folio);
     if(filtros.colaborador) params.append('colaborador', filtros.colaborador);
@@ -1201,7 +1241,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}&vista=Tesorería`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1511,7 +1551,8 @@ async function gestionarAnticipo(folio, fechaEntrega = null, fechaConfirmacion =
 
 async function buttonTransfer() {
     const container = document.querySelector('.container');
-    if(!container) return;
+    if(!container || buttonTransferIni) return;
+    buttonTransferIni = true;
 
     document.body.addEventListener('click', async (e) => {
         const button = e.target.closest('.fa-circle-dollar-to-slot');
@@ -1769,6 +1810,8 @@ async function buttonInfoDelivered() {
     const bottomTransfer = info.querySelector('.bottom-decor.transfer');
 
     if(!container || !info || !folioSpan || !closeBtn || !bottomCash || !bottomTransfer) return;
+    if(buttonInfoIni) return;
+    buttonInfoIni = true;
 
     // Limpiar eventos anteriores
     const newCloseBtn = closeBtn.cloneNode(true);
@@ -1821,7 +1864,7 @@ async function buttonInfoDelivered() {
         if(!folio || !payment) return;
 
         try {
-            const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+            const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}&vista=Tesorería`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
                 credentials: 'include'
@@ -2007,7 +2050,10 @@ async function syncCompButtons() {
 }
 
 function buttonComprobacion() {
-    document.body.addEventListener('click', (e) => {
+    if(buttonCompIni) return;
+    buttonCompIni = true;
+
+    document.body.addEventListener('click', async(e) => {
         const target = e.target;
         if(!target.classList.contains('fa-money-check-dollar')) return;
         e.stopPropagation();
@@ -2021,13 +2067,33 @@ function buttonComprobacion() {
         else if(card) 
             folio = card.querySelector('.folio-mobile')?.textContent.trim();
 
-        if(folio)
-            window.location.href = `tes-comprobaciones.html?search=${encodeURIComponent(folio)}&tipo=solicitud&tab=${target.getAttribute('tab')}`;
+        if(!folio) return;
+
+        try {
+            const response = await fetch(`${API}/api/comprobaciones/listar?solicitud=${encodeURIComponent(folio)}&limit=1`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                credentials: 'include'
+            });
+
+            if(!response.ok) throw new Error();
+
+            const data = await response.json();
+            const comp = data.comprobaciones?.[0];
+            const tab = comp?.estado === 'Aprobada' ? 'approved' : 'Pendiente' ? 'pending' : 'rejected';
+
+            window.location.href = `tes-comprobaciones.html?search=${encodeURIComponent(folio)}&tipo=solicitud&tab=${tab}`;
+        } catch {
+            const tab = target.getAttribute('tab') || 'pending';
+            window.location.href = `tes-comprobaciones.html?search=${encodeURIComponent(folio)}&tipo=solicitud&tab=${tab}`;
+        }
     });
 }
 
 // Settlement
 function buttonLiquidacion() {
+    if(buttonLiqIni) return;
+    buttonLiqIni = true;
+
     document.body.addEventListener('click', (e) => {
         const target = e.target;
         if(!target.classList.contains('fa-hand-holding-dollar')) return;

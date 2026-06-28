@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
     tabSelected();
 
@@ -30,8 +31,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 // API Banxico
 const exchangeRateCache = {};
@@ -57,7 +58,6 @@ let globalStartDate = null;
 /* ================================ FUNCTIONS ================================ */
 function updateXmlVisibility() {
     const xmlColumn = document.querySelector('#facturado-container .second-column');
-    const pdfColumn = document.querySelector('#facturado-container .first-column');
     const button = document.querySelector('.button-receipt');
 
     if(!xmlColumn || !button) return;
@@ -66,20 +66,14 @@ function updateXmlVisibility() {
         pendingEditRow.remove();
         pendingEditRow = null;
         pendingTempData = null;
-        if(pendingTempData) {
-            const index = facturasCargadas.findIndex(f => f.tempId === pendingTempData.tempId);
-            if(index !== -1) facturasCargadas.splice(index, 1);
-        }
     }
 
-    if(currentMoneda && currentMoneda.toUpperCase() !== 'MXN') {
-        xmlColumn.style.display = 'none';
-        button.innerHTML = 'LLENAR DATOS';
-    }
-    else {
+    const isFacturado = document.querySelector('.tab.factura.selected') !== null;
+    if(isFacturado) {
         xmlColumn.style.display = 'flex';
         button.innerHTML = 'CARGAR';
-    }
+    } else
+        button.innerHTML = 'LLENAR DATOS';
 }
 
 function clearPendingEdit() {
@@ -232,6 +226,49 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    const rol = Session.getRol();
+    const esJefe = Session.getJefe();
+
+    if(rol !== 'Jefe' && rol !== 'Tesorería' && !esJefe) {
+        rolDiv.style.display = 'none';
+        return;
+    }
+
+    const vistaJefe = rol === 'Jefe' || esJefe;
+
+    specialBtn.textContent = rol === 'Tesorería' ? 'TESORERÍA' : 'JEFE'; 
+    rolDiv.classList.add(rol === 'Tesorería' ? 'tes' : 'jefe');
+
+    const colab = window.location.pathname.includes('crear-comprobacion') ||
+                  window.location.pathname.includes('editar-comprobacion');
+    if(colab) {
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+    } else {
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+    }
+
+    rolDiv.style.display = 'grid';
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        window.location.href = vistaJefe ? 'jefe-dashboard.html' : 'tes-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 async function logoutReset() {
     try {
         await fetch(`${API}/auth/logout`, {
@@ -578,32 +615,47 @@ function addFacturaEditable(datosBase) {
     const tbody = document.querySelector('.table-body');
     const nuevaFila = document.createElement('tr');
     nuevaFila.setAttribute('data-temp-id', datosBase.tempId);
-    const moneda = datosBase.moneda;
-    const esMXN = (moneda === 'MXN');
-    const tipoCambioIni = esMXN ? '1.0000' : '';
+    const monedaSolicitud = currentMoneda || 'MXN';
+    const monedaIni = monedaSolicitud;
 
     nuevaFila.innerHTML = `
-        <td><input type="text" class="editable-folio" placeholder="Folio"></td>
+        <td><input type="text" class="editable-folio" placeholder="12345"></td>
         
         <td>
             <div class="fecha-container">
-                <input type="text" class="editable-fecha" placeholder="Fecha">
+                <input type="text" class="editable-fecha" placeholder="AAAA-MM-DD">
                 <i class="fa-regular fa-calendar"></i>
             </div>
         </td>
 
-        <td><input type="text" class="editable-proveedor" placeholder="Proveedor"></td>
-        <td><input type="text" class="editable-concepto" placeholder="Concepto"></td>
-        <td><input type="text" class="editable-descripcion" placeholder="Descripción"></td>
-        <td><input type="text" class="editable-importe" placeholder="Importe"></td>
-        <td><input type="text" class="editable-iva" placeholder="IVA"></td>
-        <td><input type="text" class="editable-others" placeholder="Otros"></td>
+        <td><input type="text" class="editable-proveedor" placeholder="Empresa S.A."></td>
+        <td><input type="text" class="editable-concepto" placeholder="90101500" value="-"></td>
+        <td><input type="text" class="editable-descripcion" placeholder="Hospedaje"></td>
+        <td><input type="text" class="editable-importe" placeholder="0.00"></td>
+        <td><input type="text" class="editable-iva" placeholder="0.00"></td>
+        <td><input type="text" class="editable-others" placeholder="0.00" value="0.00"></td>
         <td class="editable-total">$0.00</td>
-        <td class="editable-currency">${moneda}</td>
+
+        <td>
+            <div class="currency-mini-selector" data-value="${monedaIni}">
+                <div class="currency-mini-back">
+                    <p>${monedaIni}</p>
+                    <i class="fa-solid fa-angle-down"></i>
+                </div>
+                <div class="currency-mini-dropdown">
+                    <div class="currency-mini-option" data-value="MXN">MXN</div>
+                    <div class="currency-mini-option" data-value="USD">USD</div>
+                    <div class="currency-mini-option" data-value="EUR">EUR</div>
+                </div>
+            </div>
+        </td>
 
         <td>
             <div class="tc-container">
-                <input type="text" class="editable-tipoCambio" placeholder="Tipo Cambio" value="${tipoCambioIni}" ${esMXN ? 'readonly' : ''}>
+                <input type="text" class="editable-tipoCambio" 
+                    placeholder="Ej. 0.0000" 
+                    value="1.0000"
+                    ${monedaIni === 'MXN' && monedaSolicitud === 'MXN' ? 'readonly' : ''}>
                 <i class="fa-solid fa-circle-info"></i>
             </div>
         </td>
@@ -617,43 +669,150 @@ function addFacturaEditable(datosBase) {
 
     const fechaInput = nuevaFila.querySelector('.editable-fecha');
     const tipoCambioInput = nuevaFila.querySelector('.editable-tipoCambio');
-
-    async function actTipoCambio() {
-        const fecha = fechaInput.value;
-        if(!fecha) return;
-        if(esMXN) {
-            tipoCambioInput.value = '1.0000';
-            return;
-        }
-
-        try {
-            const rate = await getTipoCambio(moneda, fecha);
-            if(rate && !isNaN(parseFloat(rate)))
-                tipoCambioInput.value = parseFloat(rate).toFixed(4);
-            else
-                tipoCambioInput.value = '';
-        } catch(error) {
-            tipoCambioInput.value = '';
-            Toast('TIPO DE CAMBIO', 'No se pudo obtener el tipo de cambio automáticamente. Por favor, ingrésalo manualmente');
-        }
-    }
-
-    fechaInput.addEventListener('change', actTipoCambio);
-
+    const currencySelect = nuevaFila.querySelector('.editable-currency');
     const importeInput = nuevaFila.querySelector('.editable-importe');
     const ivaInput = nuevaFila.querySelector('.editable-iva');
     const otrosInput = nuevaFila.querySelector('.editable-others');
     const totalCell = nuevaFila.querySelector('.editable-total');
 
+    // ====== Currency mini selector ======
+    const miniSelector = nuevaFila.querySelector('.currency-mini-selector');
+    const miniBack = miniSelector.querySelector('.currency-mini-back');
+    const miniBackText = miniSelector.querySelector('.currency-mini-back p');
+    const miniDropdown = miniSelector.querySelector('.currency-mini-dropdown');
+
+    miniBack.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = miniDropdown.classList.contains('show');
+
+        // Cerrar otros dropdowns de moneda abiertos
+        document.querySelectorAll('.currency-mini-dropdown.show').forEach(d => {
+            d.classList.remove('show');
+            d.closest('.currency-mini-selector')?.classList.remove('open');
+        });
+
+        if(!isOpen) {
+            const valorActual = miniSelector.dataset.value;
+            miniSelector.querySelectorAll('.currency-mini-option').forEach(opt => {
+                opt.style.display = opt.dataset.value === valorActual ? 'none' : 'block';
+            });
+
+            miniDropdown.classList.add('show');
+            miniSelector.classList.add('open');
+
+            // Posicionar
+            const rect = miniBack.getBoundingClientRect();
+            miniDropdown.style.position = 'fixed';
+            miniDropdown.style.top = `${rect.bottom + 4}px`;
+            miniDropdown.style.left = `${rect.left}px`;
+            miniDropdown.style.width = `${rect.width}px`;
+            miniDropdown.style.zIndex = '9999';
+        }
+    });
+
+    miniSelector.querySelectorAll('.currency-mini-option').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const valorAnterior = miniSelector.dataset.value;
+            const valorNuevo = opt.dataset.value;
+
+            miniBackText.textContent = valorNuevo;
+            miniSelector.dataset.value = valorNuevo;
+            miniDropdown.classList.remove('show');
+            miniSelector.classList.remove('open');
+
+            miniSelector.querySelectorAll('.currency-mini-option').forEach(o => {
+                o.style.display = o.dataset.value === valorNuevo ? 'none' : 'block';
+            });
+
+            if(valorNuevo !== valorAnterior) {
+                actualizarTC();
+                actualizarTotal();
+            }
+
+            if(valorNuevo === 'MXN') {
+                const importe = parseFloat(importeInput.value) || 0;
+                if(importe > 0) {
+                    ivaInput.value = (importe * 0.16).toFixed(2);
+                    actualizarTotal();
+                }
+            } else {
+                ivaInput.value = '';
+                actualizarTotal();
+            }
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if(!miniSelector.contains(e.target)) {
+            miniDropdown.classList.remove('show');
+            miniSelector.classList.remove('open');
+        }
+    });
+
+    // ====== TC automático según moneda de factura ======
+    function getMonedaFactura() {
+        return miniSelector.dataset.value || 'MXN';
+    }
+
+    async function actualizarTC() {
+        const monedaFactura = getMonedaFactura();
+        const fecha = fechaInput.value;
+
+        if(monedaFactura === 'MXN' && monedaSolicitud === 'MXN') {
+            // Ambos MXN → TC = 1, readonly
+            tipoCambioInput.value = '1.0000';
+            tipoCambioInput.setAttribute('readonly', true);
+
+        } else if(monedaFactura === monedaSolicitud) {
+            // Misma divisa → buscar TC de esa divisa a MXN (para el ponderado)
+            tipoCambioInput.removeAttribute('readonly');
+            if(fecha) {
+                const rate = await getTipoCambio(monedaFactura, fecha);
+                if(rate) tipoCambioInput.value = rate;
+            }
+
+        } else if(monedaFactura === 'MXN' && monedaSolicitud !== 'MXN') {
+            // Factura MXN, solicitud en divisa → TC de la divisa de solicitud
+            tipoCambioInput.removeAttribute('readonly');
+            if(fecha) {
+                const rate = await getTipoCambio(monedaSolicitud, fecha);
+                if(rate) tipoCambioInput.value = rate;
+            }
+
+        } else {
+            // Cualquier otra combinación → TC de la moneda de la factura
+            tipoCambioInput.removeAttribute('readonly');
+            if(fecha) {
+                const rate = await getTipoCambio(monedaFactura, fecha);
+                if(rate) tipoCambioInput.value = rate;
+            }
+        }
+    }
+
+    fechaInput.addEventListener('change', actualizarTC);
+
     function actualizarTotal() {
+        const monedaFactura = getMonedaFactura();
         let importe = parseFloat(importeInput.value) || 0;
         let iva = parseFloat(ivaInput.value) || 0;
         let otros = parseFloat(otrosInput.value) || 0;
         let total = importe + iva + otros;
-        totalCell.textContent = formatMoney(total, moneda);
+        totalCell.textContent = formatMoney(total, monedaFactura);
     }
 
-    importeInput.addEventListener('input', actualizarTotal);
+    importeInput.addEventListener('input', () => {
+        const monedaFactura = getMonedaFactura();
+
+        if(monedaFactura === 'MXN') {
+            const importe = parseFloat(importeInput.value) || 0;
+            const ivaCalculado = (importe * 0.16).toFixed(2);
+            ivaInput.value = ivaCalculado;
+        }
+
+        actualizarTotal();
+    });
+
     ivaInput.addEventListener('input', actualizarTotal);
     otrosInput.addEventListener('input', actualizarTotal);
     actualizarTotal();
@@ -700,7 +859,7 @@ async function addPDFRow(row, tempData) {
     const descripcion = row.querySelector('.editable-descripcion')?.value.trim();
     const importe = row.querySelector('.editable-importe')?.value.trim();
     const iva = row.querySelector('.editable-iva')?.value.trim();
-    const moneda = row.querySelector('.editable-currency')?.textContent;
+    const moneda = row.querySelector('.currency-mini-selector')?.dataset.value || 'MXN';
     const tipoCambioInput = row.querySelector('.editable-tipoCambio');
 
     if(!folioFactura) {
@@ -757,11 +916,12 @@ async function addPDFRow(row, tempData) {
     }
 
     const otrosInput = row.querySelector('.editable-others');
-    if(!/^-?\d+(\.\d{1,2})?$/.test(otrosInput.value)) {
+    const otrosVal = otrosInput.value.trim() || '0.00';
+    if(!/^-?\d+(\.\d{1,2})?$/.test(otrosVal)) {
         Toast('MONTO INVÁLIDO', 'Ingresa un monto válido con hasta dos decimales o un 0 si no aplica');
         return false;
     }
-    const otros = parseFloat(otrosInput.value).toFixed(2);
+    const otros = parseFloat(otrosVal).toFixed(2);
 
     const totalCell = row.querySelector('.editable-total');
     let totalNum = 0;
@@ -776,8 +936,39 @@ async function addPDFRow(row, tempData) {
         return false;
     }
 
-    if(moneda === 'MXN')
+    if(moneda === 'MXN' && currentMoneda === 'MXN')
         tipoCambio = '1.000';
+    else if(moneda === currentMoneda && moneda !== 'MXN') {
+        if(isNaN(tipoCambio) || tipoCambio <= 0) {
+            if(fecha) {
+                const rate = await getTipoCambio(moneda, fecha);
+                tipoCambio = rate ? parseFloat(rate) : null;
+            }
+            if(!tipoCambio) {
+                Toast('TIPO DE CAMBIO REQUERIDO', 'Por favor, ingresa el tipo de cambio de la fecha de emisión');
+                return false;
+            }
+        }
+    } else if(moneda === 'MXN' && currentMoneda !== 'MXN') {
+        // Factura MXN, solicitud en divisa
+        if(isNaN(tipoCambio) || tipoCambio <= 0) {
+            if(fecha) {
+                const rate = await getTipoCambio(currentMoneda, fecha);
+                tipoCambio = rate ? parseFloat(rate) : null;
+            }
+            if(!tipoCambio) {
+                Toast('TIPO DE CAMBIO REQUERIDO', `Por favor, ingresa el tipo de cambio de ${currentMoneda} a MXN`);
+                return false;
+            }
+        }
+
+    } else {
+        // Otra combinación de divisas
+        if(isNaN(tipoCambio) || tipoCambio <= 0) {
+            Toast('TIPO DE CAMBIO REQUERIDO', 'Ingresa el tipo de cambio de la fecha de emisión');
+            return false;
+        }
+    }
 
     const facturaFinal = {
         folio: folioFactura,
@@ -846,10 +1037,10 @@ async function addPDFRow(row, tempData) {
     });
 
     const index = facturasCargadas.findIndex(f => f.tempId === tempData.tempId);
-    if(index !== -1)
-        facturasCargadas[index] = { ...facturaFinal, tempId: tempData.tempId, ...tempData };
-    else
-        facturasCargadas.push({ ...facturaFinal, tempId: tempData.tempId, ...tempData });
+if(index !== -1)
+    facturasCargadas[index] = { ...tempData, tempId: tempData.tempId, ...facturaFinal };
+else
+    facturasCargadas.push({ ...tempData, tempId: tempData.tempId, ...facturaFinal });
 
     Toast('FACTURA REGISTRADA', 'La factura se cargó correctamente. Puedes agregar otra');
     return true;
@@ -1643,31 +1834,20 @@ function initUpload() {
 
             const isFacturado = document.querySelector('.tab.factura.selected') !== null;
 
-            // ====== FACTURADO ====== //
+            // ====== FACTURADO ======
             if(isFacturado) {
-                const xmlColumn = document.querySelector('#facturado-container .second-column');
-                const isXmlVisible = xmlColumn && window.getComputedStyle(xmlColumn).display !== 'none';
+                if(!selectedPDF) {
+                    Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
+                    return;
+                }
 
-                // XML visible
-                if(isXmlVisible) {
-                    if(!selectedPDF && !selectedXML) {
-                        Toast('FALTA DE ARCHIVOS', 'Por favor, selecciona ambos archivos: PDF y XML');
-                        return;
-                    }
-                    if(!selectedPDF) {
-                        Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
-                        return;
-                    }
-                    if(!selectedXML) {
-                        Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato XML para su registro');
-                        return;
-                    }
-
+                // Si hay XML
+                if(selectedXML) {
                     showLoaderFact(pdfContainer);
                     showLoaderFact(xmlContainer);
                     showLoader();
 
-                    try {    
+                    try {
                         const datosXML = await parseXML(selectedXML);
 
                         const nuevaFactura = {
@@ -1691,27 +1871,19 @@ function initUpload() {
                         Toast('FACTURA REGISTRADA', 'La factura se cargó correctamente. Puedes agregar otra');
                     } catch(error) {
                         Toast('ERROR EN EL REGISTRO', error.message);
-                        if(selectedPDF) 
-                            previewFileInfo(pdfContainer, selectedPDF, 'fa-solid fa-file-pdf');
-                        if(selectedXML && isXmlVisible) 
-                            previewFileInfo(xmlContainer, selectedXML, 'fa-solid fa-file-code');
+                        if(selectedPDF) previewFileInfo(pdfContainer, selectedPDF, 'fa-solid fa-file-pdf');
+                        if(selectedXML) previewFileInfo(xmlContainer, selectedXML, 'fa-solid fa-file-code');
                     } finally {
                         hideLoader();
                     }
-                }
-                // PDF visible
-                else {
-                    if(!selectedPDF) {
-                        Toast('ARCHIVO FALTANTE', 'Por favor, selecciona la factura en formato PDF para su registro');
-                        return;
-                    }
+                // Solo PDF
+                } else {
                     if(pendingEditRow) {
                         Toast('ESPERA UN MOMENTO', 'Aún tienes una factura en proceso. Complétala o elimínala para continuar');
                         return;
                     }
 
                     showLoader();
-
                     try {
                         const tempId = Date.now() + '-' + Math.random();
                         const tempData = {
@@ -1724,12 +1896,10 @@ function initUpload() {
                         const newRow = addFacturaEditable(tempData);
                         pendingEditRow = newRow;
                         pendingTempData = tempData;
-
-                        
                         facturasCargadas.push(tempData);
+
                         const button = document.querySelector('.button-receipt');
                         button.innerHTML = 'CARGAR';
-                        
                         Toast('PDF REGISTRADO', 'Por favor, completa los datos de la factura en la tabla y presiona CARGAR al terminar');
                     } catch(error) {
                         Toast('ERROR EN EL REGISTRO', error.message);
@@ -1738,7 +1908,7 @@ function initUpload() {
                         hideLoader();
                     }
                 }
-            } 
+            }
             // ====== NO FACTURADO ====== //
             else {
                 if(!selectedIMG) {
@@ -1867,8 +2037,6 @@ async function enviarComprobacion() {
             fecha_comprobacion: fechaComprobacion,
             facturas: facturasEnviar
         };
-
-        console.log(body);
 
         const response = await fetch(`${API}/api/comprobaciones`, {
             method: 'POST',
@@ -2118,7 +2286,6 @@ async function loadCmpDetail() {
             });
         });
     } catch(error) {
-        console.log(error);
         Toast('ERROR', 'No se pudo cargar el detalle de la comprobación');
     } finally {
         hideLoader();

@@ -1,6 +1,7 @@
 :root {
     /* ============= PRINCIPAL COLORS ============= */
     --agave: #00758D;
+    --dark-agave: #002A32;
     --toast: #00333E;
     --black: #000000;
     --blue-white: #D9D9D9;
@@ -43,6 +44,12 @@
         #002027 100%
     );
     --option-hover: linear-gradient(90deg,
+        #002027 0%,
+        #002A32 18%,
+        #004C5B 53%,
+        var(--agave) 100%
+    );
+    --optionsec-hover: linear-gradient(280deg,
         #002027 0%,
         #002A32 18%,
         #004C5B 53%,
@@ -595,6 +602,105 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     color: var(--white);
 }
 
+.rol {
+    position: relative;
+    display: none;
+    border-radius: 25px;
+    background-color: var(--dark-agave);
+    box-shadow: rgba(0, 42, 50, 0.3) 0px 30px 60px -12px inset, 
+                rgba(0, 0, 0, 0.5) 0px 18px 10px -18px inset;
+    width: 105%;
+    font-size: 0.75em;
+    margin-bottom: 1em;
+    overflow: hidden;
+}
+
+.rol.jefe { grid-template-columns: 60% 40%; }
+
+.rol.tes { grid-template-columns: 55% 45%; }
+
+.rol:before,
+.rol:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: inherit;
+    z-index: 1;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rol::before {
+    left: 0;
+    width: 60%;
+    background-image: var(--option-hover);
+    opacity: 1;
+}
+
+.rol.jefe::before { width: 60%; }
+
+.rol.tes::before { width: 57%; }
+
+.rol::after {
+    left: 0;
+    background-image: var(--optionsec-hover);
+    opacity: 0;
+}
+
+.rol.jefe::after { width: 60%; }
+
+.rol.tes::after { width: 57%; }
+
+.rol.special-active::before { opacity: 0; }
+
+.rol.jefe.special-active::before {
+    left: 60%;
+    width: 40%;
+}
+
+.rol.tes.special-active::before {
+    left: 55%;
+    width: 45%;
+}
+
+.rol.special-active::after { opacity: 1; }
+
+.rol.jefe.special-active::after {
+    left: 60%;
+    width: 40%;
+}
+
+.rol.tes.special-active::after {
+    left: 55%;
+    width: 45%;
+}
+
+.rol .normal,
+.rol .special { 
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; 
+    padding: 0.4em 0.7em;
+    border-radius: inherit;
+    cursor: pointer;
+    z-index: 2;
+    transition: font-weight 0.3s ease, color 0.3s ease;
+    user-select: none;
+}
+
+.rol .normal:not(.current):hover,
+.rol .special:not(.current):hover { font-weight: 500; }
+
+.rol .normal.current,
+.rol .special.current {
+    font-weight: 600;
+    cursor: default;
+}
+
 .options,
 .logout {
     width: 100%;
@@ -1078,7 +1184,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 .table-body tr:last-child { border-bottom: none; }
 
 .table-body td {
-    font-size: 0.95em;
+    font-size: 0.85em;
     font-weight: 400;
     padding: 0 0.8em;
 }
@@ -1573,6 +1679,11 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .option-bar { padding: 7em 0; }
 
     .logo .name { font-size: 1.5em; }
+    
+    .rol {
+        width: 100%;
+        font-size: 0.85em;
+    }
 
     .options,
     .logout { 
@@ -1677,7 +1788,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .table-container .order i { font-size: 0.6em; }
 
-    .table-body td { font-size: 1.3em; }
+    .table-body td { font-size: 1.2em; }
 
     .table-body .folio { font-size: 1.4em; }
 
@@ -1797,8 +1908,6 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .table-head th { font-size: 1.35em; }
 
-    .table-body td { font-size: 0.95em; }
-
     .table-body .folio { font-size: 1.05em; }
 
     .monto-content img {
@@ -1834,6 +1943,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     /* OPTION BAR */
     .logo .name { font-size: 0.97em; }
+
+    .rol { font-size: 0.8em; }
 
     .options,
     .logout { font-size: 1.05em; }
@@ -1897,7 +2008,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
 
     .table-body .folio { font-size: 0.97em; }
 
-    .table-body td { font-size: 0.85em; }
+    .table-body td { font-size: 0.75em; }
 
     .monto-content img {
         width: 15px;
@@ -1961,6 +2072,11 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .logo img { width: 95%; }
     
     .logo .name { font-size: 0.95em; }
+
+    .rol { 
+        width: 100%;
+        font-size: 0.7em;
+    }
 
     .options,
     .logout { font-size: 1.05em; }
@@ -2036,7 +2152,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
         height: 16px;
     }
 
-    .table-body td { font-size: 0.9em; }
+    .table-body td { font-size: 0.8em; }
 
     .table-body .actions { font-size: 1em; }
 
@@ -2100,6 +2216,11 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .logo img { width: 95%; }
 
     .logo .name { font-size: 0.9em; }
+
+    .rol {
+        width: 97%;
+        font-size: 0.7em;
+    }
 
     .options .option { width: 97%; }
 
@@ -2172,7 +2293,7 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     /* TABLE */
     .table-head th { font-size: 1em; }
 
-    .table-body td { font-size: 0.8em; }
+    .table-body td { font-size: 0.7em; }
 
     .table-body .folio { font-size: 0.85em; }
 
@@ -2263,6 +2384,8 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     }
 
     .logo .name { font-size: 1.1em; }
+
+    .rol { width: 90%; }
 
     .options,
     .logout { 
@@ -2600,6 +2723,14 @@ div:where(.swal2-container) img:where(.swal2-image) { margin: 0 auto !important;
     .logo { padding-left: 0; }
 
     .logo .name { font-size: 1em; }
+
+    .rol {
+        width: 100%;
+        font-size: 0.65em;
+    }
+
+    .rol .normal,
+    .rol .special { padding: 0.4em 0.9em; }
 
     .options,
     .logout {

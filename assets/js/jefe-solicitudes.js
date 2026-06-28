@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -26,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 // Table information
 let motivoRechazo = null;
@@ -171,6 +172,38 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    rolDiv.style.display = 'grid';
+
+    if(specialBtn.classList.contains('current'))
+        rolDiv.classList.add('special-active');
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+
+        window.location.href = 'jefe-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+        rolDiv.classList.remove('special-active');
+
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 // Logout
 async function logoutReset() {
     try {
@@ -293,6 +326,7 @@ async function tableInformation(filtros = {}, page = 1) {
 
     // Construir query string
     const params = new URLSearchParams();
+    params.append('vista', 'Jefe');
     if(filtros.estado) params.append('estado', filtros.estado);
     if(filtros.folio) params.append('folio', filtros.folio);
     if(filtros.colaborador) params.append('colaborador', filtros.colaborador);
@@ -1071,7 +1105,7 @@ async function loadCardDetails(card) {
             return;
         }
 
-        const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+        const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}&vista=Jefe`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -1349,7 +1383,7 @@ async function buttonInfo() {
                 return;
             }
 
-            const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}`, {
+            const response = await fetch(`${API}/api/solicitudes/detalle?folio=${encodeURIComponent(folio)}&vista=Jefe`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {

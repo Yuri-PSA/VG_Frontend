@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     menuUser();
     phoneMenu();
     initMobileScroll();
+    rolSwitch();
     optionsBar();
     initCalendar();
     currencyOptions();
@@ -21,8 +22,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 let globalStartDate = null;
 let globalEndDate = null;
@@ -125,6 +126,49 @@ function initMobileScroll() {
 
 
 /* ============================== OPTIONS BAR ============================== */
+function rolSwitch() {
+    const rolDiv = document.querySelector('.rol');
+    const normalBtn = document.querySelector('.rol .normal');
+    const specialBtn = document.querySelector('.rol .special');
+    if(!rolDiv || !normalBtn || !specialBtn) return;
+
+    const rol = Session.getRol();
+    const esJefe = Session.getJefe();
+
+    if(rol !== 'Jefe' && rol !== 'Tesorería' && !esJefe) {
+        rolDiv.style.display = 'none';
+        return;
+    }
+
+    const vistaJefe = rol === 'Jefe' || esJefe;
+
+    specialBtn.textContent = rol === 'Tesorería' ? 'TESORERÍA' : 'JEFE'; 
+    rolDiv.classList.add(rol === 'Tesorería' ? 'tes' : 'jefe');
+
+    const colab = window.location.pathname.includes('crear-solicitud') || 
+                  window.location.pathname.includes('editar-solicitud');
+    if(colab) {
+        normalBtn.classList.add('current');
+        specialBtn.classList.remove('current');
+    } else {
+        specialBtn.classList.add('current');
+        normalBtn.classList.remove('current');
+        rolDiv.classList.add('special-active');
+    }
+
+    rolDiv.style.display = 'grid';
+
+    specialBtn.addEventListener('click', () => {
+        if(specialBtn.classList.contains('current')) return;
+        window.location.href = vistaJefe ? 'jefe-dashboard.html' : 'tes-dashboard.html';
+    });
+
+    normalBtn.addEventListener('click', () => {
+        if(normalBtn.classList.contains('current')) return;
+        window.location.href = 'colab-dashboard.html';
+    });
+}
+
 async function logoutReset() {
     try {
         await fetch(`${API}/auth/logout`, {
@@ -574,19 +618,13 @@ function getSymbol(code) {
 }
 
 function currencyOptions() {
-    const allCurrencies = getAllCurrencies();
+    const ALLOWED_CURRENCIES = ['MXN', 'USD', 'EUR'];
+    const allCurrencies = getAllCurrencies().filter(c => ALLOWED_CURRENCIES.includes(c.code));
 
     const selector  = document.querySelector('.currency-selector');
     const flagsDiv  = selector.querySelector('.flags');
     const dropdown  = selector.querySelector('.currency-dropdown');
     const symbol    = document.querySelector('.answer.money .symbol');
-
-    // Búsqueda dentro del dropdown
-    const searchInput = document.createElement('input');
-    searchInput.type        = 'text';
-    searchInput.placeholder = 'Buscar...';
-    searchInput.className   = 'currency-search';
-    dropdown.appendChild(searchInput);
 
     const listDiv = document.createElement('div');
     listDiv.className = 'currency-list';
@@ -614,7 +652,6 @@ function currencyOptions() {
                 e.stopPropagation();
                 updateSelectedCurrency(currency);
                 dropdown.classList.remove('show');
-                searchInput.value = '';
             });
             listDiv.appendChild(option);
         });
@@ -624,16 +661,6 @@ function currencyOptions() {
             listDiv.innerHTML = '<p class="currency-empty">Sin resultados</p>';
         }
     }
-
-    searchInput.addEventListener('input', (e) => {
-        e.stopPropagation();
-        buildDropdown(
-            flagsDiv.querySelector('p')?.textContent?.split(' ')[0] || 'MXN',
-            searchInput.value
-        );
-    });
-
-    searchInput.addEventListener('click', e => e.stopPropagation());
 
     function updateSelectedCurrency(currency) {
         flagsDiv.innerHTML = `
@@ -651,14 +678,11 @@ function currencyOptions() {
         const isOpen = dropdown.classList.contains('show');
         closeOtherDropdowns(selector);
         dropdown.classList.toggle('show', !isOpen);
-        if (!isOpen) searchInput.focus();
     });
 
     document.addEventListener('click', (e) => {
-        if (!selector.contains(e.target)) {
+        if(!selector.contains(e.target))
             dropdown.classList.remove('show');
-            searchInput.value = '';
-        }
     });
 
     const defaultCurrency = allCurrencies.find(c => c.code === 'MXN');
