@@ -45,8 +45,11 @@ let paginacionGlobal = {
     totalPaginas: 1
 };
 const limitPerPage = 7;
-let currentFolio = 'ASC';
+let currentFolio = 'DESC';
 let currentMonto = null;
+let currentColab = null;
+let currentPago = null;
+let currentFinan = null;
 
 // Pending amount
 let lastKnownCount = 0;
@@ -344,6 +347,9 @@ function getCurrentFilters() {
     if(estadoFinanciero !== null) filtros.estado = estadoFinanciero;
     filtros.orden = currentFolio;
     if(currentMonto) filtros.currentMonto = currentMonto;
+    if(currentColab) filtros.currentColab = currentColab;
+    if(currentPago) filtros.currentPago = currentPago;
+    if(currentFinan) filtros.currentFinan = currentFinan;
 
     return filtros;
 }
@@ -369,6 +375,9 @@ async function tableInformation(filtros = {}, page = 1) {
     params.append('offset', offset);
     params.append('orden', currentFolio);
     if(currentMonto) params.append('ordenMonto', currentMonto);
+    if(currentColab) params.append('ordenColaborador', currentColab);
+    if(currentPago) params.append('ordenPago', currentPago);
+    if(currentFinan) params.append('ordenFinanciero', currentFinan);
 
     try {
         const response = await fetch(`${API}/api/solicitudes/listar?${params.toString()}`, {
@@ -426,16 +435,18 @@ function buildThead(tab) {
 
     const columnas= [
         { title: 'Folio', hasOrder: true },
-        { title: 'Colaborador' },
+        { title: 'Colaborador', hasOrder: true },
         { title: 'Fecha' },
         { title: 'Monto', hasOrder: true },
-        { title: 'Pago' }, 
+        { title: 'Pago', hasOrder: true }, 
     ];
 
     if(tab === 'pending')
         columnas.push({ title: 'Entrega' });
+    else if(tab === 'delivered')
+        columnas.push({ title: 'Financiero', hasOrder:true});
     else
-        columnas.push({ title: 'Financiero' });
+        columnas.push({ title: 'Financiero' })
 
     const headerRow = document.createElement('tr');
     columnas.forEach(col => {
@@ -975,6 +986,11 @@ function initCalendar() {
 
         const dateObj = { year, month, day };
 
+        // Día actual
+        const today = new Date();
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate())
+            cell.classList.add('today');
+
         // Asignar clases de rango
         if (startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
         if (endDate && isSameDate(dateObj, endDate)) cell.classList.add('end');
@@ -1501,17 +1517,49 @@ function setupSorting() {
             e.stopPropagation();
             const column = div.dataset.column;
 
-            if(column === 'folio') {
-                currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
-                currentMonto = null;
-            } else if(column === 'monto') {
-                if(currentMonto === 'DESC')
+            switch(column) {
+                case 'folio':
+                    currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
+                    
+                    currentColab = null;
                     currentMonto = null;
-                else
+                    currentPago = null;
+                    currentFinan = null;
+                    break;
+                case 'colaborador':
+                    currentColab = currentColab === 'ASC' ? 'DESC' : 'ASC';
+                    
+                    currentFolio = null;
+                    currentMonto = null;
+                    currentPago = null;
+                    currentFinan = null;
+                    break;
+                case 'monto':
                     currentMonto = currentMonto === 'ASC' ? 'DESC' : 'ASC';
 
-                // Cuando ordenamos por monto, mantenemos el folio en ASC
-                currentFolio = 'ASC';
+                    currentFolio = null;
+                    currentColab = null;
+                    currentPago = null;
+                    currentFinan = null;
+                    break;
+                case 'pago':
+                    currentPago = currentPago === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentFolio = null;
+                    currentColab = null;
+                    currentMonto = null;
+                    currentFinan = null;
+                    break;
+                case 'financiero':
+                    currentFinan = currentFinan === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentFolio = null;
+                    currentColab = null;
+                    currentMonto = null;
+                    currentPago = null;
+                    break;
+                default:
+                    break;
             }
 
             currentPage = 1;

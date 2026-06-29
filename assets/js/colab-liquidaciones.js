@@ -43,7 +43,7 @@ let paginacionGlobal = {
     totalPaginas: 1
 };
 const limitPerPage = 7;
-let currentSol = 'ASC';
+let currentSol = 'DESC';
 let currentAnticipo = null;
 let currentComp = null;
 let currentSaldo = null;

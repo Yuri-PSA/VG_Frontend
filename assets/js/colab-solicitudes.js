@@ -35,7 +35,8 @@ let paginacionGlobal = {
     totalPaginas: 1
 };
 const limitPerPage = 7;
-let currentFolio = 'ASC';
+let currentFolio = 'DESC';
+let currentDestino = null;
 let currentMonto = null;
 let currentFinanza = null;
 
@@ -343,6 +344,7 @@ function getCurrentFilters() {
     }
 
     filtros.orden = currentFolio;
+    if(currentDestino) filtros.ordenDestino = currentDestino;
     if(currentMonto) filtros.ordenMonto = currentMonto;
     if(currentFinanza) filtros.ordenFinanza = currentFinanza;
 
@@ -366,6 +368,7 @@ async function tableInformation(filtros = {}, page = 1) {
     params.append('limit', limitPerPage);
     params.append('offset', offset);
     params.append('orden', currentFolio);
+    if(currentDestino) params.append('ordenDestino', currentDestino);
     if(currentMonto) params.append('ordenMonto', currentMonto);
     if(filtros.ordenFinanza) params.append('ordenFinanza', filtros.ordenFinanza);
 
@@ -419,7 +422,7 @@ function buildThead(tab) {
     const columnas = [
         { title: 'Folio', hasOrder: true },
         { title: 'Fecha' },
-        { title: 'Destino' },
+        { title: 'Destino', hasOrder: true },
         { title: 'Monto', hasOrder: true },
         { title: 'Estado' }
     ];
@@ -892,6 +895,11 @@ function initCalendar() {
 
         const dateObj = { year, month, day };
 
+        // Día actual
+        const today = new Date();
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate())
+            cell.classList.add('today');
+
         // Asignar clases de rango
         if (startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
         if (endDate && isSameDate(dateObj, endDate)) cell.classList.add('end');
@@ -1321,28 +1329,47 @@ function setupSorting() {
         orderIcons.addEventListener('click', async (e) => {
             e.stopPropagation();
             const column = div.dataset.column;
-            
-            if(column === 'folio') {
-                currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
-                currentMonto = null;
-                currentFinanza = null;
-                currentFinanzaIndex = -1;
-            } else if(column === 'monto') {
-                currentMonto = currentMonto === 'ASC' ? 'DESC' : 'ASC';
-                currentFolio = null;
-                currentFinanza = null;
-                currentFinanzaIndex = -1;
-            } else if(column === 'finanzas') {
-                if(availableFin.length === 0) {
-                    await fetchFinanzas();
-                    if(availableFin.length === 0) return;
-                }
 
-                currentFinIndex = (currentFinIndex + 1) % availableFin.length;
-                currentFinanza = availableFin[currentFinIndex];
+            switch(column) {
+                case 'folio':
+                    currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
 
-                currentFolio = null;
-                currentMonto = null;
+                    currentDestino = null;
+                    currentMonto = null;
+                    currentFinanza = null;
+                    currentFinanzaIndex = -1;
+                    break;
+                case 'destino':
+                    currentDestino = currentDestino === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentFolio = null;
+                    currentMonto = null;
+                    currentFinanza = null;
+                    currentFinanzaIndex = -1;
+                    break;
+                case 'monto':
+                    currentMonto = currentMonto === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentFolio = null;
+                    currentDestino = null;
+                    currentFinanza = null;
+                    currentFinanzaIndex = -1;
+                    break;
+                case 'finanzas':
+                    if(availableFin.length === 0) {
+                        await fetchFinanzas();
+                        if(availableFin.length === 0) return;
+                    }
+
+                    currentFinIndex = (currentFinIndex + 1) % availableFin.length;
+                    currentFinanza = availableFin[currentFinIndex];
+
+                    currentFolio = null;
+                    currentDestino = null;
+                    currentMonto = null;
+                    break;
+                default:
+                    break;
             }
 
             currentPage = 1;
