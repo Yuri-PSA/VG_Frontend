@@ -1323,6 +1323,9 @@ body {
     font-weight: 600;
 }
 
+.button-conexion,
+.back-buttons:has(.page.final) { display: none; }
+
 .button-conexion { font-size: 1em; }
 
 .prev .icon,
@@ -1882,6 +1885,8 @@ body {
 
     .page { font-size: 1.5em; }
 
+    .button-conexion { font-size: 1.4em; }
+
     /* INFORMATION */
     .info-wrapper {
         width: 39em;
@@ -2130,6 +2135,8 @@ body {
 
     .page { font-size: 0.9em; }
 
+    .button-conexion { font-size: 0.95em; }
+
     /* INFORMATION */
     .info-wrapper {
         width: 31em;
@@ -2293,6 +2300,8 @@ body {
     }
 
     .page { font-size: 0.9em; }
+
+    .button-conexion { font-size: 0.9em; }
 
     /* INFORMATION */
     .info-wrapper {
@@ -2481,6 +2490,8 @@ body {
     }
 
     .page { font-size: 0.9em; }
+
+    .button-conexion { font-size: 0.85em; }
 
     /* INFORMATION */
     .info-wrapper {
@@ -3218,6 +3229,8 @@ body {
 
     /* PAGE */
     .tab-buttons { margin-top: 2.5em; }
+
+    .tab-buttons { gap: 1em; }
 
     /* INFORMATION */
     .container::before { border-radius: 20px; }
