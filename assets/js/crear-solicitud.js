@@ -861,6 +861,11 @@ function initCalendar() {
 
         const dateObj = { year, month, day };
 
+        // Día actual
+        const today = new Date();
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate())
+            cell.classList.add('today');
+
         // Asignar clases de rango
         if (startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
         if (endDate && isSameDate(dateObj, endDate)) cell.classList.add('end');

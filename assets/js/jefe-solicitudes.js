@@ -41,7 +41,9 @@ let paginacionGlobal = {
     totalPaginas: 1
 };
 const limitPerPage = 7;
-let currentFolio = 'ASC';
+let currentFolio = 'DESC';
+let currentColab = null;
+let currentDestino = null;
 let currentMonto = null;
 
 // Pending amount
@@ -310,6 +312,8 @@ function getCurrentFilters() {
     }
 
     filtros.orden = currentFolio;
+    if(currentColab) filtros.ordenColaborador = currentColab;
+    if(currentDestino) filtros.ordenDestino = currentDestino;
     if(currentMonto) filtros.ordenMonto = currentMonto;
 
     return filtros;
@@ -335,6 +339,8 @@ async function tableInformation(filtros = {}, page = 1) {
     params.append('limit', limitPerPage);
     params.append('offset', offset);
     params.append('orden', currentFolio);
+    if(currentColab) params.append('ordenColaborador', currentColab);
+    if(currentDestino) params.append('ordenDestino', currentDestino);
     if(currentMonto) params.append('ordenMonto', currentMonto);
 
     try {
@@ -840,6 +846,11 @@ function initCalendar() {
 
         const dateObj = { year, month, day };
 
+        // Día actual
+        const today = new Date();
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate())
+            cell.classList.add('today');
+
         // Asignar clases de rango
         if (startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
         if (endDate && isSameDate(dateObj, endDate)) cell.classList.add('end');
@@ -1236,17 +1247,37 @@ function setupSorting() {
             e.stopPropagation();
             const column = div.dataset.column;
 
-            if(column === 'folio') {
-                currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
-                currentMonto = null;
-            } else if(column === 'monto') {
-                if(currentMonto === 'DESC')
+            switch(column) {
+                case 'folio':
+                    currentFolio = currentFolio === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentColab = null;
+                    currentDestino = null;
                     currentMonto = null;
-                else
+                    break;
+                case 'colaborador':
+                    currentColab = currentColab === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentFolio = null;
+                    currentDestino = null;
+                    currentMonto = null;
+                    break;
+                case 'destino':
+                    currentDestino = currentDestino === 'ASC' ? 'DESC' : 'ASC';
+
+                    currentFolio = null;
+                    currentColab = null;
+                    currentMonto = null;
+                    break;
+                case 'monto':
                     currentMonto = currentMonto === 'ASC' ? 'DESC' : 'ASC';
 
-                // Cuando ordenamos por monto, mantenemos el folio en ASC
-                currentFolio = 'ASC';
+                    currentFolio = null;
+                    currentColab = null;
+                    currentDestino = null;
+                    break;
+                default:
+                    break;
             }
 
             currentPage = 1;

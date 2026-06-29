@@ -6,6 +6,7 @@
     --white: #FFFFFF;
     --gray: #747474;
     --selected: #428188;
+    --today: #295255;
     --line-gray: #919A9B;
     --tab-selected: #ACBCC0;
     --tabs-gray: #B0BDC1;
@@ -898,6 +899,14 @@ body {
     background-color: var(--selected); 
     color: var(--white);
 }
+
+.date-cell.today {
+    background-color: var(--today);
+    color: var(--white);
+    font-weight: 600;
+}
+
+.date-cell.today.in-range { color: var(--black); }
 
 .date-cell.in-range { background-color: var(--tr-date-range); }
 

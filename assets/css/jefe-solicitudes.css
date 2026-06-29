@@ -16,6 +16,7 @@
     --tabs-hover: #969C9C;
     --date: #B0BDC1;
     --selected: #428188;
+    --today: #295255;
     --red: #992F2C;
     --passport-gray: #5E6364;
     --html-back: #002027;
@@ -1022,6 +1023,14 @@ body {
     background-color: var(--selected); 
     color: var(--white);
 }
+
+.date-cell.today {
+    background-color: var(--today);
+    color: var(--white);
+    font-weight: 600;
+}
+
+.date-cell.today.in-range { color: var(--black); }
 
 .date-cell.in-range { background-color: var(--tr-date-range); }
 

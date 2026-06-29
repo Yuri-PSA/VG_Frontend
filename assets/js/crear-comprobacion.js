@@ -46,6 +46,7 @@ let facturasCargadas = [];
 let uploadFactura = false;
 let nextButton = null;
 let currentMoneda = null;
+let currentMonto = null;
 
 // Table
 let pendingEditRow = null;
@@ -53,6 +54,18 @@ let pendingTempData = null;
 
 // Date
 let globalStartDate = null;
+
+const CURRENCY_COUNTRY = {
+    EUR: 'eu', USD: 'us', GBP: 'gb', AUD: 'au', CAD: 'ca',
+    CHF: 'ch', CNY: 'cn', JPY: 'jp', MXN: 'mx', BRL: 'br',
+    INR: 'in', KRW: 'kr', SGD: 'sg', HKD: 'hk', NOK: 'no',
+    SEK: 'se', DKK: 'dk', NZD: 'nz', ZAR: 'za', RUB: 'ru',
+    ARS: 'ar', CLP: 'cl', COP: 'co', PEN: 'pe', VES: 've',
+    AED: 'ae', SAR: 'sa', QAR: 'qa', KWD: 'kw', EGP: 'eg',
+    TRY: 'tr', PLN: 'pl', CZK: 'cz', HUF: 'hu', RON: 'ro',
+    TWD: 'tw', THB: 'th', MYR: 'my', IDR: 'id', PHP: 'ph',
+    PKR: 'pk', BDT: 'bd', VND: 'vn', ILS: 'il', NGN: 'ng',
+};
 
 
 /* ================================ FUNCTIONS ================================ */
@@ -126,6 +139,11 @@ function obtenerSimboloMoneda(code) {
     } catch {
         return code;
     }
+}
+
+function getFlagUrl(code) {
+    const country = CURRENCY_COUNTRY[code] || code.slice(0, 2).toLowerCase();
+    return `https://flagcdn.com/w40/${country}.png`;
 }
 
 
@@ -465,7 +483,10 @@ async function requestDropdown() {
                         dropdown.classList.remove('show');
                         selector.dataset.selectedFolio = item.folio;
                         currentMoneda = item.moneda;
+                        currentMonto = item.monto;
                         updateXmlVisibility();
+                        updatePayment(item.monto, item.moneda);
+                        hideComp();
                     });
                     dropdown.appendChild(option);
                 });
@@ -502,6 +523,110 @@ async function requestDropdown() {
         if(!selector.contains(e.target))
             dropdown.classList.remove('show');
     });
+}
+
+// Update Anticipo
+function updatePayment(monto, moneda) {
+    const anticipo = document.querySelector('.anticipo');
+    const anticipoDiv = document.querySelector('.anticipo .monto-content');
+    if(!anticipo || !anticipoDiv) return;
+
+    const img = anticipoDiv.querySelector('img');
+    const p = anticipoDiv.querySelector('p');
+    
+    const flagUrl = getFlagUrl(moneda);
+    const symbol = obtenerSimboloMoneda(moneda);
+    const montoFormateado = new Intl.NumberFormat('es-MX', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(monto);
+
+    if(img) {
+        img.src = flagUrl;
+        img.alt = moneda;
+    }
+    if(p) p.innerHTML = `${symbol}${montoFormateado}`;
+    anticipo.classList.add('visible');
+}
+
+// Update Comp
+function hideComp() {
+    const comprobadoDiv = document.querySelector('.comprobado');
+    if(comprobadoDiv) comprobadoDiv.style.display = 'none';
+}
+
+function updateComp() {
+    if(!currentMoneda) return;
+
+    const monedaSolicitud = currentMoneda;
+    let totalComprobado = 0;
+
+    for(const factura of facturasCargadas) {
+        if(factura.tipoEdicion && !factura.folio) continue;
+
+        const total = parseFloat(String(factura.total).replace(/[^0-9.-]/g, '')) || 0;
+        const tc = parseFloat(String(factura.tipoCambio).replace(/[^0-9.-]/g, '')) || 1;
+        const monedaFactura = factura.moneda || 'MXN';
+
+        if(monedaFactura === 'MXN' && monedaSolicitud === 'MXN')
+            totalComprobado += total;
+        else if(monedaFactura !== 'MXN' && monedaSolicitud === 'MXN')
+            totalComprobado += total * tc;
+        else if(monedaFactura === monedaSolicitud)
+            totalComprobado += total;
+        else if(monedaFactura === 'MXN' && monedaSolicitud !== 'MXN')
+            totalComprobado += total / tc;
+        else
+            totalComprobado += total;
+    }
+
+    const comprobado = document.querySelector('.comprobado');
+    const comprobadoDiv = document.querySelector('.comprobado .monto-content');
+    const saldoEl = document.querySelector('.saldo');
+    const saldoDiv = document.querySelector('.saldo .monto-content');
+    if(!comprobado || !comprobadoDiv || !saldoEl || !saldoDiv) return;
+
+    if(totalComprobado > 0) {
+        comprobado.style.display = 'flex';
+        saldoEl.style.display = 'flex';
+
+        const imgComp = comprobadoDiv.querySelector('img');
+        const pComp = comprobadoDiv.querySelector('p');
+
+        const imgSal = saldoDiv.querySelector('img');
+        const pSal = saldoDiv.querySelector('p');
+
+        const flagUrl = getFlagUrl(monedaSolicitud);
+        const symbol = obtenerSimboloMoneda(monedaSolicitud);
+        const montoFormateado = new Intl.NumberFormat('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(totalComprobado);
+
+        if(imgComp) {
+            imgComp.src = flagUrl;
+            imgComp.alt = monedaSolicitud;
+        }
+        if(pComp) pComp.innerHTML = `${symbol}${montoFormateado}`;
+
+        const anticipo = parseFloat(currentMonto) || 0;
+        const saldoNum = anticipo - totalComprobado;
+        const saldoAbs = Math.abs(saldoNum);
+        const signo = saldoNum < 0 ? '- ' : '';
+        const saldoFormat = new Intl.NumberFormat('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(saldoAbs);
+        
+        if(imgSal) {
+            imgSal.src = flagUrl;
+            imgSal.alt = monedaSolicitud;
+        }
+        if(pSal) pSal.innerHTML = `${signo}${symbol}${saldoFormat}`;
+    } else {
+        comprobado.style.display = 'none';
+        saldoEl.style.display = 'none';
+    }
 }
 
 
@@ -548,12 +673,22 @@ function addFactura(datos) {
     const moneda = datos.moneda;
 
     let fileButtonsHTML = '';
+
+    // Servidor
     if(datos.rutaPDF)
-        fileButtonsHTML += `<i class="fa-solid fa-file-pdf download-btn-cmp" data-url="${datos.rutaPDF}" data-type="pdf"></i>`;
+        fileButtonsHTML += `<i class="fa-solid fa-file-pdf preview-btn-cmp" data-url="${datos.rutaPDF}" data-type="pdf"></i>`;
     if(datos.rutaXML)
-        fileButtonsHTML += `<i class="fa-solid fa-file-code download-btn-cmp" data-url="${datos.rutaXML}" data-type="xml"></i>`;
+        fileButtonsHTML += `<i class="fa-solid fa-file-code preview-btn-cmp" data-url="${datos.rutaXML}" data-type="xml"></i>`;
     if(!datos.rutaPDF && !datos.rutaXML && datos.rutaIMG)
-        fileButtonsHTML += `<i class="fa-solid fa-file-image download-btn-cmp" data-url="${datos.rutaIMG}" data-type="img"></i>`;
+        fileButtonsHTML += `<i class="fa-solid fa-file-image preview-btn-cmp" data-url="${datos.rutaIMG}" data-type="img"></i>`;
+
+    // Locales
+    if(!datos.rutaPDF && datos.pdfFile instanceof File)
+        fileButtonsHTML += `<i class="fa-solid fa-file-pdf preview-btn-cmp" data-type="pdf"></i>`;
+    if(!datos.rutaXML && datos.xmlFile instanceof File)
+        fileButtonsHTML += `<i class="fa-solid fa-file-code preview-btn-cmp" data-type="xml"></i>`;
+    if(!datos.rutaIMG && datos.imgFile instanceof File)
+        fileButtonsHTML += `<i class="fa-solid fa-file-image preview-btn-cmp" data-type="img"></i>`;
 
     nuevaFila.innerHTML = `
         <td>${datos.folio || ''}</td>
@@ -575,28 +710,34 @@ function addFactura(datos) {
         </td>
     `;
     tbody.appendChild(nuevaFila);
+    updateComp();
 
-    nuevaFila.querySelectorAll('.download-btn-cmp').forEach(btn => {
+    // Botones archivos
+    nuevaFila.querySelectorAll('.preview-btn-cmp').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const url = btn.dataset.url;
             const type = btn.dataset.type;
-            const folioFactura = datos.folio || 'documento';
+            const url = btn.dataset.url
 
-            let extension = '';
-            if(type === 'pdf') 
-                extension = 'pdf';
-            else if(type === 'xml') 
-                extension = 'xml';
-            else if(type === 'img') {
-                const match = url.match(/\.(jpe?g|png)$/i);
-                extension = match ? match[1] : 'jpg';
+            let file = null;
+
+            if(type === 'pdf') file = datos.pdfFile;
+            else if(type === 'xml') file = datos.xmlFile;
+            else if(type === 'img') file = datos.imgFile;
+
+            if(file instanceof File) {
+                // Local
+                const blobUrl = URL.createObjectURL(file);
+                window.open(blobUrl, '_blank');
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            } else if(url) {
+                // Servidor
+                window.open(`${API}/${url}`, '_blank');
             }
-
-            downloadFileCmp(`Factura_${folioFactura}.${extension}`, url);
         });
     });
     
+    // Eliminar
     const deleteBtn = nuevaFila.querySelector('.fa-trash-can');
     deleteBtn.addEventListener('click', () => {
         const index = facturasCargadas.findIndex(f => 
@@ -606,6 +747,7 @@ function addFactura(datos) {
         );
         if(index !== -1) facturasCargadas.splice(index, 1);
         nuevaFila.remove();
+        updateComp();
         Toast('FACTURA ELIMINADA', 'Se ha eliminado exitosamente la factura de la lista');
     });
 }
@@ -961,7 +1103,6 @@ async function addPDFRow(row, tempData) {
                 return false;
             }
         }
-
     } else {
         // Otra combinación de divisas
         if(isNaN(tipoCambio) || tipoCambio <= 0) {
@@ -1012,6 +1153,14 @@ async function addPDFRow(row, tempData) {
         return false;
     }
 
+    let fileButtonsHTML = '';
+    if(facturaFinal.pdfFile instanceof File)
+        fileButtonsHTML += `<i class="fa-solid fa-file-pdf preview-btn-cmp" data-type="pdf"></i>`;
+    if(facturaFinal.xmlFile instanceof File)
+        fileButtonsHTML += `<i class="fa-solid fa-file-code preview-btn-cmp" data-type="xml"></i>`;
+    if(facturaFinal.imgFile instanceof File)
+        fileButtonsHTML += `<i class="fa-solid fa-file-image preview-btn-cmp" data-type="img"></i>`;
+
     row.innerHTML = `
         <td>${facturaFinal.folio}</td>
         <td>${facturaFinal.fecha}</td>
@@ -1024,25 +1173,51 @@ async function addPDFRow(row, tempData) {
         <td>${formatMoney(facturaFinal.total, facturaFinal.moneda)}</td>
         <td>${facturaFinal.moneda}</td>
         <td>${facturaFinal.tipoCambio}</td>
-        <td class="delete-row"><div class="actions"><i class="fa-solid fa-trash-can"></i></div></td>
+        <td class="delete-row">
+            <div class="actions">
+                ${fileButtonsHTML}
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+        </td>
     `;
 
+    // Botones archivos
+    row.querySelectorAll('.preview-btn-cmp').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const type = btn.dataset.type;
+            let file = null;
+
+            if(type === 'pdf') file = facturaFinal.pdfFile;
+            else if(type === 'xml') file = facturaFinal.xmlFile;
+            else if(type === 'img') file = facturaFinal.imgFile;
+
+            if(file instanceof File) {
+                const blobUrl = URL.createObjectURL(file);
+                window.open(blobUrl, '_blank');
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+            }
+        });
+    });
+
     // Evento eliminar
-    const deleteBtn = row.querySelector('.delete-row i');
+    const deleteBtn = row.querySelector('.delete-row .fa-trash-can');
     deleteBtn.addEventListener('click', () => {
         const index = facturasCargadas.findIndex(f => f.tempId === tempData.tempId);
         if (index !== -1) facturasCargadas.splice(index, 1);
         row.remove();
+        updateComp();
         Toast('FACTURA ELIMINADA', 'Se ha eliminado exitosamente la factura de la lista');
     });
 
     const index = facturasCargadas.findIndex(f => f.tempId === tempData.tempId);
-if(index !== -1)
-    facturasCargadas[index] = { ...tempData, tempId: tempData.tempId, ...facturaFinal };
-else
-    facturasCargadas.push({ ...tempData, tempId: tempData.tempId, ...facturaFinal });
+    if(index !== -1)
+        facturasCargadas[index] = { ...tempData, tempId: tempData.tempId, ...facturaFinal };
+    else
+        facturasCargadas.push({ ...tempData, tempId: tempData.tempId, ...facturaFinal });
 
     Toast('FACTURA REGISTRADA', 'La factura se cargó correctamente. Puedes agregar otra');
+    updateComp();
     return true;
 }
 
@@ -1053,30 +1228,6 @@ function duplicateFactura(nuevaFactura) {
         existente.fecha === nuevaFactura.fecha &&
         existente.descripcion === nuevaFactura.descripcion
     );
-}
-
-// Download
-async function downloadFileCmp(filename, url) {
-    try {
-        const response = await fetch(`${API}/${url}`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-            credentials: 'include'
-        });
-
-        if(!response.ok) throw new Error('Error al descargar el archivo');
-
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-    } catch(error) {
-        Toast('ERROR', 'No fue posible descargar el archivo');
-    }
 }
 
 
@@ -1172,6 +1323,11 @@ function initCalendar() {
         if(isOtherMonth) cell.classList.add('other-month');
 
         const dateObj = { year, month, day };
+
+        // Día actual
+        const today = new Date();
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate())
+            cell.classList.add('today');
 
         // Asignar clases de rango
         if(startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
@@ -1850,9 +2006,25 @@ function initUpload() {
                     try {
                         const datosXML = await parseXML(selectedXML);
 
+                        let tipoCambioCorr = datosXML.tipoCambio;
+
+                        if(datosXML.moneda === 'MXN' && currentMoneda === 'MXN')
+                            tipoCambioCorr = '1.0000';
+                        else if(datosXML.moneda === currentMoneda && datosXML.moneda !== 'MXN') {
+                            const rate = await getTipoCambio(datosXML.moneda, datosXML.fecha);
+                            tipoCambioCorr = rate || datosXML.tipoCambio || '1.0000';
+                        } else if(datosXML.moneda === 'MXN' && currentMoneda !== 'MXN') {
+                            const rate = await getTipoCambio(currentMoneda, datosXML.fecha);
+                            tipoCambioCorr = rate || '1.0000';
+                        } else {
+                            const rate = await getTipoCambio(datosXML.moneda, datosXML.fecha);
+                            tipoCambioCorr = rate || datosXML.tipoCambio || '1.0000';
+                        }
+
                         const nuevaFactura = {
                             folio: datosXML.folio,
                             ...datosXML,
+                            tipoCambio: tipoCambioCorr,
                             pdfFile: selectedPDF,
                             xmlFile: selectedXML,
                             pdfPath: null,
@@ -1865,8 +2037,8 @@ function initUpload() {
                             return;
                         }
 
-                        addFactura(nuevaFactura);
                         facturasCargadas.push(nuevaFactura);
+                        addFactura(nuevaFactura);
                         resetFacturado();
                         Toast('FACTURA REGISTRADA', 'La factura se cargó correctamente. Puedes agregar otra');
                     } catch(error) {
@@ -2213,7 +2385,8 @@ async function loadCmpDetail() {
         const { comprobacion, facturas } = await response.json();
 
         if(facturas.length) {
-            currentMoneda = facturas[0].tipo_moneda;
+            currentMoneda = comprobacion.total_moneda;
+            currentMonto = comprobacion.anticipo; 
             updateXmlVisibility();
         }
 
@@ -2285,7 +2458,11 @@ async function loadCmpDetail() {
                 imgPath: f.ruta_jpg  || null,
             });
         });
+
+        updateComp();
+        updatePayment(comprobacion.anticipo, comprobacion.total_moneda);
     } catch(error) {
+        console.log(error);
         Toast('ERROR', 'No se pudo cargar el detalle de la comprobación');
     } finally {
         hideLoader();

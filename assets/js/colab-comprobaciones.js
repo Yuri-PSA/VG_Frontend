@@ -45,7 +45,7 @@ let paginacionGlobal = {
     totalPaginas: 1
 };
 const limitPerPage = 7;
-let currentFolio = 'ASC';
+let currentFolio = 'DESC';
 let currentSol = null;
 let currentTotal = null;
 let currentSaldo = null;
@@ -900,6 +900,11 @@ function initCalendar() {
 
         const dateObj = { year, month, day };
 
+        // Día actual
+        const today = new Date();
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate())
+            cell.classList.add('today');
+
         // Asignar clases de rango
         if (startDate && isSameDate(dateObj, startDate)) cell.classList.add('start');
         if (endDate && isSameDate(dateObj, endDate)) cell.classList.add('end');
@@ -1413,6 +1418,7 @@ async function loadDetails(folio) {
 
         const data = await response.json();
         const { comprobacion, facturas } = data;
+        const monedaSol = comprobacion.total_moneda;
 
         // =================== DATOS =================== //
         // Encabezado
@@ -1432,6 +1438,32 @@ async function loadDetails(folio) {
             else if(comprobacion.estado === 'Aprobada') statusDiv.classList.add('st-approved');
             else if(comprobacion.estado === 'Rechazada') statusDiv.classList.add('st-rejected');
         }
+
+        // =================== CALCULAR TOTALES CON CONVERSIÓN =================== //
+        let totalImporte = 0;
+        let totalIva = 0;
+        let totalOtros = 0;
+
+        facturas.forEach(fact => {
+            const tc = fact.tipo_cambio?.tipo_cambio || 1;
+            const monedaFact = fact.tipo_moneda;
+
+            let factor = 1;
+            if(monedaFact === 'MXN' && monedaSol === 'MXN')
+                factor = 1;
+            else if(monedaFact !== 'MXN' && monedaSol === 'MXN')
+                factor = tc;
+            else if(monedaFact === monedaSol)
+                factor = 1;
+            else if(monedaFact === 'MXN' && monedaSol !== 'MXN')
+                factor = 1 / tc;
+            else
+                factor = 1;
+
+            totalImporte += (fact.importe || 0) * factor;
+            totalIva += (fact.iva || 0) * factor;
+            totalOtros += (fact.otros_montos || 0) * factor;
+        });
 
         // Montos comprobación
         const importeCmp = document.querySelector('.cmp-importe');
@@ -1453,43 +1485,42 @@ async function loadDetails(folio) {
             container.appendChild(document.createTextNode(formatCurrency(value)));
         }
 
-        setNumberValue(importeCmp, comprobacion.total_importe);
-        setNumberValue(ivaCmp, comprobacion.total_iva);
-        setNumberValue(otrosCmp, comprobacion.total_otros);
+        setNumberValue(importeCmp, totalImporte);
+        setNumberValue(ivaCmp, totalIva);
+        setNumberValue(otrosCmp, totalOtros);
         setNumberValue(anticipo, comprobacion.anticipo);
         totalCmp.forEach(t => { setNumberValue(t, comprobacion.total); });
         
-        if(comprobacion.total_moneda) {
-            const symbol = obtenerSimboloMoneda(comprobacion.total_moneda);
+        if(monedaSol) {
+            const symbol = obtenerSimboloMoneda(monedaSol);
             if(symbolImpCmp) symbolImpCmp.textContent = `${symbol} `;
             if(symbolIvaCmp) symbolIvaCmp.textContent = `${symbol} `;
             if(symbolOtrCmp) symbolOtrCmp.textContent = `${symbol} `;
             if(symbolAnt) symbolAnt.textContent = `${symbol} `;
             
             const totalSpans = document.querySelectorAll('.cmp-total span');
-            totalSpans.forEach(span => {
-                span.textContent = `${symbol}`;
-            });
+            totalSpans.forEach(span => { span.textContent = `${symbol}`; });
         }
 
+        // Banderas
         const cmpFlags = document.querySelectorAll('.info-currency img');
         const cmpCurrencies = document.querySelectorAll('.info-currency p');
 
-        if(cmpFlags.length >= 1 && comprobacion.total_moneda) {
-            cmpFlags[0].src = getFlagUrl(comprobacion.total_moneda);
-            cmpFlags[0].alt = comprobacion.total_moneda;
+        if(cmpFlags.length >= 1 && monedaSol) {
+            cmpFlags[0].src = getFlagUrl(monedaSol);
+            cmpFlags[0].alt = monedaSol;
             cmpFlags[0].onerror = () => cmpFlags[0].style.display = 'none';
-            if(cmpCurrencies[0]) cmpCurrencies[0].textContent = comprobacion.total_moneda;
+            if(cmpCurrencies[0]) cmpCurrencies[0].textContent = monedaSol;
         }
-        if (cmpFlags.length >= 2 && comprobacion.saldo_moneda) {
+        if(cmpFlags.length >= 2 && comprobacion.saldo_moneda) {
             cmpFlags[1].src = getFlagUrl(comprobacion.saldo_moneda);
             cmpFlags[1].alt = comprobacion.saldo_moneda;
             cmpFlags[1].onerror = () => cmpFlags[1].style.display = 'none';
             if(cmpCurrencies[1]) cmpCurrencies[1].textContent = comprobacion.saldo_moneda;
         }
 
+        // Saldo
         const simboloSaldo = obtenerSimboloMoneda(comprobacion.saldo_moneda);
-
         const saldoNum = comprobacion.saldo || 0;
         const saldoAbs = Math.abs(saldoNum);
         const saldoFormateado = new Intl.NumberFormat('es-MX', {
@@ -1502,7 +1533,7 @@ async function loadDetails(folio) {
         const saldoParrafo = document.querySelector('.cmp-saldo');
         if(saldoParrafo) saldoParrafo.textContent = saldoTexto;
 
-        // Facturas
+        // =================== FACTURAS =================== //
         const facturasContainer = document.querySelector('.content-fact');
         if(!facturasContainer) return;
         facturasContainer.innerHTML = '';
@@ -1531,13 +1562,50 @@ async function loadDetails(folio) {
                 buttonsHtml += `<i class="fa-solid fa-file-image download-btn" data-url="${fact.ruta_jpg}" data-type="img"></i>`;
 
             const tipoCambioObj = fact.tipo_cambio || {};
-            const monedaTC = tipoCambioObj.moneda || fact.tipo_moneda || 'MXN';
+            const monedaFact =  fact.tipo_moneda || 'MXN';
             let tipoCambioVal = tipoCambioObj.tipo_cambio || 1;
             if(tipoCambioVal === null || tipoCambioVal === undefined) tipoCambioVal = 1;
             const tipoCambioFormateado = parseFloat(tipoCambioVal).toFixed(4);
 
             // TC Ponderado
-            totalMXN += fact.total_factura * tipoCambioVal;
+            if(monedaFact === 'MXN')
+                totalMXN += parseFloat(fact.total_factura) || 0;
+            else
+                totalMXN += (parseFloat(fact.total_factura) || 0) * tipoCambioVal;
+
+            const flagFact = getFlagUrl(monedaFact);
+            const symbolFact = obtenerSimboloMoneda(monedaFact);
+            const flagSol = getFlagUrl(monedaSol);
+            const symbolSol = obtenerSimboloMoneda(monedaSol);
+
+            const mismaMoneda = monedaFact === monedaSol;
+            const monedaExtranjera = monedaFact !== 'MXN' ? monedaFact : monedaSol !== 'MXN' ? monedaSol : null;
+
+            const tcHtml = (monedaFact === 'MXN' && monedaSol === 'MXN') ? `
+                <div class="moneda-cambio">
+                    <div class="monto-currency cambio-intern">
+                        <img src="https://flagcdn.com/w40/mx.png" alt="MXN" onerror="this.style.display='none'">
+                        <p><span>$</span>1.0000</p>
+                    </div>
+                    <p class="fact-text equal">=</p>
+                    <div class="monto-currency cambio-mx">
+                        <img src="https://flagcdn.com/w40/mx.png" alt="MXN" onerror="this.style.display='none'">
+                        <p><span>$</span>1.0000</p>
+                    </div>
+                </div>
+            ` : `
+                <div class="moneda-cambio">
+                    <div class="monto-currency cambio-intern">
+                        <img src="${getFlagUrl(monedaExtranjera)}" alt="${monedaExtranjera}" onerror="this.style.display='none'">
+                        <p><span>${obtenerSimboloMoneda(monedaExtranjera)}</span>1.0000</p>
+                    </div>
+                    <p class="fact-text equal">=</p>
+                    <div class="monto-currency cambio-mx">
+                        <img src="https://flagcdn.com/w40/mx.png" alt="MXN" onerror="this.style.display='none'">
+                        <p><span>$</span>${tipoCambioFormateado}</p>
+                    </div>
+                </div>
+            `;
 
             card.innerHTML = `
                 <div class="factura-pres">
@@ -1572,37 +1640,26 @@ async function loadDetails(folio) {
                                 </div>
 
                                 <div class="calc-values">
-                                    <p><span>${obtenerSimboloMoneda(fact.tipo_moneda)} </span>${formatCurrency(fact.importe)}</p>
-                                    <p><span>${obtenerSimboloMoneda(fact.tipo_moneda)} </span>${formatCurrency(fact.iva)}</p>
-                                    <p><span>${obtenerSimboloMoneda(fact.tipo_moneda)} </span>${formatCurrency(fact.otros_montos)}</p>
+                                    <p><span>${symbolFact} </span>${formatCurrency(fact.importe)}</p>
+                                    <p><span>${symbolFact} </span>${formatCurrency(fact.iva)}</p>
+                                    <p><span>${symbolFact} </span>${formatCurrency(fact.otros_montos)}</p>
                                 </div>
                             </div>
 
                             <div class="calc-saldo">
                                 <p class="calc-subtitle">TOTAL:</p>
-                                <p><span>${obtenerSimboloMoneda(fact.tipo_moneda)}</span>${formatCurrency(fact.total_factura)}</p>
+                                <p><span>${symbolFact}</span>${formatCurrency(fact.total_factura)}</p>
                             </div>
 
                             <div class="monto-currency">
-                                <img src="${getFlagUrl(fact.tipo_moneda)}" alt="${fact.tipo_moneda}" onerror="this.style.display='none'">
-                                <p>${fact.tipo_moneda}</p>
+                                <img src="${flagFact}" alt="${monedaFact}" onerror="this.style.display='none'">
+                                <p>${monedaFact}</p>
                             </div>
                         </div>
 
                         <div class="fact-tipo-cambio">
                             <p class="fact-subtitle prin">TIPO DE CAMBIO</p>
-
-                            <div class="moneda-cambio">
-                                <div class="monto-currency cambio-intern">
-                                    <img src="${getFlagUrl(monedaTC)}" alt="${monedaTC}" onerror="this.style.display='none'">
-                                    <p><span>${obtenerSimboloMoneda(monedaTC)}</span>1.0000</p>
-                                </div>
-                                <p class="fact-text equal">=</p>
-                                <div class="monto-currency cambio-mx">
-                                    <img src="https://flagcdn.com/w40/mx.png" alt="MXN" onerror="this.style.display='none'">
-                                    <p><span>$</span>${tipoCambioFormateado}</p>
-                                </div>
-                            </div>
+                            ${tcHtml}
 
                             <div class="buttons-info">${buttonsHtml}</div>
                         </div>
@@ -1616,12 +1673,16 @@ async function loadDetails(folio) {
         // TC Ponderado
         const cmpTCDiv = document.querySelector('.calc-info.tipo-cambio');
         if(cmpTCDiv) {
-            if(comprobacion.saldo_moneda !== 'MXN') {
+            if(monedaSol !== 'MXN') {
                 cmpTCDiv.style.display = 'flex';
                 const tcAmount = cmpTCDiv.querySelector('.monto-currency.cambio-intern p');
-            
-                tcAmount.textContent = '$' + (totalMXN / comprobacion.total).toFixed(4);
-            } else 
+                const tcFlagRight = cmpTCDiv.querySelector('.monto-currency.cambio-mx img');
+                const tcSymbolRight = cmpTCDiv.querySelector('.monto-currency.cambio-mx p');
+
+                if(tcAmount) tcAmount.innerHTML = `<span>${obtenerSimboloMoneda(monedaSol)}</span>${(totalMXN / comprobacion.total).toFixed(4)}`;
+                if(tcFlagRight) { tcFlagRight.src = 'https://flagcdn.com/w40/mx.png'; tcFlagRight.alt = 'MXN'; }
+                if(tcSymbolRight) tcSymbolRight.innerHTML = `<span>$</span>${(totalMXN / comprobacion.total).toFixed(4)}`;
+            } else
                 cmpTCDiv.style.display = 'none';
         }
 
@@ -1629,21 +1690,7 @@ async function loadDetails(folio) {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const url = btn.dataset.url;
-                const type = btn.dataset.type;
-
-                const card = btn.closest('.card-factura');
-                const folioFactura = card?.querySelector('.fact-first-info .fact-text.folio')?.textContent || 'documento';
-                
-                let extension = '';
-                if(type === 'pdf') extension = 'pdf';
-                else if(type === 'xml') extension = 'xml';
-                else if(type === 'img') {
-                    const extensionMatch = url.match(/\.(jpe?g|png)$/i);
-                    extension = extensionMatch ? extensionMatch[1] : 'jpg';
-                }
-                
-                const filename = `Factura_${folioFactura}.${extension}`;
-                downloadFile(url, filename);
+                window.open(`${API}/${url}`, '_blank');
             });
         });
     } catch(error) {
@@ -1685,7 +1732,7 @@ async function buttonInfo() {
 }
 
 // Download
-async function downloadFile(url, filename) {
+async function openFile(url, filename) {
     try {
         if(!token) {
             Toast('SESIÓN EXPIRADA', 'Por favor, inicia sesión nuevamente');
@@ -1698,21 +1745,16 @@ async function downloadFile(url, filename) {
         });
 
         if(!response.ok) {
-            const err = await response.json().catch(() => ({ message: 'Error al descargar la información' }));
-            throw new Error(err.message || 'Error al descargar la información');
+            const err = await response.json().catch(() => ({ message: 'Error al abrir el archivo' }));
+            throw new Error(err.message || 'Error al abrir el archivo');
         }
 
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
+        window.open(blobUrl, '_blank');
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
     } catch(error) {
-        Toast('ERROR', 'Lo siento, no fue posible descargar el archivo');
+        Toast('ERROR', 'Lo siento, no fue posible abrir el archivo');
     }
 }
 
