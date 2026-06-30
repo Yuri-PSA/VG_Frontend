@@ -28,10 +28,7 @@ const limitPerPage = 7;
 let currentNombre = null;
 let currentEmail = null;
 let currentDep = null;
-let currentRol = null;
-
-// Rol
-const ROLES = ['Colaborador', 'Jefe', 'Tesorería', 'Administrador'];
+let currentJefe = null;
 
 
 /* ================================= LOADER ================================= */
@@ -228,7 +225,7 @@ function getCurrentFilters() {
     if(currentNombre) filtros.ordenNombre = currentNombre;
     if(currentEmail) filtros.ordenEmail = currentEmail;
     if(currentDep) filtros.ordenDep = currentDep;
-    if(currentRol) filtros.ordenRol = currentRol;
+    if(currentJefe) filtros.ordenJefe = currentJefe;
 
     return filtros;
 }
@@ -248,8 +245,8 @@ async function tableInformation(filtros = {}, page = 1) {
     if(filtros.ordenNombre) params.append('ordenNombre', filtros.ordenNombre);
     if(filtros.ordenEmail) params.append('ordenEmail', filtros.ordenEmail);
     if(filtros.ordenDep) params.append('ordenDep', filtros.ordenDep);
-    if(filtros.ordenRol) params.append('ordenRol', filtros.ordenRol);
-    params.append('pagina', 'Roles');
+    if(filtros.ordenJefe) params.append('ordenJefe', filtros.ordenJefe);
+    params.append('pagina', 'Jefes');
     params.append('limit', limitPerPage);
     params.append('offset', offset);
 
@@ -306,7 +303,7 @@ function buildThead(tab) {
 
     columnas.push(
         { title: 'Departamento', hasOrder: true },
-        { title: 'Rol', hasOrder: true }
+        { title: 'Jefe', hasOrder: true }
     );
 
     const headerRow = document.createElement('tr');
@@ -352,13 +349,7 @@ function renderTable(usuarios) {
 
         html += `
             <td><p>${u.departamento || '—'}</p></td>
-            <td>
-                <div class="rol-selector" data-usuario-id="${u.usuario_id}" data-current="${u.rol}">
-                    <p class="rol-text">${u.rol}</p>
-                    <i class="fa-solid fa-angle-down"></i>
-                    <div class="rol-dropdown"></div>
-                </div>
-            </td>
+            <td><p>${u.jefe || '—'}</p></td>
         `;
 
         tr.innerHTML = html;
@@ -371,8 +362,6 @@ function renderTable(usuarios) {
         emptyRow.innerHTML = `<td><p class="empty-row">Empty</p></td><td></td><td></td>`;
         tbody.appendChild(emptyRow);
     }
-
-    setupRolDropdowns();
 }
 
 // Pagination
@@ -587,24 +576,24 @@ function setupSorting() {
 
                     currentEmail = null;
                     currentDep = null;
-                    currentRol = null;
+                    currentJefe = null;
                     break;
                 case 'correo':
                     currentEmail = currentEmail === 'ASC' ? 'DESC' : 'ASC';
 
                     currentNombre = null;
                     currentDep = null;
-                    currentRol = null;
+                    currentJefe = null;
                     break;
                 case 'departamento':
                     currentDep = currentDep === 'ASC' ? 'DESC' : 'ASC';
 
                     currentNombre = null;
                     currentEmail = null;
-                    currentRol = null;
+                    currentJefe = null;
                     break;
-                case 'rol':
-                    currentRol = currentRol == 'ASC' ? 'DESC' : 'ASC';
+                case 'jefe':
+                    currentJefe = currentJefe == 'ASC' ? 'DESC' : 'ASC';
 
                     currentNombre = null;
                     currentEmail = null;
@@ -621,75 +610,6 @@ function setupSorting() {
     });
 }
 
-
-/* =================================== ROLES =================================== */
-function setupRolDropdowns() {
-    const selectors = document.querySelectorAll('.rol-selector');
-
-    selectors.forEach(selector => {
-        const dropdown = selector.querySelector('.rol-dropdown');
-        const text = selector.querySelector('.rol-text');
-        const usuarioId = selector.dataset.usuarioId;
-
-        function buildDropdown(currentRol) {
-            dropdown.innerHTML = '';
-            const otros = ROLES.filter(r => r !== currentRol);
-
-            otros.forEach(rolOpcion => {
-                const option = document.createElement('div');
-                option.className = 'rol-option';
-                option.textContent = rolOpcion;
-
-                option.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    await updateRol(usuarioId, rolOpcion, selector, text, buildDropdown);
-                });
-
-                dropdown.appendChild(option);
-            });
-        }
-
-        buildDropdown(selector.dataset.current);
-
-        selector.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = dropdown.classList.contains('show');
-            document.querySelectorAll('.rol-dropdown.show').forEach(d => d.classList.remove('show'));
-            if(!isOpen) dropdown.classList.add('show');
-        });
-    });
-
-    document.addEventListener('click', (e) => {
-        if(!e.target.closest('.rol-selector'))
-            document.querySelectorAll('.rol-dropdown.show').forEach(d => d.classList.remove('show'));
-    });
-}
-
-async function updateRol(usuarioId, nuevoRol, selector, textEl, buildDropdownFn) {
-    try {
-        const response = await fetch(`${API}/auth/actualizar-rol`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            credentials: 'include',
-            body: JSON.stringify({ usuarioId: parseInt(usuarioId), rol: nuevoRol })
-        });
-
-        if(!response.ok) throw new Error('Error al actualizar el rol');
-
-        textEl.textContent = nuevoRol;
-        selector.dataset.current = nuevoRol;
-        buildDropdownFn(nuevoRol);
-        selector.querySelector('.rol-dropdown').classList.remove('show');
-
-        Toast('ROL ACTUALIZADO', `El rol del usuario se actualizó a ${nuevoRol} correctamente`);
-    } catch(error) {
-        console.log(error);
-        Toast('ACTUALIZACIÓN FALLIDA', 'No fue posible actualizar el rol del usuario. Por favor, inténtalo nuevamente');
-    }
-}
 
 
 /* =================================== TOAST =================================== */
