@@ -1,6 +1,6 @@
 /* ================================ VARIABLES ================================ */
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'http://127.0.0.1:3000';
+// const API = 'http://10.10.164.200:3000';
 
 const msalConfig = {
     auth: {
@@ -80,6 +80,9 @@ async function loginBackend(microsoftToken) {
         // Redirigir según rol
         const rol = data.usuario.rol;
         switch(rol) {
+            case 'Administrador':
+                window.location.href = 'admin-usuarios.html'
+                break;
             case 'Jefe': 
                 window.location.href = 'jefe-dashboard.html';  
                 break;
@@ -147,7 +150,7 @@ async function login() {
                     window.location.href = 'colab-dashboard.html';
                     break;
                 case 'Administrador':
-                    window.location.href = 'admin-dashboard.html';
+                    window.location.href = 'admin-usuarios.html';
                     break;
                 default:
                     window.location.href = 'index.html';    // fallback
