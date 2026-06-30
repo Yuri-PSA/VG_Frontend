@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    
+    <title>Viáticos</title>
+    <meta name="title" content="Viáticos">
+    <meta name="description" content="Gestión de solicitudes, anticipos y comprobación de gastos">
+    <link rel="icon" href="./assets/images/Page_icon.ico" type="image/x-icon">
+
+    <!-- ======================= CSS ======================= -->
+    <link rel="stylesheet" href="./assets/css/admin-jefes.css">
+
+    <!-- ======================= ICONS ======================= -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- ======================= SWEET ALERT ======================= -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <!-- ======================= LOADER ======================= -->
+    <div class="loader-overlay">
+        <div class="dot-spinner">
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+            <div class="dot-spinner__dot"></div>
+        </div>
+    </div>
+
+    <!-- ======================= CONTENT ======================= -->
+    <div class="background">
+        <!-- ======================= PHONE MENU ======================= -->
+        <div class="mobile-nav">
+            <label class="hamburger" id="hamburger">
+                <input type="checkbox">
+                <svg viewBox="0 0 32 32">
+                    <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+                    <path class="line" d="M7 16 27 16"></path>
+                </svg>
+            </label>
+        </div>
+
+        <!-- ======================= OPTIONS BAR ======================= -->
+        <div class="option-bar" id="optionBar">
+            <div class="logo">
+                <img src="./assets/images/White_logo.webp" alt="Grupo | PSA">
+                <div class="name"><p></p></div>
+            </div>
+
+            <div class="options">
+                <div class="option access">
+                    <i class="fa-solid fa-user-check"></i>
+                    <p>Accesos</p>
+                </div>
+
+                <div class="option roles">
+                    <i class="fa-solid fa-user-tag"></i>
+                    <p>Roles</p>
+                </div>
+
+                <div class="option boss">
+                    <i class="fa-solid fa-user-group"></i>
+                    <p>Jefes</p>
+                </div>
+            </div>
+
+            <div class="logout">
+                <div class="option log-out">
+                    <i class="fa-solid fa-arrow-right-from-bracket fa-rotate-180"></i>
+                    <p>Cerrar sesión</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= CONTENT CONTAINER ======================= -->
+        <div class="content-container">
+            <div class="container">
+                <!-- ==================== CONTENT HEADER ==================== -->
+                <div class="content-header">
+                    <div class="titles">
+                        <h1 class="title">JEFES DIRECTOS</h1>
+                        <p class="subtitle">Asigna o modifica el jefe directo de cada colaborador</p>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <div class="tab-header">
+                        <div class="tabs">
+                            <div class="tab name selected"><p class="tab-selected">Colaborador</p></div>
+                            <div class="tab email"><p>Correo electrónico</p></div>
+                        </div>
+
+                        <div class="search">
+                            <div class="search-back">
+                                <i class="fa-regular fa-circle-user"></i>
+                                <input type="text" placeholder="Colaborador. . .">
+                                <i class="fa-regular fa-building"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-background">
+                        <div class="table-container">
+                            <table>
+                                <thead class="table-head"></thead>
+
+                                <tbody class="table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="cards-mobile"></div>
+
+                    <!-- ==================== PAGES ==================== -->
+                    <div class="tab-buttons">
+                        <div class="back-buttons disabled">
+                            <div class="prev disabled">
+                                <svg class="icon default-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                                <svg class="icon hover-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="15,6 9,12 15,18" fill="none" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="back-buttons">
+                            <div class="page"></div>
+                        </div>
+
+                        <div class="button-conexion">
+                            <div>de</div>
+                        </div>
+
+                        <div class="back-buttons">
+                            <div class="page final"></div>
+                        </div>
+
+                        <div class="back-buttons">
+                            <div class="next">
+                                <svg class="icon default-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                                <svg class="icon hover-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="9,6 15,12 9,18" fill="none" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            
+                <div class="agave-mobile">
+                    <img src="./assets/images/Agave.webp" alt="Agave">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/js/session.js"></script>
+    <script src="./assets/js/admin-jefes.js"></script>
+</body>
+</html>
