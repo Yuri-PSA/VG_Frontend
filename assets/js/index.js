@@ -47,10 +47,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.querySelector('.button-login.microsoft').addEventListener('click', () => {
         msalInstance.loginRedirect({ scopes: LOGIN_SCOPES });
     });
-
-    // Borrar
-    login();
-    passwordVisibility();
 });
 
 
@@ -101,10 +97,7 @@ async function loginBackend(microsoftToken) {
 }
 
 
-
-
-/* BORRAR DESPUÉS */
-/* =================================== LOGIN =================================== */
+/* ================================ LOGIN MANUAL ================================ */
 async function login() {
     document.querySelector('.button-login').addEventListener('click', async(e) => {
         e.stopPropagation();
@@ -192,7 +185,6 @@ function loginValidation() {
     }
     return true;
 }
-/* HASTA AQUÍ */
 
 
 /* =================================== TOAST =================================== */

@@ -349,7 +349,13 @@ function renderTable(usuarios) {
 
         html += `
             <td><p>${u.departamento || '—'}</p></td>
-            <td><p>${u.jefe || '—'}</p></td>
+            <td>
+                <div class="jefe-selector" data-usuario-id="${u.usuario_id}" data-current-jefe="${u.jefe || ''}">
+                    <p class="jefe-text">${u.jefe || 'Sin jefe'}</p>
+                    <i class="fa-solid fa-angle-down"></i>
+                    <div class="jefe-dropdown"></div>
+                </div>
+            </td>
         `;
 
         tr.innerHTML = html;
@@ -362,6 +368,8 @@ function renderTable(usuarios) {
         emptyRow.innerHTML = `<td><p class="empty-row">Empty</p></td><td></td><td></td>`;
         tbody.appendChild(emptyRow);
     }
+
+    setupJefeDropdown();
 }
 
 // Pagination
@@ -610,6 +618,102 @@ function setupSorting() {
     });
 }
 
+
+/* ================================= JEFES ================================= */
+async function setupJefeDropdown() {
+    const selectors = document.querySelectorAll('.jefe-selector');
+
+    selectors.forEach(selector => {
+        const dropdown = selector.querySelector('.jefe-dropdown');
+        const text = selector.querySelector('.jefe-text');
+        const usuarioId = selector.dataset.usuarioId;
+
+        async function buildDropdown() {
+            try {
+                const response = await fetch(`${API}/auth/jefes-disponibles?targetId=${usuarioId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    credentials: 'include'
+                });
+
+                if(!response.ok) throw new Error('Error al cargar jefes disponibles');
+                const jefes = await response.json();
+
+                dropdown.innerHTML = '';
+
+                // Opción "Sin jefe"
+                const opcionSinJefe = document.createElement('div');
+                opcionSinJefe.className = 'jefe-option';
+                opcionSinJefe.textContent = 'Sin jefe';
+                opcionSinJefe.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await updateJefe(usuarioId, null, 'Sin jefe', selector, text);
+                });
+                dropdown.appendChild(opcionSinJefe);
+
+                jefes.forEach(jefe => {
+                    const option = document.createElement('div');
+                    option.className = 'jefe-option';
+                    option.textContent = jefe.nombre;
+
+                    option.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        await updateJefe(usuarioId, jefe.usuario_id, jefe.nombre, selector, text);
+                    });
+
+                    dropdown.appendChild(option);
+                });
+            } catch(error) {
+                Toast('ERROR', 'No se pudieron cargar los jefes disponibles');
+            }
+        }
+
+        selector.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const isOpen = dropdown.classList.contains('show');
+
+            document.querySelectorAll('.jefe-dropdown.show').forEach(d => d.classList.remove('show'));
+
+            if(!isOpen) {
+                await buildDropdown();
+                dropdown.classList.add('show');
+            }
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if(!e.target.closest('.jefe-selector'))
+            document.querySelectorAll('.jefe-dropdown.show').forEach(d => d.classList.remove('show'));
+    });
+}
+
+async function updateJefe(usuarioId, jefeId, jefeNombre, selector, textEl) {
+    try {
+        const response = await fetch(`${API}/auth/actualizar-jefe`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include',
+            body: JSON.stringify({ usuarioId: parseInt(usuarioId), jefeId: jefeId ? parseInt(jefeId) : null })
+        });
+
+        if(!response.ok) throw new Error('Error al actualizar el jefe');
+
+        textEl.textContent = jefeNombre;
+        selector.dataset.currentJefe = jefeNombre === 'Sin jefe' ? '' : jefeNombre;
+        selector.querySelector('.jefe-dropdown').classList.remove('show');
+
+        Toast(
+            'JEFE ACTUALIZADO',
+            jefeNombre === 'Sin jefe'
+                ? 'El usuario ya no tiene un jefe directo asignado.'
+                : `El jefe directo ahora es ${jefeNombre}.`
+        );
+    } catch(error) {
+        Toast('ACTUALIZACIÓN FALLIDA', 'No fue posible actualizar el jefe directo. Por favor, inténtalo nuevamente');
+    }
+}
 
 
 /* =================================== TOAST =================================== */

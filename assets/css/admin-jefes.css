@@ -878,6 +878,90 @@ body {
     visibility: hidden;
 }
 
+/* ROL SELECTOR */
+.jefe-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: fit-content;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 500;
+    gap: 1em;
+}
+
+.jefe-selector::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -6px;
+    right: -6px;
+    bottom: -4px;
+    background-color: var(--tabs-gray);
+    border-radius: 5px;
+    z-index: -2;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jefe-selector:hover::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.jefe-selector i {
+    color: var(--gray);
+    font-size: 0.7em;
+    margin-left: 0.5em;
+    transform: translateY(0.15em);
+}
+
+.jefe-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5em);
+    left: -0.5em;
+    background-color: var(--blue-white);
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+    display: none;
+    min-width: 130%;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: nowrap;
+    padding: 0.4em 0.4em;
+}
+
+.jefe-dropdown.show { display: block; }
+
+.jefe-dropdown::-webkit-scrollbar { width: 6px; }
+
+.jefe-dropdown::-webkit-scrollbar-track { background-color: transparent; }
+
+.jefe-dropdown::-webkit-scrollbar-thumb {
+    background-color: var(--icons);
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+/* Para Firefox */
+.jefe-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: var(--icons) transparent;
+}
+
+.jefe-option {
+    padding: 0.4em 0.8em;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.2s;
+}
+
+.jefe-option:hover { background-color: rgba(0, 0, 0, 0.1); }
+
 /* PAGINATION */
 .tab-buttons {
     display: flex;
@@ -1105,7 +1189,10 @@ body {
 
     .table-container .order i { font-size: 0.6em; }
 
-    .table-body td { font-size: 1.3em; }
+    .table-body td,
+    .jefe-selector  { font-size: 1.3em; }
+
+    .jefe-option { font-size: 1.15em; }
 
     .tab-buttons { margin-top: 1.5em; }
 
@@ -1182,6 +1269,8 @@ body {
     .table-head th { font-size: 1.35em; }
 
     .table-body td { font-size: 0.95em; }
+
+    .jefe-option { font-size: 0.95em; }
 
     .back-buttons {
         width: 2em;
@@ -1433,6 +1522,8 @@ body {
     .table-head th { font-size: 1em; }
 
     .table-body td { font-size: 0.8em; }
+
+    .jefe-selector { font-size: 1em; }
 
     .back-buttons {
         width: 2em;
