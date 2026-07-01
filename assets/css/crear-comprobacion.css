@@ -1715,8 +1715,9 @@ body {
     .datepicker-header { font-size: 1em; }
 
     .datepicker-header button,
-    .days-header span,
-    .dates { font-size: 0.8em; }
+    .days-header span { font-size: 0.8em; }
+
+    .dates { font-size: 0.75em; }
 
     .date-button { font-size: 0.75em; }
 }
@@ -1797,9 +1798,10 @@ body {
     .datepicker-header button,
     .days-header span { font-size: 0.7em; }
 
-    .dates { font-size: 0.8em; }
+    .dates { gap: 0.2em; }
 
-    .date-button { font-size: 0.75em; }
+    .dates,
+    .date-button { font-size: 0.7em; }
 
     .factura-content { height: 9.5em; }
 
@@ -2031,15 +2033,16 @@ body {
         height: 5.5em; 
     }
 
-    .datepicker-header { font-size: 0.9em; }
+    .datepicker-header { font-size: 0.85em; }
 
     .datepicker-header button { 
         font-size: 0.8em; 
         transform: translateY(-1%);
     }
 
-    .days-header span,
-    .dates { font-size: 0.7em; }
+    .days-header span { font-size: 0.7em; }
+
+    .dates { font-size: 0.66em; }
 
     .date-cell { padding: 0.1em 0; }
 
