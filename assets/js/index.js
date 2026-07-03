@@ -47,6 +47,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.querySelector('.button-login.microsoft').addEventListener('click', () => {
         msalInstance.loginRedirect({ scopes: LOGIN_SCOPES });
     });
+
+    login();
+    passwordVisibility();
 });
 
 
