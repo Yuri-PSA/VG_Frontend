@@ -235,7 +235,7 @@ function getCurrentFilters() {
 async function tableInformation(filtros = {}, page = 1) {
     showLoader();
     renderTable([]);
-    //renderCards([]);
+    renderCards([]);
 
     const offset = (page - 1) * limitPerPage;
 
@@ -263,7 +263,7 @@ async function tableInformation(filtros = {}, page = 1) {
 
         if(!response.ok) {
             renderTable([]);
-            //renderCards([]);
+            renderCards([]);
             throw new Error('Error al obtener usuarios');
             return;
         }
@@ -272,19 +272,18 @@ async function tableInformation(filtros = {}, page = 1) {
 
         if(data.mensaje) {
             renderTable([]);
-            //renderCards([]);
+            renderCards([]);
             Toast('SIN USUARIOS', 'No tienes usuarios activos para mostrar en este momento');
             return;
         }
 
         renderTable(data.usuarios);
-        //renderCards(data.usuarios);
+        renderCards(data.usuarios);
         updatePagination(data.paginacion);
         currentPage = data.paginacion.paginaActual;
     } catch(error) {
         renderTable([]);
-        //renderCards([]);
-        console.log(error);
+        renderCards([]);
         Toast('ERROR AL MOSTRAR', 'No se pudieron cargar los usuarios. Por favor, intenta de nuevo');
     } finally {
         hideLoader();
@@ -371,6 +370,44 @@ function renderTable(usuarios) {
     }
 
     setupAccessToggle();
+}
+
+// Cards Information
+function renderCards(usuarios) {
+    const container = document.querySelector('.cards-mobile');
+    if(!container) return;
+
+    container.innerHTML = '';
+    const tab = getActiveTabId();
+    if(usuarios.length === 0) return;
+
+    usuarios.forEach(u => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+
+        card.innerHTML = `
+            <div class="first-info">
+                <div class="info-mobile">
+                    <p class="subt-mobile">${tab === 'email' ? 'CORREO' : 'COLABORADOR'}</p>
+                    <p>${tab === 'email' ? u.correo || '—' : u.nombre_completo || '—'}</p>
+                </div>
+
+                <div class="info-mobile">
+                    <p class="subt-mobile">DEPARTAMENTO</p>
+                    <p>${u.departamento || '—'}</p>
+                </div>
+
+                <div class="info-mobile">
+                    <label class="check">
+                        <input type="checkbox" data-usuario-id="${u.usuario_id}" ${u.acceso ? 'checked' : ''}>
+                        <div class="checkmark"></div>
+                    </label>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
 }
 
 // Pagination
