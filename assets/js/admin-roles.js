@@ -664,7 +664,7 @@ function setupSorting() {
 
 
 /* =================================== ROLES =================================== */
-function setupRolDropdowns() {
+async function setupRolDropdowns() {
     const selectors = document.querySelectorAll('.rol-selector');
 
     selectors.forEach(selector => {
@@ -672,7 +672,7 @@ function setupRolDropdowns() {
         const text = selector.querySelector('.rol-text');
         const usuarioId = selector.dataset.usuarioId;
 
-        function buildDropdown(currentRol) {
+        async function buildDropdown(currentRol) {
             dropdown.innerHTML = '';
             const otros = ROLES.filter(r => r !== currentRol);
 
@@ -692,11 +692,15 @@ function setupRolDropdowns() {
 
         buildDropdown(selector.dataset.current);
 
-        selector.addEventListener('click', (e) => {
-            e.stopPropagation();
+        selector.addEventListener('click', async(e) => {
+            e.stopImmediatePropagation();
             const isOpen = dropdown.classList.contains('show');
             document.querySelectorAll('.rol-dropdown.show').forEach(d => d.classList.remove('show'));
-            if(!isOpen) dropdown.classList.add('show');
+
+            if(!isOpen) {
+                await buildDropdown(selector.dataset.current);
+                dropdown.classList.add('show');
+            }
         });
     });
 
