@@ -708,7 +708,7 @@ async function setupJefeDropdown() {
         }
 
         selector.addEventListener('click', async (e) => {
-            e.stopPropagation();
+            e.stopImmediatePropagation();
             const isOpen = dropdown.classList.contains('show');
 
             document.querySelectorAll('.jefe-dropdown.show').forEach(d => d.classList.remove('show'));
