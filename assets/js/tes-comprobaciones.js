@@ -36,8 +36,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // Backend
 const token = Session.getToken();
 const logoUser = Session.getUser();
-// const API = 'http://127.0.0.1:3000';
-const API = 'http://10.10.164.200:3000';
+const API = 'https://api.apps-dev-mamr.com.mx/';
+// const API = 'http://10.10.164.200:3000';
 
 let globalStartDate = null;
 let globalEndDate = null;
